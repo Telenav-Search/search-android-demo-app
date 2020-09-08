@@ -1,0 +1,9 @@
+*.iml
+.idea/
+.gradle/
+local.properties
+build/
+.DS_Store
+**/gen
+tags
+tags.*
