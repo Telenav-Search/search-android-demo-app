@@ -10,7 +10,6 @@ import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -24,6 +23,20 @@ class CategoriesFragment : Fragment() {
     private lateinit var vCategoryTree: RecyclerView
     private lateinit var vCategoryLoading: ContentLoadingProgressBar
     private lateinit var vCategoryError: TextView
+
+    private val hotCategoriesList = arrayListOf(
+        HotCategory("Food", R.drawable.ic_food),
+        HotCategory("Coffee", R.drawable.ic_coffee),
+        HotCategory("Grocery", R.drawable.ic_grocery),
+        HotCategory("Shopping", R.drawable.ic_shopping),
+        HotCategory("Parking", R.drawable.ic_parking),
+        HotCategory("Banks / ATMs", R.drawable.ic_atm),
+        HotCategory("Hotels / Motels", R.drawable.ic_hotel),
+        HotCategory("Attractions", R.drawable.ic_attraction),
+        HotCategory("Fuel", R.drawable.ic_gas),
+        HotCategory("Electric Vehicle Charge Station", R.drawable.ic_ev),
+        HotCategory("More", R.drawable.ic_more)
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,10 +54,19 @@ class CategoriesFragment : Fragment() {
         vCategoryError = view.findViewById(R.id.categoriesError)
 
         vCategoryTree.layoutManager = LinearLayoutManager(activity)
-        requestCategories()
+        showHotCategories()
+    }
+
+    private fun showHotCategories() {
+        vCategoryLoading.hide()
+        vCategories.visibility = View.VISIBLE
+        vCategoryTree.setAdapter(CategoriesHotRecyclerAdapter(hotCategoriesList) {
+            requestCategories()
+        })
     }
 
     private fun requestCategories() {
+        vCategories.visibility = View.GONE
         vCategoryLoading.show()
         telenavService.getCategoriesRequest().asyncCall(
             object : Callback<EntityGetCategoriesResponse> {
@@ -68,3 +90,5 @@ class CategoriesFragment : Fragment() {
     }
 
 }
+
+class HotCategory(val name: String, val icon: Int)

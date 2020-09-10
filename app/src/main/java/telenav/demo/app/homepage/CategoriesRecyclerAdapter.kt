@@ -100,6 +100,7 @@ class CategoryHolder(view: View) : RecyclerView.ViewHolder(view) {
     val vExpand = view.findViewById<TextView>(R.id.category_item_expand)
     val vName = view.findViewById<TextView>(R.id.category_item_name)
     val vSearch = view.findViewById<ImageView>(R.id.category_item_search)
+    val vIcon = view.findViewById<ImageView>(R.id.category_item_icon)
 }
 
 class CategoryNode(val level: Int, val category: Category) {

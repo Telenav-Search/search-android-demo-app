@@ -1,12 +1,9 @@
 package telenav.demo.app
 
 import android.app.Application
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.OnSuccessListener
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.entity.api.EntityService
-import java.lang.String
 
 
 class App : Application() {
