@@ -1,5 +1,6 @@
 package telenav.demo.app.homepage
 
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import telenav.demo.app.R
+import telenav.demo.app.entitydetails.EntityDetailsActivity
+import telenav.demo.app.searchlist.SearchListActivity
 
 class SuggestionRecyclerAdapter(suggestions: List<Suggestion>) :
     RecyclerView.Adapter<SuggestionHolder>() {
@@ -24,7 +27,13 @@ class SuggestionRecyclerAdapter(suggestions: List<Suggestion>) :
         val item = list[position];
         holder.vName.text = item.formattedLabel
         holder.itemView.setOnClickListener {
-            Log.w("test", "Open suggestion ${item.formattedLabel}")
+            holder.itemView.context.startActivity(
+                Intent(
+                    holder.itemView.context,
+                    EntityDetailsActivity::class.java
+                ).apply {
+                    putExtra("id", item.id)
+                })
             return@setOnClickListener
         }
         holder.vDistanceTo.text =

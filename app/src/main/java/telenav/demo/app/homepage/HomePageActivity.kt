@@ -3,9 +3,9 @@ package telenav.demo.app.homepage
 import android.Manifest
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -31,6 +31,7 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.R
+import telenav.demo.app.searchlist.SearchListActivity
 
 
 class HomePageActivity : AppCompatActivity() {
@@ -91,7 +92,9 @@ class HomePageActivity : AppCompatActivity() {
         vSearchInput.setOnEditorActionListener { view, id, _ ->
             if (id == EditorInfo.IME_ACTION_SEARCH) {
 
-                Log.w("test", "search ${view.text}")
+                startActivity(Intent(this, SearchListActivity::class.java).apply {
+                    putExtra("text", view.text.toString())
+                })
 
                 true
             } else
@@ -117,7 +120,7 @@ class HomePageActivity : AppCompatActivity() {
             hidePredictions()
             return
         }
-        val location = lastKnownLocation?:Location("")
+        val location = lastKnownLocation ?: Location("")
 
         telenavService.wordPredictionRequest()
             .setQuery(lastWord)
@@ -221,7 +224,6 @@ class HomePageActivity : AppCompatActivity() {
         } catch (e: SecurityException) {
 
         }
-
     }
 
     override fun onRequestPermissionsResult(

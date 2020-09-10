@@ -1,5 +1,6 @@
 package telenav.demo.app.homepage
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.telenav.sdk.entity.model.base.Category
 import telenav.demo.app.R
+import telenav.demo.app.searchlist.SearchListActivity
 import java.util.*
 
 class CategoriesRecyclerAdapter(categories: List<Category>) :
@@ -55,7 +57,13 @@ class CategoriesRecyclerAdapter(categories: List<Category>) :
         holder.vName.setTypeface(null, if (node.expandable) Typeface.BOLD else Typeface.NORMAL);
         holder.vItem.setOnClickListener {
             if (!node.expandable) {
-                Log.w("test", "Open category ${node.category.name}")
+                holder.vItem.context.startActivity(
+                    Intent(
+                        holder.vItem.context,
+                        SearchListActivity::class.java
+                    ).apply {
+                        putExtra("text", node.category.name)
+                    })
                 return@setOnClickListener
             }
             node.expanded = !node.expanded;
