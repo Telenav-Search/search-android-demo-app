@@ -10,6 +10,7 @@ import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ContentLoadingProgressBar
@@ -37,6 +38,7 @@ class SearchListActivity : AppCompatActivity() {
     private lateinit var vSearchTitle: TextView
     private lateinit var vSearchLoading: ContentLoadingProgressBar
     private lateinit var vSearchList: RecyclerView
+    private lateinit var vSearchIcon: ImageView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
@@ -45,33 +47,45 @@ class SearchListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search_list)
 
-        val query = intent.getStringExtra("text") ?: ""
+        val icon = intent.getIntExtra(PARAM_ICON, 0)
+        val query = intent.getStringExtra(PARAM_QUERY) ?: ""
+        val title = intent.getStringExtra(PARAM_TITLE) ?: query
 
+        vSearchIcon = findViewById(R.id.search_icon)
         vSearchTitle = findViewById(R.id.search_title)
         vSearchLoading = findViewById(R.id.search_loading)
         vSearchList = findViewById(R.id.search_list)
         vSearchLoading.show()
 
-        vSearchTitle.text = query
+        vSearchTitle.text = title
         vSearchList.layoutManager = LinearLayoutManager(this)
+        if (icon != 0) {
+            vSearchIcon.setImageResource(icon)
+            vSearchIcon.visibility = View.VISIBLE
+        }
+
+        findViewById<View>(R.id.search_back).setOnClickListener { finish() }
 
         getLocationAndSearch(query)
         initMap()
     }
 
-    private fun search(text: String, location: Location = Location("")) {
+    private fun search(query: String, location: Location = Location("")) {
         telenavService.searchRequest()
-            .setQuery(text)
+            .setQuery(query)
             .setLocation(location.latitude, location.longitude)
 //            .setLocation(40.0, -120.0)
-            .setLimit(30)
+            .setLimit(20)
             .asyncCall(
                 object : Callback<EntitySearchResponse> {
                     override fun onSuccess(response: EntitySearchResponse) {
                         runOnUiThread {
                             vSearchLoading.hide()
                             if (response.results != null && response.results.size > 0) {
-                                vSearchList.adapter = SearchListRecyclerAdapter(response.results)
+                                vSearchList.adapter = SearchListRecyclerAdapter(
+                                    response.results,
+                                    intent.getIntExtra(PARAM_ICON, 0)
+                                )
                                 vSearchList.visibility = View.VISIBLE
                                 showMapEntities(response.results)
                             }
@@ -158,7 +172,12 @@ class SearchListActivity : AppCompatActivity() {
                 val id = marker.tag as String
                 startActivity(
                     Intent(this, EntityDetailsActivity::class.java).apply {
-                        putExtra("id", id)
+                        putExtra(EntityDetailsActivity.PARAM_ID, id)
+                        if (intent.hasExtra(PARAM_ICON))
+                            putExtra(
+                                EntityDetailsActivity.PARAM_ICON,
+                                intent.getIntExtra(PARAM_ICON, 0)
+                            )
                     })
             }
         }
@@ -204,6 +223,11 @@ class SearchListActivity : AppCompatActivity() {
         return newImage
     }
 
+    companion object {
+        const val PARAM_QUERY = "query"
+        const val PARAM_TITLE = "title"
+        const val PARAM_ICON = "icon"
+    }
 }
 
 fun Context.dip(value: Int): Int = (value * resources.displayMetrics.density).toInt()

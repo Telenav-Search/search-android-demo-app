@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ContentLoadingProgressBar
@@ -39,7 +40,10 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var vEntityName: TextView
     private lateinit var vEntityDetails: View
     private lateinit var vEntityAddress: TextView
-    private lateinit var vEntityCall: Button
+    private lateinit var vEntityCall: View
+    private lateinit var vEntityCallButton: Button
+    private lateinit var vEntityCallNumber: TextView
+    private lateinit var vEntityIcon: ImageView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
@@ -48,14 +52,25 @@ class EntityDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_entity_details)
 
-        val id = intent.getStringExtra("id") ?: ""
+        val id = intent.getStringExtra(PARAM_ID) ?: ""
+        val icon = intent.getIntExtra(PARAM_ICON, 0)
 
         vLoading = findViewById(R.id.entity_details_loading)
         vEntityName = findViewById(R.id.entity_details_name)
         vEntityDetails = findViewById(R.id.entity_details)
         vEntityAddress = findViewById(R.id.entity_details_address)
         vEntityCall = findViewById(R.id.entity_details_call)
+        vEntityCallButton = findViewById(R.id.entity_details_call_button)
+        vEntityCallNumber = findViewById(R.id.entity_details_call_number)
+        vEntityIcon = findViewById(R.id.entity_details_icon)
         vLoading.show()
+
+        if (icon != 0) {
+            vEntityIcon.setImageResource(icon)
+            vEntityIcon.visibility = View.VISIBLE
+        }
+
+        findViewById<View>(R.id.entity_details_back).setOnClickListener { finish() }
 
         getLocationAndDetails(id)
         initMap()
@@ -121,6 +136,7 @@ class EntityDetailsActivity : AppCompatActivity() {
     }
 
     private fun getDetails(id: String, location: Location = Location("")) {
+        Log.w("test", "getDetails ${id}")
         telenavService.detailRequest
             .setEntityIds(listOf(id))
             .asyncCall(
@@ -151,7 +167,8 @@ class EntityDetailsActivity : AppCompatActivity() {
             vEntityAddress.text = entity.place.address.formattedAddress
             if (entity.place.phoneNumbers.size > 0) {
                 vEntityCall.visibility = View.VISIBLE
-                vEntityCall.setOnClickListener {
+                vEntityCallNumber.text = "${entity.place.phoneNumbers[0]}"
+                vEntityCallButton.setOnClickListener {
                     val intent = Intent(
                         Intent.ACTION_DIAL,
                         Uri.fromParts("tel", entity.place.phoneNumbers[0], null)
@@ -201,4 +218,8 @@ class EntityDetailsActivity : AppCompatActivity() {
         return newImage
     }
 
+    companion object {
+        const val PARAM_ID = "id"
+        const val PARAM_ICON = "icon"
+    }
 }

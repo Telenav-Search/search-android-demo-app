@@ -11,6 +11,7 @@ import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -53,9 +54,10 @@ class SuggestionFragment : Fragment() {
         telenavService.suggestionPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
-            .setLimit(30)
+            .setLimit(10)
             .asyncCall(object : Callback<EntitySuggestionPredictionResponse> {
                 override fun onSuccess(response: EntitySuggestionPredictionResponse) {
+                    Log.w("test", Gson().toJson(response.results))
                     activity?.runOnUiThread {
                         vSuggestionsLoading.hide()
                         if (response.results.isEmpty())

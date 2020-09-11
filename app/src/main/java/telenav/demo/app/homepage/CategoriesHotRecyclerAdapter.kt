@@ -40,7 +40,8 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onMoreClic
                         holder.vItem.context,
                         SearchListActivity::class.java
                     ).apply {
-                        putExtra("text", category.name)
+                        putExtra(SearchListActivity.PARAM_QUERY, category.name)
+                        putExtra(SearchListActivity.PARAM_ICON, category.icon)
                     })
         }
     }

@@ -42,7 +42,6 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInputClear: View
 
     private var popupWindow: PopupWindow? = null
-    private var usedPrediction: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +92,7 @@ class HomePageActivity : AppCompatActivity() {
             if (id == EditorInfo.IME_ACTION_SEARCH) {
 
                 startActivity(Intent(this, SearchListActivity::class.java).apply {
-                    putExtra("text", view.text.toString())
+                    putExtra(SearchListActivity.PARAM_QUERY, view.text.toString())
                 })
 
                 true
@@ -114,16 +113,10 @@ class HomePageActivity : AppCompatActivity() {
     }
 
     private fun predictSearchWord() {
-        val lastWord = vSearchInput.text.toString().split(' ').last()
-        if (lastWord.isEmpty() || lastWord.equals(usedPrediction)) {
-            usedPrediction = null
-            hidePredictions()
-            return
-        }
         val location = lastKnownLocation ?: Location("")
 
         telenavService.wordPredictionRequest()
-            .setQuery(lastWord)
+            .setQuery(vSearchInput.text.toString())
             .setLocation(location.latitude, location.longitude)
             .setLimit(10)
             .asyncCall(
@@ -179,7 +172,6 @@ class HomePageActivity : AppCompatActivity() {
                 )
             )
             view.setOnClickListener {
-                usedPrediction = word.predictWord
                 var text = vSearchInput.text.toString()
                 val i = text.lastIndexOf(' ')
                 if (i >= 0) {

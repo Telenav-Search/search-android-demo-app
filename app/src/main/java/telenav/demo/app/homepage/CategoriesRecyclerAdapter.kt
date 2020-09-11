@@ -62,7 +62,7 @@ class CategoriesRecyclerAdapter(categories: List<Category>) :
                         holder.vItem.context,
                         SearchListActivity::class.java
                     ).apply {
-                        putExtra("text", node.category.name)
+                        putExtra(SearchListActivity.PARAM_QUERY, node.category.name)
                     })
                 return@setOnClickListener
             }

@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
+import telenav.demo.app.convertNumberToDistance
 import telenav.demo.app.entitydetails.EntityDetailsActivity
 
-class SearchListRecyclerAdapter(entities: List<Entity>) :
+class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
     RecyclerView.Adapter<EntityHolder>() {
     var list: List<Entity> = entities
 
@@ -34,11 +35,14 @@ class SearchListRecyclerAdapter(entities: List<Entity>) :
                     holder.itemView.context,
                     EntityDetailsActivity::class.java
                 ).apply {
-                    putExtra("id", entity.id)
+                    putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
+                    if (categoryIcon != 0)
+                        putExtra(EntityDetailsActivity.PARAM_ICON, categoryIcon)
                 })
             return@setOnClickListener
         }
-        holder.vDistanceTo.text = String.format("%.1f km", entity.distance / 1000)
+        holder.vDistanceTo.text =
+            holder.vDistanceTo.context.convertNumberToDistance(entity.distance)
         holder.vNumber.text = "${position + 1}."
         if (entity.type == EntityType.ADDRESS) {
             holder.vAddress.visibility = View.GONE
