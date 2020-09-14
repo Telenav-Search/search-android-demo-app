@@ -36,6 +36,8 @@ class SearchListActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
 
     private lateinit var vSearchTitle: TextView
+    private lateinit var vSearchEmpty: TextView
+    private lateinit var vSearchError: TextView
     private lateinit var vSearchLoading: ContentLoadingProgressBar
     private lateinit var vSearchList: RecyclerView
     private lateinit var vSearchIcon: ImageView
@@ -54,6 +56,8 @@ class SearchListActivity : AppCompatActivity() {
         vSearchIcon = findViewById(R.id.search_icon)
         vSearchTitle = findViewById(R.id.search_title)
         vSearchLoading = findViewById(R.id.search_loading)
+        vSearchEmpty = findViewById(R.id.search_empty)
+        vSearchError = findViewById(R.id.search_error)
         vSearchList = findViewById(R.id.search_list)
         vSearchLoading.show()
 
@@ -74,7 +78,7 @@ class SearchListActivity : AppCompatActivity() {
         telenavService.searchRequest()
             .setQuery(query)
             .setLocation(location.latitude, location.longitude)
-//            .setLocation(40.0, -120.0)
+//            .setLocation(37.77881,-121.91933)
             .setLimit(20)
             .asyncCall(
                 object : Callback<EntitySearchResponse> {
@@ -88,11 +92,13 @@ class SearchListActivity : AppCompatActivity() {
                                 )
                                 vSearchList.visibility = View.VISIBLE
                                 showMapEntities(response.results)
-                            }
+                            } else
+                                vSearchEmpty.visibility = View.VISIBLE
                         }
                     }
 
                     override fun onFailure(p1: Throwable?) {
+                        vSearchError.visibility = View.VISIBLE
                         Log.e("testapp", "onFailure", p1)
                     }
                 }

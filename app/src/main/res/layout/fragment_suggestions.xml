@@ -37,9 +37,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:text="Suggestions:"
-            android:paddingBottom="10dp" />
+            android:padding="10dp"
+            android:text="Suggestions:" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/suggestionsList"

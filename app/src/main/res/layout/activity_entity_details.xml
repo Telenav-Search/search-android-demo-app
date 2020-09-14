@@ -48,13 +48,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:paddingHorizontal="10dp"
         android:orientation="vertical"
         android:background="@color/colorPrimary">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
+            android:paddingVertical="10dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -80,8 +81,7 @@
             android:layout_height="wrap_content"
             android:paddingVertical="3dp"
             android:background="?android:attr/selectableItemBackground"
-            android:visibility="gone"
-            android:layout_marginLeft="5dp">
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/entity_star1"
@@ -132,7 +132,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:padding="10dp"
+            android:paddingVertical="10dp"
             android:textSize="16sp" />
 
         <LinearLayout
@@ -198,7 +198,7 @@
             android:layout_height="wrap_content"
             android:visibility="gone"
             android:textSize="18sp"
-            android:padding="5dp" />
+            android:paddingVertical="5dp" />
 
     </LinearLayout>
 

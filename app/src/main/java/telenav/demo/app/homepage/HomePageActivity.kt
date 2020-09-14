@@ -56,8 +56,12 @@ class HomePageActivity : AppCompatActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && popupWindow != null) {
-            hidePredictions()
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (popupWindow != null) {
+                hidePredictions()
+            } else {
+                showCategoriesFragment()
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -67,6 +71,7 @@ class HomePageActivity : AppCompatActivity() {
         vSearchInputClear.setOnClickListener {
             vSearchInput.setText("")
             vSearchInput.hideKeyboard()
+            hidePredictions()
         }
         vSearchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -175,10 +180,10 @@ class HomePageActivity : AppCompatActivity() {
                 var text = vSearchInput.text.toString()
                 val i = text.lastIndexOf(' ')
                 if (i >= 0) {
-                    text = text.replaceAfterLast(' ', word.predictWord)
+                    text = text.replaceAfterLast(' ', word.predictWord+' ')
                     vSearchInput.setText(text)
                 } else
-                    vSearchInput.setText(word.predictWord)
+                    vSearchInput.setText(word.predictWord+' ')
                 vSearchInput.setSelection(vSearchInput.text.length);
                 hidePredictions()
             }
