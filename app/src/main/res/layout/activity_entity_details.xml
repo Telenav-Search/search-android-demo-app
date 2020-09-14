@@ -74,6 +74,59 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/entity_stars"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="3dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:visibility="gone"
+            android:layout_marginLeft="5dp">
+
+            <ImageView
+                android:id="@+id/entity_star1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_star_empty" />
+
+            <ImageView
+                android:id="@+id/entity_star2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_star_empty" />
+
+            <ImageView
+                android:id="@+id/entity_star3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_star_empty" />
+
+            <ImageView
+                android:id="@+id/entity_star4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_star_empty" />
+
+            <ImageView
+                android:id="@+id/entity_star5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_star_empty" />
+
+            <TextView
+                android:id="@+id/entity_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:paddingLeft="10dp"></TextView>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/entity_details_address"
             android:layout_width="match_parent"
@@ -83,27 +136,70 @@
             android:textSize="16sp" />
 
         <LinearLayout
-            android:id="@+id/entity_details_call"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/entity_details_call_button"
+                android:id="@+id/entity_details_call"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_call"
+                android:paddingLeft="5dp"
+                android:visibility="gone"
+                android:textSize="14sp"
                 android:text="Call" />
 
-            <TextView
-                android:id="@+id/entity_details_call_number"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/entity_details_url"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:textSize="14sp"
-                android:layout_gravity="center_vertical" />
+                android:layout_marginLeft="5dp"
+                android:layout_gravity="center_vertical"
+                android:background="?android:attr/selectableItemBackground"
+                android:visibility="gone"
+                android:src="@drawable/ic_web_link" />
+
+            <ImageView
+                android:id="@+id/entity_details_twitter"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginLeft="5dp"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_twitter" />
+
+            <ImageView
+                android:id="@+id/entity_details_facebook"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginLeft="5dp"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_facebook" />
+
+            <ImageView
+                android:id="@+id/entity_details_yelp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginLeft="5dp"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_yelp" />
+
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/entity_open_hours"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="18sp"
+            android:padding="5dp" />
+
     </LinearLayout>
 
     <View

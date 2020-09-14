@@ -7,3 +7,4 @@ build/
 **/gen
 tags
 tags.*
+/app/release/

@@ -26,12 +26,12 @@ import com.google.gson.Gson
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
-import com.telenav.sdk.entity.model.base.AddressType
-import com.telenav.sdk.entity.model.base.Entity
-import com.telenav.sdk.entity.model.base.EntityType
+import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.searchlist.dip
+import java.util.*
+import kotlin.collections.ArrayList
 
 class EntityDetailsActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
@@ -40,10 +40,16 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var vEntityName: TextView
     private lateinit var vEntityDetails: View
     private lateinit var vEntityAddress: TextView
-    private lateinit var vEntityCall: View
-    private lateinit var vEntityCallButton: Button
-    private lateinit var vEntityCallNumber: TextView
+    private lateinit var vEntityCall: Button
+    private lateinit var vEntityUrl: View
+    private lateinit var vEntityTwitter: View
+    private lateinit var vEntityFacebook: View
+    private lateinit var vEntityYelp: View
     private lateinit var vEntityIcon: ImageView
+    private lateinit var vEntityStars: View
+    private lateinit var vEntityRating: TextView
+    private lateinit var vEntityOpenHours: TextView
+    private val vEntityStar = ArrayList<ImageView>()
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
@@ -60,11 +66,21 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityDetails = findViewById(R.id.entity_details)
         vEntityAddress = findViewById(R.id.entity_details_address)
         vEntityCall = findViewById(R.id.entity_details_call)
-        vEntityCallButton = findViewById(R.id.entity_details_call_button)
-        vEntityCallNumber = findViewById(R.id.entity_details_call_number)
+        vEntityUrl = findViewById(R.id.entity_details_url)
+        vEntityTwitter = findViewById(R.id.entity_details_twitter)
+        vEntityFacebook = findViewById(R.id.entity_details_facebook)
+        vEntityYelp = findViewById(R.id.entity_details_yelp)
         vEntityIcon = findViewById(R.id.entity_details_icon)
-        vLoading.show()
+        vEntityStars = findViewById(R.id.entity_stars)
+        vEntityStar.add(findViewById(R.id.entity_star1))
+        vEntityStar.add(findViewById(R.id.entity_star2))
+        vEntityStar.add(findViewById(R.id.entity_star3))
+        vEntityStar.add(findViewById(R.id.entity_star4))
+        vEntityStar.add(findViewById(R.id.entity_star5))
+        vEntityRating = findViewById(R.id.entity_rating)
+        vEntityOpenHours = findViewById(R.id.entity_open_hours)
 
+        vLoading.show()
         if (icon != 0) {
             vEntityIcon.setImageResource(icon)
             vEntityIcon.visibility = View.VISIBLE
@@ -142,6 +158,7 @@ class EntityDetailsActivity : AppCompatActivity() {
             .asyncCall(
                 object : Callback<EntityGetDetailResponse> {
                     override fun onSuccess(response: EntityGetDetailResponse) {
+                        Log.w("test", "result ${Gson().toJson(response.results)}")
                         runOnUiThread {
                             vLoading.hide()
                             if (response.results != null && response.results.size > 0) {
@@ -165,10 +182,11 @@ class EntityDetailsActivity : AppCompatActivity() {
         if (entity.type == EntityType.PLACE) {
             vEntityAddress.visibility = View.VISIBLE
             vEntityAddress.text = entity.place.address.formattedAddress
-            if (entity.place.phoneNumbers.size > 0) {
+
+            if (entity.place.phoneNumbers != null && entity.place.phoneNumbers.size > 0) {
                 vEntityCall.visibility = View.VISIBLE
-                vEntityCallNumber.text = "${entity.place.phoneNumbers[0]}"
-                vEntityCallButton.setOnClickListener {
+                vEntityCall.text = "${entity.place.phoneNumbers[0]}"
+                vEntityCall.setOnClickListener {
                     val intent = Intent(
                         Intent.ACTION_DIAL,
                         Uri.fromParts("tel", entity.place.phoneNumbers[0], null)
@@ -176,9 +194,91 @@ class EntityDetailsActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
+            if (entity.place.websites != null && entity.place.websites.isNotEmpty()) {
+                showWebsites(entity.place.websites)
+            }
+
         } else {
             vEntityAddress.visibility = View.VISIBLE
             vEntityAddress.text = entity.address.addressType.toString()
+        }
+
+        if (entity.facets?.rating != null && entity.facets?.rating!!.size > 0) {
+            showStars(entity.facets?.rating!![0])
+        }
+
+        if (entity.facets?.openHours != null)
+            showOpenHours(entity.facets?.openHours!!)
+    }
+
+    private fun showOpenHours(openHours: FacetOpenHours) {
+        vEntityOpenHours.visibility = View.VISIBLE
+        if (openHours.open24hours == true) {
+            vEntityOpenHours.text = "Open Today: 24 hours"
+        } else {
+            val calendar: Calendar = Calendar.getInstance()
+            val today: Int = calendar.get(Calendar.DAY_OF_WEEK)
+            val scheduling = openHours.regularOpenHours.find { day -> day.day == today }
+            if (scheduling != null) {
+                val times =
+                    scheduling.openTime.map { dt -> "${dt.from.trimSeconds()} - ${dt.to.trimSeconds()}" }
+                vEntityOpenHours.text = "Open Today: ${times.joinToString(", ")}"
+            } else
+                vEntityOpenHours.text = "Closed"
+        }
+    }
+
+    private fun showStars(rating: Rating) {
+        vEntityStars.visibility = View.VISIBLE
+        for (i in 0..5) {
+            if (rating.averageRating >= i + 1) {
+                vEntityStar[i].setImageResource(R.drawable.ic_star_full)
+            } else if (rating.averageRating > i) {
+                vEntityStar[i].setImageResource(R.drawable.ic_start_half)
+            }
+        }
+
+        vEntityRating.text =
+            "${String.format("%.1f", rating.averageRating)}  (${rating.totalCount} Reviews)"
+        if (rating.url != null) {
+            vEntityRating.paintFlags = vEntityRating.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            vEntityStars.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(rating.url)))
+            }
+        }
+    }
+
+    private fun showWebsites(websites: List<String>) {
+        val siteUrl = websites.find { name ->
+            !name.contains("twitter.com") && !name.contains("facebook.com") && !name.contains("yelp.com")
+        }
+        val twitterUrl = websites.find { name -> name.contains("twitter.com") }
+        val facebookUrl = websites.find { name -> name.contains("facebook.com") }
+        val yelpUrl = websites.find { name -> name.contains("yelp.com") }
+
+        if (siteUrl != null) {
+            vEntityUrl.visibility = View.VISIBLE
+            vEntityUrl.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(siteUrl)))
+            }
+        }
+        if (twitterUrl != null) {
+            vEntityTwitter.visibility = View.VISIBLE
+            vEntityTwitter.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(twitterUrl)))
+            }
+        }
+        if (facebookUrl != null) {
+            vEntityFacebook.visibility = View.VISIBLE
+            vEntityFacebook.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(facebookUrl)))
+            }
+        }
+        if (yelpUrl != null) {
+            vEntityYelp.visibility = View.VISIBLE
+            vEntityYelp.setOnClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(yelpUrl)))
+            }
         }
     }
 
@@ -222,4 +322,11 @@ class EntityDetailsActivity : AppCompatActivity() {
         const val PARAM_ID = "id"
         const val PARAM_ICON = "icon"
     }
+}
+
+fun String.trimSeconds(): String {
+    return if (this.count { it == ':' } > 1)
+        this.substring(0, this.lastIndexOf(':'))
+    else
+        this
 }
