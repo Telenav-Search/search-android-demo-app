@@ -2,6 +2,10 @@ package telenav.demo.app
 
 import android.app.Application
 import android.content.Context
+import android.view.View
+import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.Transformation
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.entity.api.EntityService
@@ -31,4 +35,51 @@ fun Context.convertNumberToDistance(dist: Double): String {
     } else {
         String.format("%.1f km", km)
     }
+}
+
+fun View.expand(koef: Int = 1) {
+    val matchParentMeasureSpec: Int =
+        View.MeasureSpec.makeMeasureSpec((parent as View).width, View.MeasureSpec.EXACTLY)
+    val wrapContentMeasureSpec: Int =
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+    measure(matchParentMeasureSpec, wrapContentMeasureSpec)
+    val targetHeight: Int = measuredHeight / koef
+
+    layoutParams.height = 1
+    visibility = View.VISIBLE
+    val a: Animation = object : Animation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
+            layoutParams.height =
+                if (interpolatedTime == 1f) ViewGroup.LayoutParams.WRAP_CONTENT else (targetHeight * interpolatedTime).toInt()
+            requestLayout()
+        }
+
+        override fun willChangeBounds(): Boolean {
+            return true
+        }
+    }
+
+    a.duration = (targetHeight / context.resources.displayMetrics.density / 3).toLong()
+    startAnimation(a)
+}
+
+fun View.collapse() {
+    val initialHeight = measuredHeight
+    val a: Animation = object : Animation() {
+        override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
+            if (interpolatedTime == 1f) {
+                visibility = View.GONE
+            } else {
+                layoutParams.height = initialHeight - (initialHeight * interpolatedTime).toInt()
+                requestLayout()
+            }
+        }
+
+        override fun willChangeBounds(): Boolean {
+            return true
+        }
+    }
+
+    a.duration = (initialHeight / context.resources.displayMetrics.density / 3).toLong()
+    startAnimation(a)
 }

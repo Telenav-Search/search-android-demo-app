@@ -28,11 +28,11 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onMoreClic
         holder.vIcon.visibility = View.VISIBLE
         holder.vName.setTypeface(
             null,
-            if (category.name == "More") Typeface.NORMAL else Typeface.BOLD
+            if (category.id.isEmpty()) Typeface.NORMAL else Typeface.BOLD
         )
         holder.vIcon.setImageResource(category.icon)
         holder.vItem.setOnClickListener {
-            if (category.name == "More") {
+            if (category.id.isEmpty()) {
                 onMoreClicked()
             } else
                 holder.vItem.context.startActivity(
@@ -40,8 +40,9 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onMoreClic
                         holder.vItem.context,
                         SearchListActivity::class.java
                     ).apply {
-                        putExtra(SearchListActivity.PARAM_QUERY, category.name)
+                        putExtra(SearchListActivity.PARAM_CATEGORY, category.id)
                         putExtra(SearchListActivity.PARAM_ICON, category.icon)
+                        putExtra(SearchListActivity.PARAM_TITLE, category.name)
                     })
         }
     }

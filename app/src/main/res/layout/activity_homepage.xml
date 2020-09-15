@@ -25,6 +25,7 @@
             android:layout_weight="1"
             android:inputType="text|textNoSuggestions"
             android:hint="Search for an address or destination"
+            android:textSize="20sp"
             android:imeOptions="actionSearch"
             android:importantForAutofill="no" />
 

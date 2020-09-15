@@ -32,6 +32,7 @@ import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.R
 import telenav.demo.app.searchlist.SearchListActivity
+import telenav.demo.app.searchlist.dip
 
 
 class HomePageActivity : AppCompatActivity() {
@@ -119,9 +120,12 @@ class HomePageActivity : AppCompatActivity() {
 
     private fun predictSearchWord() {
         val location = lastKnownLocation ?: Location("")
+        val text = vSearchInput.text.toString()
+        if (text.isEmpty())
+            return
 
         telenavService.wordPredictionRequest()
-            .setQuery(vSearchInput.text.toString())
+            .setQuery(text)
             .setLocation(location.latitude, location.longitude)
             .setLimit(10)
             .asyncCall(
@@ -133,7 +137,7 @@ class HomePageActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(p1: Throwable?) {
-                        Log.e("testapp", "onFailure", p1)
+                        Log.e("testapp", "onFailure prediction ${text}", p1)
                     }
                 }
             )
@@ -168,6 +172,7 @@ class HomePageActivity : AppCompatActivity() {
             view.text = word.predictWord
             view.setTextColor(0xFFFFFFFF.toInt())
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(0, dip(10), 0, dip(10))
             view.setLines(1)
             popupView.addView(
                 view,
@@ -180,10 +185,10 @@ class HomePageActivity : AppCompatActivity() {
                 var text = vSearchInput.text.toString()
                 val i = text.lastIndexOf(' ')
                 if (i >= 0) {
-                    text = text.replaceAfterLast(' ', word.predictWord+' ')
+                    text = text.replaceAfterLast(' ', word.predictWord + ' ')
                     vSearchInput.setText(text)
                 } else
-                    vSearchInput.setText(word.predictWord+' ')
+                    vSearchInput.setText(word.predictWord + ' ')
                 vSearchInput.setSelection(vSearchInput.text.length);
                 hidePredictions()
             }

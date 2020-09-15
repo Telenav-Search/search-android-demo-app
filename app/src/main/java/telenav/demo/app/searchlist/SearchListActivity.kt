@@ -28,9 +28,13 @@ import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.entity.model.search.CategoryFilter
 import com.telenav.sdk.entity.model.search.EntitySearchResponse
+import com.telenav.sdk.entity.model.search.SearchFilters
 import telenav.demo.app.R
+import telenav.demo.app.collapse
 import telenav.demo.app.entitydetails.EntityDetailsActivity
+import telenav.demo.app.expand
 
 class SearchListActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
@@ -40,7 +44,9 @@ class SearchListActivity : AppCompatActivity() {
     private lateinit var vSearchError: TextView
     private lateinit var vSearchLoading: ContentLoadingProgressBar
     private lateinit var vSearchList: RecyclerView
+    private lateinit var vSearchListContainer: View
     private lateinit var vSearchIcon: ImageView
+    private lateinit var vSearchToggle: TextView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
@@ -50,8 +56,9 @@ class SearchListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search_list)
 
         val icon = intent.getIntExtra(PARAM_ICON, 0)
-        val query = intent.getStringExtra(PARAM_QUERY) ?: ""
-        val title = intent.getStringExtra(PARAM_TITLE) ?: query
+        val categoryId = intent.getStringExtra(PARAM_CATEGORY)
+        val query = intent.getStringExtra(PARAM_QUERY)
+        val title = intent.getStringExtra(PARAM_TITLE) ?: query ?: ""
 
         vSearchIcon = findViewById(R.id.search_icon)
         vSearchTitle = findViewById(R.id.search_title)
@@ -59,6 +66,8 @@ class SearchListActivity : AppCompatActivity() {
         vSearchEmpty = findViewById(R.id.search_empty)
         vSearchError = findViewById(R.id.search_error)
         vSearchList = findViewById(R.id.search_list)
+        vSearchListContainer = findViewById(R.id.search_list_container)
+        vSearchToggle = findViewById(R.id.search_toggle)
         vSearchLoading.show()
 
         vSearchTitle.text = title
@@ -70,13 +79,43 @@ class SearchListActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.search_back).setOnClickListener { finish() }
 
-        getLocationAndSearch(query)
+        getLocationAndSearch(query, categoryId)
         initMap()
     }
 
-    private fun search(query: String, location: Location = Location("")) {
+    private fun setToggler(opened: Boolean) {
+        vSearchToggle.visibility = View.VISIBLE
+        if (opened) {
+            vSearchToggle.text = "COLLAPSE"
+            vSearchToggle.setOnClickListener {
+                vSearchListContainer.collapse()
+                setToggler(false)
+            }
+        } else {
+            vSearchToggle.text = "EXPAND"
+            vSearchToggle.setOnClickListener {
+                vSearchListContainer.expand(2)
+                setToggler(true)
+            }
+        }
+    }
+
+    private fun search(query: String?, categoryId: String?, location: Location = Location("")) {
         telenavService.searchRequest()
-            .setQuery(query)
+            .apply {
+                if (query != null)
+                    setQuery(query)
+            }
+            .apply {
+                if (categoryId != null)
+                    setFilters(
+                        SearchFilters.builder()
+                            .setCategoryFilter(
+                                CategoryFilter.builder().addCategory(categoryId).build()
+                            )
+                            .build()
+                    )
+            }
             .setLocation(location.latitude, location.longitude)
 //            .setLocation(37.77881,-121.91933)
             .setLimit(20)
@@ -90,7 +129,8 @@ class SearchListActivity : AppCompatActivity() {
                                     response.results,
                                     intent.getIntExtra(PARAM_ICON, 0)
                                 )
-                                vSearchList.visibility = View.VISIBLE
+                                vSearchListContainer.expand(2)
+                                setToggler(true)
                                 showMapEntities(response.results)
                             } else
                                 vSearchEmpty.visibility = View.VISIBLE
@@ -98,28 +138,31 @@ class SearchListActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(p1: Throwable?) {
-                        vSearchError.visibility = View.VISIBLE
+                        runOnUiThread {
+                            vSearchLoading.hide()
+                            vSearchError.visibility = View.VISIBLE
+                        }
                         Log.e("testapp", "onFailure", p1)
                     }
                 }
             )
     }
 
-    private fun getLocationAndSearch(text: String) {
+    private fun getLocationAndSearch(query: String?, categoryId: String?) {
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationClient.lastLocation
                 .addOnSuccessListener(this) { location ->
                     if (location != null) {
                         lastKnowLocation = location
-                        search(text, location)
+                        search(query, categoryId, location)
                         positionMap(location.latitude, location.longitude)
                     } else
-                        search(text)
+                        search(query, categoryId)
 
                 }
         } catch (e: SecurityException) {
-            search(text)
+            search(query, categoryId)
         }
     }
 
@@ -233,6 +276,7 @@ class SearchListActivity : AppCompatActivity() {
         const val PARAM_QUERY = "query"
         const val PARAM_TITLE = "title"
         const val PARAM_ICON = "icon"
+        const val PARAM_CATEGORY = "category"
     }
 }
 

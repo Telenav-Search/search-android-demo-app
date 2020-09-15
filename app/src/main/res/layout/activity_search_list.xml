@@ -70,12 +70,18 @@
         android:paddingVertical="10dp"
         android:layout_gravity="center_horizontal" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_list"
+    <FrameLayout
+        android:id="@+id/search_list_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <View
         android:layout_width="match_parent"
@@ -83,10 +89,29 @@
         android:background="@color/colorAccent" />
 
     <FrameLayout
-        android:id="@+id/search_map"
+        android:id="@+id/search_map_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#eee"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:id="@+id/search_map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#eee" />
+
+        <TextView
+            android:id="@+id/search_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:paddingBottom="3dp"
+            android:paddingHorizontal="10dp"
+            android:textColor="#fff"
+            android:background="@drawable/toggler_bg"
+            android:text="EXPAND" />
+    </FrameLayout>
 
 </LinearLayout>

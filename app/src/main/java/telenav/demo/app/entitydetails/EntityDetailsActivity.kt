@@ -29,6 +29,8 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
+import telenav.demo.app.collapse
+import telenav.demo.app.expand
 import telenav.demo.app.searchlist.dip
 import java.util.*
 import kotlin.collections.ArrayList
@@ -48,6 +50,7 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var vEntityIcon: ImageView
     private lateinit var vEntityStars: View
     private lateinit var vEntityRating: TextView
+    private lateinit var vEntityToggle: TextView
     private lateinit var vEntityOpenHours: TextView
     private val vEntityStar = ArrayList<ImageView>()
     private lateinit var fMap: SupportMapFragment
@@ -79,6 +82,7 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityStar.add(findViewById(R.id.entity_star5))
         vEntityRating = findViewById(R.id.entity_rating)
         vEntityOpenHours = findViewById(R.id.entity_open_hours)
+        vEntityToggle = findViewById(R.id.entity_details_toggle)
 
         vLoading.show()
         if (icon != 0) {
@@ -91,6 +95,23 @@ class EntityDetailsActivity : AppCompatActivity() {
         getLocationAndDetails(id)
         initMap()
 
+    }
+
+    private fun setToggler(opened: Boolean) {
+        vEntityToggle.visibility = View.VISIBLE
+        if (opened) {
+            vEntityToggle.text = "COLLAPSE"
+            vEntityToggle.setOnClickListener {
+                vEntityDetails.collapse()
+                setToggler(false)
+            }
+        } else {
+            vEntityToggle.text = "EXPAND"
+            vEntityToggle.setOnClickListener {
+                vEntityDetails.expand()
+                setToggler(true)
+            }
+        }
     }
 
     private fun getLocationAndDetails(id: String) {
@@ -164,6 +185,7 @@ class EntityDetailsActivity : AppCompatActivity() {
                             if (response.results != null && response.results.size > 0) {
                                 showEntityOnMap(response.results[0])
                                 showDetails(response.results[0])
+                                setToggler(true)
                             }
                         }
                     }
@@ -178,7 +200,6 @@ class EntityDetailsActivity : AppCompatActivity() {
     private fun showDetails(entity: Entity) {
         Log.w("test", Gson().toJson(entity))
         vEntityName.text = entity.place?.name ?: entity.address?.formattedAddress
-        vEntityDetails.visibility = View.VISIBLE
         if (entity.type == EntityType.PLACE) {
             vEntityAddress.visibility = View.VISIBLE
             vEntityAddress.text = entity.place.address.formattedAddress
@@ -209,6 +230,8 @@ class EntityDetailsActivity : AppCompatActivity() {
 
         if (entity.facets?.openHours != null)
             showOpenHours(entity.facets?.openHours!!)
+
+        vEntityDetails.expand()
     }
 
     private fun showOpenHours(openHours: FacetOpenHours) {

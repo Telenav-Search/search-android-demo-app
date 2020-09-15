@@ -25,17 +25,17 @@ class CategoriesFragment : Fragment() {
     private lateinit var vCategoryError: TextView
 
     private val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food),
-        HotCategory("Coffee", R.drawable.ic_coffee),
-        HotCategory("Grocery", R.drawable.ic_grocery),
-        HotCategory("Shopping", R.drawable.ic_shopping),
-        HotCategory("Parking", R.drawable.ic_parking),
-        HotCategory("Banks / ATMs", R.drawable.ic_atm),
-        HotCategory("Hotels / Motels", R.drawable.ic_hotel),
-        HotCategory("Attractions", R.drawable.ic_attraction),
-        HotCategory("Fuel", R.drawable.ic_gas),
-        HotCategory("Electric Vehicle Charge Station", R.drawable.ic_ev),
-        HotCategory("More", R.drawable.ic_more)
+        HotCategory("Food", R.drawable.ic_food,"2040"),
+        HotCategory("Coffee", R.drawable.ic_coffee,"241"),
+        HotCategory("Grocery", R.drawable.ic_grocery,"221"),
+        HotCategory("Shopping", R.drawable.ic_shopping,"4090"),
+        HotCategory("Parking", R.drawable.ic_parking,"600"),
+        HotCategory("Banks / ATMs", R.drawable.ic_atm,"374"),
+        HotCategory("Hotels / Motels", R.drawable.ic_hotel,"595"),
+        HotCategory("Attractions", R.drawable.ic_attraction,"605"),
+        HotCategory("Fuel", R.drawable.ic_gas,"811"),
+        HotCategory("Electric Vehicle Charge Station", R.drawable.ic_ev,"771"),
+        HotCategory("More", R.drawable.ic_more,"")
     )
 
     override fun onCreateView(
@@ -91,4 +91,4 @@ class CategoriesFragment : Fragment() {
 
 }
 
-class HotCategory(val name: String, val icon: Int)
+class HotCategory(val name: String, val icon: Int, val id:String)
