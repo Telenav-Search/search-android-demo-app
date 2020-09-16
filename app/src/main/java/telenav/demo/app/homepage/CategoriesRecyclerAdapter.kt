@@ -2,7 +2,6 @@ package telenav.demo.app.homepage
 
 import android.content.Intent
 import android.graphics.Typeface
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +10,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.telenav.sdk.entity.model.base.Category
 import telenav.demo.app.R
-import telenav.demo.app.searchlist.SearchListActivity
+import telenav.demo.app.searchlist.SearchListFragment
 import java.util.*
 
-class CategoriesRecyclerAdapter(categories: List<Category>) :
+class CategoriesRecyclerAdapter(
+    categories: List<Category>,
+    val clickListener: (category: Category) -> Unit
+) :
     RecyclerView.Adapter<CategoryHolder>() {
     var list: List<CategoryNode> =
         sortCategories(categories).map { cat: Category -> CategoryNode(0, cat) }
@@ -57,14 +59,7 @@ class CategoriesRecyclerAdapter(categories: List<Category>) :
         holder.vName.setTypeface(null, if (node.expandable) Typeface.BOLD else Typeface.NORMAL);
         holder.vItem.setOnClickListener {
             if (!node.expandable) {
-                holder.vItem.context.startActivity(
-                    Intent(
-                        holder.vItem.context,
-                        SearchListActivity::class.java
-                    ).apply {
-                        putExtra(SearchListActivity.PARAM_CATEGORY, node.category.id)
-                        putExtra(SearchListActivity.PARAM_TITLE, node.category.name)
-                    })
+                clickListener(node.category)
                 return@setOnClickListener
             }
             node.expanded = !node.expanded;

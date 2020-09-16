@@ -30,8 +30,9 @@ import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.collapse
+import telenav.demo.app.dip
 import telenav.demo.app.expand
-import telenav.demo.app.searchlist.dip
+import telenav.demo.app.homepage.getUIExecutor
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -177,16 +178,15 @@ class EntityDetailsActivity : AppCompatActivity() {
         telenavService.detailRequest
             .setEntityIds(listOf(id))
             .asyncCall(
+                getUIExecutor(),
                 object : Callback<EntityGetDetailResponse> {
                     override fun onSuccess(response: EntityGetDetailResponse) {
                         Log.w("test", "result ${Gson().toJson(response.results)}")
-                        runOnUiThread {
-                            vLoading.hide()
-                            if (response.results != null && response.results.size > 0) {
-                                showEntityOnMap(response.results[0])
-                                showDetails(response.results[0])
-                                setToggler(true)
-                            }
+                        vLoading.hide()
+                        if (response.results != null && response.results.size > 0) {
+                            showEntityOnMap(response.results[0])
+                            showDetails(response.results[0])
+                            setToggler(true)
                         }
                     }
 

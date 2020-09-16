@@ -83,3 +83,5 @@ fun View.collapse() {
     a.duration = (initialHeight / context.resources.displayMetrics.density / 3).toLong()
     startAnimation(a)
 }
+
+fun Context.dip(value: Int): Int = (value * resources.displayMetrics.density).toInt()

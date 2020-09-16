@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import telenav.demo.app.R
-import telenav.demo.app.searchlist.SearchListActivity
+import telenav.demo.app.searchlist.SearchListFragment
 
-class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onMoreClicked: () -> Unit) :
+class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onCategoryClicked: (category:HotCategory) -> Unit) :
     RecyclerView.Adapter<CategoryHolder>() {
     var list: List<HotCategory> = categories
 
@@ -32,18 +32,7 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onMoreClic
         )
         holder.vIcon.setImageResource(category.icon)
         holder.vItem.setOnClickListener {
-            if (category.id.isEmpty()) {
-                onMoreClicked()
-            } else
-                holder.vItem.context.startActivity(
-                    Intent(
-                        holder.vItem.context,
-                        SearchListActivity::class.java
-                    ).apply {
-                        putExtra(SearchListActivity.PARAM_CATEGORY, category.id)
-                        putExtra(SearchListActivity.PARAM_ICON, category.icon)
-                        putExtra(SearchListActivity.PARAM_TITLE, category.name)
-                    })
+            onCategoryClicked(category)
         }
     }
 

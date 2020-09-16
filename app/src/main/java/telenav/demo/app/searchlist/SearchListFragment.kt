@@ -1,6 +1,5 @@
 package telenav.demo.app.searchlist
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -9,11 +8,13 @@ import android.graphics.Rect
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ContentLoadingProgressBar
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.LocationServices
@@ -27,16 +28,22 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.entity.model.prediction.Suggestion
 import com.telenav.sdk.entity.model.search.CategoryFilter
 import com.telenav.sdk.entity.model.search.EntitySearchResponse
 import com.telenav.sdk.entity.model.search.SearchFilters
 import telenav.demo.app.R
 import telenav.demo.app.collapse
+import telenav.demo.app.dip
 import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.expand
+import telenav.demo.app.homepage.HomePageActivity
+import telenav.demo.app.homepage.HotCategory
+import telenav.demo.app.homepage.getUIExecutor
 
-class SearchListActivity : AppCompatActivity() {
+class SearchListFragment : Fragment() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
 
     private lateinit var vSearchTitle: TextView
@@ -51,33 +58,41 @@ class SearchListActivity : AppCompatActivity() {
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_search_list)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.activity_search_list, container, false)
+    }
 
-        val icon = intent.getIntExtra(PARAM_ICON, 0)
-        val categoryId = intent.getStringExtra(PARAM_CATEGORY)
-        val query = intent.getStringExtra(PARAM_QUERY)
-        val title = intent.getStringExtra(PARAM_TITLE) ?: query ?: ""
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        vSearchIcon = findViewById(R.id.search_icon)
-        vSearchTitle = findViewById(R.id.search_title)
-        vSearchLoading = findViewById(R.id.search_loading)
-        vSearchEmpty = findViewById(R.id.search_empty)
-        vSearchError = findViewById(R.id.search_error)
-        vSearchList = findViewById(R.id.search_list)
-        vSearchListContainer = findViewById(R.id.search_list_container)
-        vSearchToggle = findViewById(R.id.search_toggle)
+        val icon = arguments!!.getInt(PARAM_ICON, 0)
+        val categoryId = arguments!!.getString(PARAM_CATEGORY)
+        val query = arguments!!.getString(PARAM_QUERY)
+        val title = arguments!!.getString(PARAM_TITLE) ?: query ?: ""
+
+        vSearchIcon = view.findViewById(R.id.search_icon)
+        vSearchTitle = view.findViewById(R.id.search_title)
+        vSearchLoading = view.findViewById(R.id.search_loading)
+        vSearchEmpty = view.findViewById(R.id.search_empty)
+        vSearchError = view.findViewById(R.id.search_error)
+        vSearchList = view.findViewById(R.id.search_list)
+        vSearchListContainer = view.findViewById(R.id.search_list_container)
+        vSearchToggle = view.findViewById(R.id.search_toggle)
         vSearchLoading.show()
 
         vSearchTitle.text = title
-        vSearchList.layoutManager = LinearLayoutManager(this)
+        vSearchList.layoutManager = LinearLayoutManager(activity)
         if (icon != 0) {
             vSearchIcon.setImageResource(icon)
             vSearchIcon.visibility = View.VISIBLE
         }
 
-        findViewById<View>(R.id.search_back).setOnClickListener { finish() }
+        view.findViewById<View>(R.id.search_back)
+            .setOnClickListener { (activity!! as HomePageActivity).removeTopFragment() }
 
         getLocationAndSearch(query, categoryId)
         initMap()
@@ -120,28 +135,25 @@ class SearchListActivity : AppCompatActivity() {
 //            .setLocation(37.77881,-121.91933)
             .setLimit(20)
             .asyncCall(
+                activity?.getUIExecutor(),
                 object : Callback<EntitySearchResponse> {
                     override fun onSuccess(response: EntitySearchResponse) {
-                        runOnUiThread {
-                            vSearchLoading.hide()
-                            if (response.results != null && response.results.size > 0) {
-                                vSearchList.adapter = SearchListRecyclerAdapter(
-                                    response.results,
-                                    intent.getIntExtra(PARAM_ICON, 0)
-                                )
-                                vSearchListContainer.expand(2)
-                                setToggler(true)
-                                showMapEntities(response.results)
-                            } else
-                                vSearchEmpty.visibility = View.VISIBLE
-                        }
+                        vSearchLoading.hide()
+                        if (response.results != null && response.results.size > 0) {
+                            vSearchList.adapter = SearchListRecyclerAdapter(
+                                response.results,
+                                arguments!!.getInt(PARAM_ICON, 0)
+                            )
+                            vSearchListContainer.expand(2)
+                            setToggler(true)
+                            showMapEntities(response.results)
+                        } else
+                            vSearchEmpty.visibility = View.VISIBLE
                     }
 
                     override fun onFailure(p1: Throwable?) {
-                        runOnUiThread {
-                            vSearchLoading.hide()
-                            vSearchError.visibility = View.VISIBLE
-                        }
+                        vSearchLoading.hide()
+                        vSearchError.visibility = View.VISIBLE
                         Log.e("testapp", "onFailure", p1)
                     }
                 }
@@ -150,9 +162,9 @@ class SearchListActivity : AppCompatActivity() {
 
     private fun getLocationAndSearch(query: String?, categoryId: String?) {
         try {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
             fusedLocationClient.lastLocation
-                .addOnSuccessListener(this) { location ->
+                .addOnSuccessListener(activity!!) { location ->
                     if (location != null) {
                         lastKnowLocation = location
                         search(query, categoryId, location)
@@ -168,11 +180,9 @@ class SearchListActivity : AppCompatActivity() {
 
     private fun initMap() {
         fMap = SupportMapFragment()
-        supportFragmentManager.beginTransaction().replace(R.id.search_map, fMap).commit()
+        childFragmentManager.beginTransaction().replace(R.id.search_map, fMap).commit()
 
         fMap.getMapAsync {
-            if (isFinishing)
-                return@getMapAsync
             map = it
             it.mapType = GoogleMap.MAP_TYPE_NORMAL
 
@@ -220,12 +230,12 @@ class SearchListActivity : AppCompatActivity() {
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
                 startActivity(
-                    Intent(this, EntityDetailsActivity::class.java).apply {
+                    Intent(activity!!, EntityDetailsActivity::class.java).apply {
                         putExtra(EntityDetailsActivity.PARAM_ID, id)
-                        if (intent.hasExtra(PARAM_ICON))
+                        if (arguments!!.containsKey(PARAM_ICON))
                             putExtra(
                                 EntityDetailsActivity.PARAM_ICON,
-                                intent.getIntExtra(PARAM_ICON, 0)
+                                arguments!!.getInt(PARAM_ICON, 0)
                             )
                     })
             }
@@ -238,7 +248,7 @@ class SearchListActivity : AppCompatActivity() {
     }
 
     private fun createMarker(text: String): Bitmap {
-        val size = dip(32)
+        val size = activity!!.dip(32)
         val centerX = (size / 2).toFloat()
         val centerY = (size / 2).toFloat()
         val newImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
@@ -277,7 +287,42 @@ class SearchListActivity : AppCompatActivity() {
         const val PARAM_TITLE = "title"
         const val PARAM_ICON = "icon"
         const val PARAM_CATEGORY = "category"
+
+        @JvmStatic
+        fun newInstance(query: String) =
+            SearchListFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PARAM_QUERY, query)
+                }
+            }
+
+        @JvmStatic
+        fun newInstance(category: HotCategory) =
+            SearchListFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PARAM_CATEGORY, category.id)
+                    putInt(PARAM_ICON, category.icon)
+                    putString(PARAM_TITLE, category.name)
+                }
+            }
+
+        @JvmStatic
+        fun newInstance(category: Category) =
+            SearchListFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PARAM_CATEGORY, category.id)
+                    putString(PARAM_TITLE, category.name)
+                }
+            }
+
+        @JvmStatic
+        fun newInstance(suggestion: Suggestion) =
+            SearchListFragment().apply {
+                arguments = Bundle().apply {
+                    putString(PARAM_QUERY, suggestion.query)
+                    putString(PARAM_TITLE, suggestion.formattedLabel)
+                }
+            }
     }
 }
 
-fun Context.dip(value: Int): Int = (value * resources.displayMetrics.density).toInt()

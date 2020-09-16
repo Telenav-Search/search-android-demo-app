@@ -1,9 +1,9 @@
 package telenav.demo.app.homepage
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
@@ -31,13 +31,15 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.R
-import telenav.demo.app.searchlist.SearchListActivity
-import telenav.demo.app.searchlist.dip
+import telenav.demo.app.dip
+import telenav.demo.app.searchlist.SearchListFragment
+import java.util.concurrent.Executor
 
 
 class HomePageActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
     var lastKnownLocation: Location? = null
+    var lastLaunchedPrediction: String = ""
 
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
@@ -60,7 +62,7 @@ class HomePageActivity : AppCompatActivity() {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (popupWindow != null) {
                 hidePredictions()
-            } else {
+            } else if (!removeTopFragment()) {
                 showCategoriesFragment()
             }
             return true
@@ -96,15 +98,25 @@ class HomePageActivity : AppCompatActivity() {
         vSearchInput.setText("")
         vSearchInput.setOnEditorActionListener { view, id, _ ->
             if (id == EditorInfo.IME_ACTION_SEARCH) {
-
-                startActivity(Intent(this, SearchListActivity::class.java).apply {
-                    putExtra(SearchListActivity.PARAM_QUERY, view.text.toString())
-                })
-
+                showSearchFragment(SearchListFragment.newInstance(view.text.toString()))
                 true
             } else
                 false
         }
+    }
+
+    fun removeTopFragment(): Boolean {
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            supportFragmentManager.popBackStack()
+            return true
+        }
+        return false
+    }
+
+    fun showSearchFragment(fragment: SearchListFragment) {
+        hidePredictions()
+        supportFragmentManager.beginTransaction().add(R.id.fragmentFrame, fragment)
+            .addToBackStack("").commit()
     }
 
     private fun showCategoriesFragment() {
@@ -121,6 +133,8 @@ class HomePageActivity : AppCompatActivity() {
     private fun predictSearchWord() {
         val location = lastKnownLocation ?: Location("")
         val text = vSearchInput.text.toString()
+        lastLaunchedPrediction = text
+        hidePredictions()
         if (text.isEmpty())
             return
 
@@ -128,12 +142,11 @@ class HomePageActivity : AppCompatActivity() {
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
             .setLimit(10)
-            .asyncCall(
+            .asyncCall(getUIExecutor(),
                 object : Callback<EntityWordPredictionResponse> {
                     override fun onSuccess(response: EntityWordPredictionResponse) {
-                        runOnUiThread {
+                        if (lastLaunchedPrediction == text)
                             showPredictionPopup(response.results)
-                        }
                     }
 
                     override fun onFailure(p1: Throwable?) {
@@ -248,3 +261,7 @@ fun View.hideKeyboard() {
 
 fun Context.checkLocationPermission(): Boolean =
     checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
+
+fun Activity.getUIExecutor(): Executor {
+    return Executor { r -> runOnUiThread(r) }
+}

@@ -1,21 +1,18 @@
 package telenav.demo.app.homepage
 
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.telenav.sdk.entity.model.prediction.Suggestion
-import com.telenav.sdk.entity.model.prediction.SuggestionType
 import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
-import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.searchlist.SearchListActivity
 
-class SuggestionRecyclerAdapter(suggestions: List<Suggestion>) :
+class SuggestionRecyclerAdapter(
+    suggestions: List<Suggestion>,
+    val clickListener: (Suggestion) -> Unit
+) :
     RecyclerView.Adapter<SuggestionHolder>() {
     var list: List<Suggestion> = suggestions
 
@@ -29,26 +26,7 @@ class SuggestionRecyclerAdapter(suggestions: List<Suggestion>) :
     override fun onBindViewHolder(holder: SuggestionHolder, position: Int) {
         val item = list[position];
         holder.vName.text = item.formattedLabel
-        holder.itemView.setOnClickListener {
-            Log.e("test", "click suggestion ${Gson().toJson(item)}")
-            if (item.type == SuggestionType.ENTITY)
-                holder.itemView.context.startActivity(
-                    Intent(
-                        holder.itemView.context,
-                        EntityDetailsActivity::class.java
-                    ).apply {
-                        putExtra(EntityDetailsActivity.PARAM_ID, item.id)
-                    })
-            else
-                holder.itemView.context.startActivity(
-                    Intent(
-                        holder.itemView.context,
-                        SearchListActivity::class.java
-                    ).apply {
-                        putExtra(SearchListActivity.PARAM_TITLE, item.formattedLabel)
-                        putExtra(SearchListActivity.PARAM_QUERY, item.query)
-                    })
-        }
+        holder.itemView.setOnClickListener { clickListener(item) }
         holder.vDistanceTo.text =
             if (item.entity != null) holder.vDistanceTo.context.convertNumberToDistance(item.entity.distance) else ""
     }

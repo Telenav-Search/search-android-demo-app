@@ -1,5 +1,6 @@
 package telenav.demo.app.homepage
 
+import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -16,7 +17,10 @@ import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
+import com.telenav.sdk.entity.model.prediction.SuggestionType
 import telenav.demo.app.R
+import telenav.demo.app.entitydetails.EntityDetailsActivity
+import telenav.demo.app.searchlist.SearchListFragment
 
 class SuggestionFragment : Fragment() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
@@ -48,35 +52,45 @@ class SuggestionFragment : Fragment() {
 
     private fun requestSuggestions() {
         val text = arguments!!.getString("text")
-        val location = (activity!! as HomePageActivity).lastKnownLocation?: Location("");
-        Log.w("test","${location.latitude} ${location.longitude}")
+        val location = (activity!! as HomePageActivity).lastKnownLocation ?: Location("");
+        Log.w("test", "${location.latitude} ${location.longitude}")
 
         telenavService.suggestionPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
             .setLimit(10)
-            .asyncCall(object : Callback<EntitySuggestionPredictionResponse> {
-                override fun onSuccess(response: EntitySuggestionPredictionResponse) {
-                    Log.w("test", Gson().toJson(response.results))
-                    activity?.runOnUiThread {
+            .asyncCall(activity!!.getUIExecutor(),
+                object : Callback<EntitySuggestionPredictionResponse> {
+                    override fun onSuccess(response: EntitySuggestionPredictionResponse) {
+                        if (activity == null)
+                            return
+                        Log.w("test", Gson().toJson(response.results))
                         vSuggestionsLoading.hide()
                         if (response.results.isEmpty())
                             vSuggestionsEmpty.visibility = View.VISIBLE
                         else {
                             vSuggestions.visibility = View.VISIBLE
-                            vSuggestionsList.setAdapter(SuggestionRecyclerAdapter(response.results))
+                            vSuggestionsList.setAdapter(SuggestionRecyclerAdapter(response.results) { suggestion ->
+                                Log.e("test", "click suggestion ${Gson().toJson(suggestion)}")
+                                if (suggestion.type == SuggestionType.ENTITY)
+                                    activity?.startActivity(
+                                        Intent(activity, EntityDetailsActivity::class.java).apply {
+                                            putExtra(EntityDetailsActivity.PARAM_ID, suggestion.id)
+                                        })
+                                else
+                                    (activity!! as HomePageActivity).showSearchFragment(
+                                        SearchListFragment.newInstance(suggestion)
+                                    )
+                            })
                         }
                     }
-                }
 
-                override fun onFailure(error: Throwable) {
-                    activity?.runOnUiThread {
+                    override fun onFailure(error: Throwable) {
                         vSuggestionsLoading.hide()
                         vSuggestionsError.visibility = View.VISIBLE
+                        Log.e("test", "", error)
                     }
-                    Log.e("test", "", error)
-                }
-            })
+                })
     }
 
     companion object {
