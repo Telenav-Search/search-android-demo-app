@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:paddingLeft="10dp"/>
+                android:paddingLeft="10dp" />
         </LinearLayout>
 
         <TextView
@@ -200,6 +200,64 @@
             android:visibility="gone"
             android:textSize="18sp"
             android:paddingVertical="5dp" />
+
+        <LinearLayout
+            android:id="@+id/entity_connectors"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:visibility="gone"
+            android:background="#a0000000"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textSize="18sp"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:text="Connectors:" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/entity_prices"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:visibility="gone"
+            android:background="#a0000000"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textSize="18sp"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:text="Price:" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/entity_parking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:visibility="gone"
+            android:background="#a0000000"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textSize="18sp"
+                android:textColor="#fff"
+                android:textStyle="bold"
+                android:text="Parking:" />
+        </LinearLayout>
+
 
     </LinearLayout>
 

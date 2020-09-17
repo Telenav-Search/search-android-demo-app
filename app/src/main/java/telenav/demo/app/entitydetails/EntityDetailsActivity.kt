@@ -7,10 +7,14 @@ import android.graphics.Paint
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ContentLoadingProgressBar
@@ -51,6 +55,9 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var vEntityRating: TextView
     private lateinit var vEntityToggle: TextView
     private lateinit var vEntityOpenHours: TextView
+    private lateinit var vEntityParkings: LinearLayout
+    private lateinit var vEntityPrices: LinearLayout
+    private lateinit var vEntityConnectors: LinearLayout
     private val vEntityStar = ArrayList<ImageView>()
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
@@ -82,6 +89,9 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityRating = findViewById(R.id.entity_rating)
         vEntityOpenHours = findViewById(R.id.entity_open_hours)
         vEntityToggle = findViewById(R.id.entity_details_toggle)
+        vEntityConnectors = findViewById(R.id.entity_connectors)
+        vEntityPrices = findViewById(R.id.entity_prices)
+        vEntityParkings = findViewById(R.id.entity_parking)
 
         vLoading.show()
         if (icon != 0) {
@@ -226,6 +236,18 @@ class EntityDetailsActivity : AppCompatActivity() {
             showStars(entity.facets?.rating!![0])
         }
 
+        if (entity.facets?.evConnectors != null) {
+            showEVConnectors(entity.facets?.evConnectors!!)
+        }
+        if (entity.facets?.priceInfo != null) {
+            showPriceDetails(entity.facets?.priceInfo!!)
+        }
+        if (entity.facets?.parking != null) {
+            showParking(entity.facets?.parking!!)
+        }
+
+        Log.w("test", "parkin: " + Gson().toJson(entity.facets?.parking))
+
         if (entity.facets?.openHours != null)
             showOpenHours(entity.facets?.openHours!!)
 
@@ -238,7 +260,9 @@ class EntityDetailsActivity : AppCompatActivity() {
             vEntityOpenHours.text = "Open Today: 24 hours"
         } else {
             val calendar: Calendar = Calendar.getInstance()
-            val today: Int = calendar.get(Calendar.DAY_OF_WEEK)
+            var today: Int = calendar.get(Calendar.DAY_OF_WEEK) - 1
+            if (today == 0)
+                today = 7 //adjustment to match SDK week days
             val scheduling = openHours.regularOpenHours.find { day -> day.day == today }
             if (scheduling != null) {
                 val times =
@@ -267,6 +291,108 @@ class EntityDetailsActivity : AppCompatActivity() {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(rating.url)))
             }
         }
+    }
+
+    private fun showEVConnectors(evConnectors: FacetEvConnectors) {
+        val connectors = evConnectors.connectors
+        if (connectors.size == 0)
+            return
+        vEntityConnectors.visibility = View.VISIBLE
+        connectors.forEach { connector ->
+            val view = TextView(this)
+            view.text =
+                "${connector.powerFeedLevel.name}: total ${connector.connectorNumber ?: 0}, available ${connector.available ?: 0}"
+            view.setTextColor(0xFFFFFFFF.toInt())
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(dip(5), dip(3), dip(5), dip(3))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            vEntityConnectors.addView(
+                view,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            )
+
+        }
+    }
+
+    private fun showPriceDetails(priceInfo: FacetPriceInfo) {
+        val prices = priceInfo.priceDetails ?: return
+        if (prices.size == 0)
+            return
+        vEntityPrices.visibility = View.VISIBLE
+        prices.forEach { price ->
+            val view = TextView(this)
+            view.text =
+                "${price.label}: ${price.currency} ${String.format("%.3f", price.amount)} / gal"
+            view.setTextColor(0xFFFFFFFF.toInt())
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(dip(5), dip(3), dip(5), dip(3))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            vEntityPrices.addView(
+                view,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            )
+
+        }
+    }
+
+    private fun showParking(parking: Parking) {
+        vEntityParkings.visibility = View.VISIBLE
+        val prices = parking.pricing?.prices
+        prices?.forEachIndexed { index, price ->
+            if (index > 3)
+                return@forEachIndexed
+            val view = TextView(this)
+            view.text =
+                "Price: ${price.symbol} ${String.format("%.1f", price.amount)} / ${price.unitText}"
+            view.setTextColor(0xFFFFFFFF.toInt())
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(dip(5), dip(3), dip(5), dip(3))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            vEntityParkings.addView(
+                view,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            )
+        }
+        var view = TextView(this)
+        view.text = "Total spaces: ${parking.spacesTotal}"
+        view.setTextColor(0xFFFFFFFF.toInt())
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        view.setPadding(dip(5), dip(3), dip(5), dip(3))
+        view.ellipsize = TextUtils.TruncateAt.END
+        view.setLines(1)
+        vEntityParkings.addView(
+            view,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
+        view = TextView(this)
+        view.text = "Available: ${parking.spacesAvailable ?: "NO"}"
+        view.setTextColor(0xFFFFFFFF.toInt())
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        view.setPadding(dip(5), dip(3), dip(5), dip(3))
+        view.ellipsize = TextUtils.TruncateAt.END
+        view.setLines(1)
+        vEntityParkings.addView(
+            view,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        )
     }
 
     private fun showWebsites(websites: List<String>) {
