@@ -346,7 +346,16 @@ class EntityDetailsActivity : AppCompatActivity() {
     private fun showParking(parking: Parking) {
         vEntityParkings.visibility = View.VISIBLE
         val prices = parking.pricing?.prices
-        prices?.forEachIndexed { index, price ->
+
+        val uniqPrices = ArrayList<ParkingPriceItem>()
+
+        prices?.forEach { price ->
+            if (uniqPrices.find { uniq -> uniq.unitText == price.unitText } == null) {
+                uniqPrices.add(price)
+            }
+        }
+
+        uniqPrices.forEachIndexed { index, price ->
             if (index > 3)
                 return@forEachIndexed
             val view = TextView(this)
