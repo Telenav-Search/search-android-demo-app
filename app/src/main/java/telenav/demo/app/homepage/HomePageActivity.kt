@@ -8,7 +8,9 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.util.TypedValue
@@ -24,6 +26,9 @@ import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
@@ -40,6 +45,7 @@ class HomePageActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
     var lastKnownLocation: Location? = null
     var lastLaunchedPrediction: String = ""
+    private var locationCallback: LocationCallback? = null
 
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
@@ -49,8 +55,6 @@ class HomePageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_homepage)
-
-        checkGPSPermission()
 
         vSearchInput = findViewById(R.id.search_input)
         vSearchInputClear = findViewById(R.id.search_input_clear)
@@ -186,6 +190,7 @@ class HomePageActivity : AppCompatActivity() {
             view.setTextColor(0xFFFFFFFF.toInt())
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             view.setPadding(0, dip(10), 0, dip(10))
+            view.ellipsize=TextUtils.TruncateAt.END
             view.setLines(1)
             popupView.addView(
                 view,
@@ -215,6 +220,17 @@ class HomePageActivity : AppCompatActivity() {
         popupWindow = null;
     }
 
+    override fun onResume() {
+        super.onResume()
+        checkGPSPermission()
+    }
+
+    override fun onPause() {
+        stopGPSListner()
+        super.onPause()
+    }
+
+
     private fun checkGPSPermission() {
         if (Build.VERSION.SDK_INT >= 23 && !this.checkLocationPermission())
             ActivityCompat.requestPermissions(
@@ -228,16 +244,42 @@ class HomePageActivity : AppCompatActivity() {
     }
 
     private fun getLocation() {
+        val locationRequest = LocationRequest.create()?.apply {
+            interval = 5000
+            fastestInterval = 1000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
         try {
             val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener(this) { location ->
-                    if (location != null) {
+            locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult?) {
+                    locationResult ?: return
+                    for (location in locationResult.locations) {
                         lastKnownLocation = location;
                     }
+// Fake GPS data
+//          lastKnownLocation = Location("").apply {
+//                            latitude=35.832335
+//                            longitude=-115.436228
+////                                .setLocation(37.77881,-121.91933)
+//                        };
                 }
+            }
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
         } catch (e: SecurityException) {
+        }
+    }
 
+    private fun stopGPSListner() {
+        try {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            if (locationCallback != null)
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+        } catch (e: SecurityException) {
         }
     }
 

@@ -17,7 +17,6 @@ import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -25,6 +24,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.Gson
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -35,10 +35,8 @@ import com.telenav.sdk.entity.model.search.CategoryFilter
 import com.telenav.sdk.entity.model.search.EntitySearchResponse
 import com.telenav.sdk.entity.model.search.SearchFilters
 import telenav.demo.app.R
-import telenav.demo.app.collapse
 import telenav.demo.app.dip
 import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.expand
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.homepage.getUIExecutor
@@ -56,7 +54,6 @@ class SearchListFragment : Fragment() {
     private lateinit var vSearchToggle: TextView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
-    private var lastKnowLocation: Location? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,7 +91,7 @@ class SearchListFragment : Fragment() {
         view.findViewById<View>(R.id.search_back)
             .setOnClickListener { (activity!! as HomePageActivity).removeTopFragment() }
 
-        getLocationAndSearch(query, categoryId)
+        search(query, categoryId)
         initMap()
     }
 
@@ -103,19 +100,20 @@ class SearchListFragment : Fragment() {
         if (opened) {
             vSearchToggle.text = "COLLAPSE"
             vSearchToggle.setOnClickListener {
-                vSearchListContainer.collapse()
+                vSearchListContainer.visibility = View.GONE
                 setToggler(false)
             }
         } else {
             vSearchToggle.text = "EXPAND"
             vSearchToggle.setOnClickListener {
-                vSearchListContainer.expand(2)
+                vSearchListContainer.visibility = View.VISIBLE
                 setToggler(true)
             }
         }
     }
 
-    private fun search(query: String?, categoryId: String?, location: Location = Location("")) {
+    private fun search(query: String?, categoryId: String?) {
+        val location = (activity!! as HomePageActivity).lastKnownLocation ?: Location("");
         telenavService.searchRequest()
             .apply {
                 if (query != null)
@@ -132,19 +130,19 @@ class SearchListFragment : Fragment() {
                     )
             }
             .setLocation(location.latitude, location.longitude)
-//            .setLocation(37.77881,-121.91933)
             .setLimit(20)
             .asyncCall(
                 activity?.getUIExecutor(),
                 object : Callback<EntitySearchResponse> {
                     override fun onSuccess(response: EntitySearchResponse) {
+                        Log.w("test", Gson().toJson(response.results))
                         vSearchLoading.hide()
                         if (response.results != null && response.results.size > 0) {
                             vSearchList.adapter = SearchListRecyclerAdapter(
                                 response.results,
                                 arguments!!.getInt(PARAM_ICON, 0)
                             )
-                            vSearchListContainer.expand(2)
+                            vSearchListContainer.visibility = View.VISIBLE
                             setToggler(true)
                             showMapEntities(response.results)
                         } else
@@ -158,24 +156,6 @@ class SearchListFragment : Fragment() {
                     }
                 }
             )
-    }
-
-    private fun getLocationAndSearch(query: String?, categoryId: String?) {
-        try {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener(activity!!) { location ->
-                    if (location != null) {
-                        lastKnowLocation = location
-                        search(query, categoryId, location)
-                        positionMap(location.latitude, location.longitude)
-                    } else
-                        search(query, categoryId)
-
-                }
-        } catch (e: SecurityException) {
-            search(query, categoryId)
-        }
     }
 
     private fun initMap() {
@@ -192,8 +172,9 @@ class SearchListFragment : Fragment() {
             }
             it.isTrafficEnabled = true
 
-            if (lastKnowLocation != null) {
-                positionMap(lastKnowLocation!!.latitude, lastKnowLocation!!.longitude)
+            val location = (activity!! as HomePageActivity).lastKnownLocation;
+            if (location != null) {
+                positionMap(location.latitude, location.longitude)
             }
         }
     }

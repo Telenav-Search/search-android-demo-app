@@ -29,9 +29,7 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
-import telenav.demo.app.collapse
 import telenav.demo.app.dip
-import telenav.demo.app.expand
 import telenav.demo.app.homepage.getUIExecutor
 import java.util.*
 import kotlin.collections.ArrayList
@@ -103,13 +101,13 @@ class EntityDetailsActivity : AppCompatActivity() {
         if (opened) {
             vEntityToggle.text = "COLLAPSE"
             vEntityToggle.setOnClickListener {
-                vEntityDetails.collapse()
+                vEntityDetails.visibility = View.GONE
                 setToggler(false)
             }
         } else {
             vEntityToggle.text = "EXPAND"
             vEntityToggle.setOnClickListener {
-                vEntityDetails.expand()
+                vEntityDetails.visibility = View.VISIBLE
                 setToggler(true)
             }
         }
@@ -231,7 +229,7 @@ class EntityDetailsActivity : AppCompatActivity() {
         if (entity.facets?.openHours != null)
             showOpenHours(entity.facets?.openHours!!)
 
-        vEntityDetails.expand()
+        vEntityDetails.visibility = View.VISIBLE
     }
 
     private fun showOpenHours(openHours: FacetOpenHours) {
