@@ -254,17 +254,17 @@ class HomePageActivity : AppCompatActivity() {
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult?) {
                     locationResult ?: return
-//                    for (location in locationResult.locations) {
-//                        lastKnownLocation = location;
-//                    }
+                    for (location in locationResult.locations) {
+                        lastKnownLocation = location;
+                    }
 // Fake GPS data
-                    lastKnownLocation = Location("").apply {
-//                            latitude=35.832335
-//                            longitude=-115.436228
-                        latitude = 37.77881
-                        longitude = -121.91933
-////                                .setLocation(37.77881,-121.91933)
-                    };
+//                    lastKnownLocation = Location("").apply {
+////                            latitude=35.832335
+////                            longitude=-115.436228
+//                        latitude = 37.77881
+//                        longitude = -121.91933
+//////                                .setLocation(37.77881,-121.91933)
+//                    };
                 }
             }
             fusedLocationClient.requestLocationUpdates(
