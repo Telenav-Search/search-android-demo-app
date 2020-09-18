@@ -374,34 +374,36 @@ class EntityDetailsActivity : AppCompatActivity() {
                 )
             )
         }
-        var view = TextView(this)
-        view.text = "Total spaces: ${parking.spacesTotal}"
-        view.setTextColor(0xFFFFFFFF.toInt())
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-        view.setPadding(dip(5), dip(3), dip(5), dip(3))
-        view.ellipsize = TextUtils.TruncateAt.END
-        view.setLines(1)
-        vEntityParkings.addView(
-            view,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+        if(parking.spacesTotal!=null) {
+            var view = TextView(this)
+            view.text = "Total spaces: ${parking.spacesTotal}"
+            view.setTextColor(0xFFFFFFFF.toInt())
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(dip(5), dip(3), dip(5), dip(3))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            vEntityParkings.addView(
+                view,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
             )
-        )
-        view = TextView(this)
-        view.text = "Available: ${parking.spacesAvailable ?: "NO"}"
-        view.setTextColor(0xFFFFFFFF.toInt())
-        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-        view.setPadding(dip(5), dip(3), dip(5), dip(3))
-        view.ellipsize = TextUtils.TruncateAt.END
-        view.setLines(1)
-        vEntityParkings.addView(
-            view,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
+            view = TextView(this)
+            view.text = "Available: ${parking.spacesAvailable ?: "NO"}"
+            view.setTextColor(0xFFFFFFFF.toInt())
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            view.setPadding(dip(5), dip(3), dip(5), dip(3))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            vEntityParkings.addView(
+                view,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
             )
-        )
+        }
     }
 
     private fun showWebsites(websites: List<String>) {

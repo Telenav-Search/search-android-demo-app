@@ -190,7 +190,7 @@ class HomePageActivity : AppCompatActivity() {
             view.setTextColor(0xFFFFFFFF.toInt())
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
             view.setPadding(0, dip(10), 0, dip(10))
-            view.ellipsize=TextUtils.TruncateAt.END
+            view.ellipsize = TextUtils.TruncateAt.END
             view.setLines(1)
             popupView.addView(
                 view,
@@ -254,15 +254,17 @@ class HomePageActivity : AppCompatActivity() {
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(locationResult: LocationResult?) {
                     locationResult ?: return
-                    for (location in locationResult.locations) {
-                        lastKnownLocation = location;
-                    }
+//                    for (location in locationResult.locations) {
+//                        lastKnownLocation = location;
+//                    }
 // Fake GPS data
-//          lastKnownLocation = Location("").apply {
+                    lastKnownLocation = Location("").apply {
 //                            latitude=35.832335
 //                            longitude=-115.436228
+                        latitude = 37.77881
+                        longitude = -121.91933
 ////                                .setLocation(37.77881,-121.91933)
-//                        };
+                    };
                 }
             }
             fusedLocationClient.requestLocationUpdates(
