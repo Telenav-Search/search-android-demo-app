@@ -105,6 +105,7 @@
                     app:tint="#FB8924" />
 
                 <ImageView
+                    android:id="@+id/entity_yelp_sign"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginLeft="5dp"

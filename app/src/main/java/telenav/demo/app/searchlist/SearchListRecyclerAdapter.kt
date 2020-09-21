@@ -56,7 +56,7 @@ class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
             holder.vAddress.visibility = View.VISIBLE
         }
 
-        if (entity.facets?.rating != null && entity.facets?.rating!!.size > 0 && entity.facets?.rating!![0].source == "YELP")
+        if (entity.facets?.rating != null && entity.facets?.rating!!.size > 0)//&&
             showStars(entity.facets?.rating!![0], holder)
     }
 
@@ -66,6 +66,7 @@ class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
 
     private fun showStars(rating: Rating, holder: EntityHolder) {
         holder.vEntityStars.visibility = View.VISIBLE
+        holder.vEntityYelpSign.visibility = if (rating.source == "YELP") View.VISIBLE else View.GONE
         for (i in 0..5) {
             if (rating.averageRating >= i + 1) {
                 holder.vEntityStar[i].setImageResource(R.drawable.ic_star_full)
@@ -74,7 +75,11 @@ class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
             }
         }
 
-        holder.vEntityRating.text = "${rating.totalCount} Yelp reviews"
+        holder.vEntityRating.text =
+            if (rating.source == "YELP")
+                "${rating.totalCount} Yelp reviews"
+            else
+                "${rating.totalCount} reviews"
     }
 
 }
@@ -86,6 +91,7 @@ class EntityHolder(view: View) : RecyclerView.ViewHolder(view) {
     val vAddress = view.findViewById<TextView>(R.id.entity_address)
     val vEntityStars = view.findViewById<View>(R.id.entity_stars)
     val vEntityRating = view.findViewById<TextView>(R.id.entity_rating)
+    val vEntityYelpSign = view.findViewById<View>(R.id.entity_yelp_sign)
     val vEntityStar = ArrayList<ImageView>().apply {
         add(view.findViewById(R.id.entity_star1))
         add(view.findViewById(R.id.entity_star2))

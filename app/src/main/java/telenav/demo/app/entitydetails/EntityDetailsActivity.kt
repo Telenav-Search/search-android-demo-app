@@ -58,6 +58,7 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var vEntityParkings: LinearLayout
     private lateinit var vEntityPrices: LinearLayout
     private lateinit var vEntityConnectors: LinearLayout
+    private lateinit var vEntityYelpSign: View
     private val vEntityStar = ArrayList<ImageView>()
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
@@ -81,6 +82,7 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityYelp = findViewById(R.id.entity_details_yelp)
         vEntityIcon = findViewById(R.id.entity_details_icon)
         vEntityStars = findViewById(R.id.entity_stars)
+        vEntityYelpSign = findViewById(R.id.entity_yelp_sign)
         vEntityStar.add(findViewById(R.id.entity_star1))
         vEntityStar.add(findViewById(R.id.entity_star2))
         vEntityStar.add(findViewById(R.id.entity_star3))
@@ -266,7 +268,13 @@ class EntityDetailsActivity : AppCompatActivity() {
             val scheduling = openHours.regularOpenHours.find { day -> day.day == today }
             if (scheduling != null) {
                 val times =
-                    scheduling.openTime.map { dt -> "${dt.from.trimSeconds()} - ${dt.to.trimSeconds()}" }
+                    scheduling.openTime.map { dt ->
+                        if (dt.from == "00:00:00" && dt.to == "24:00:00")
+                            "24 hours"
+                        else
+                            "${dt.from.trimSeconds().convertHour()} - " +
+                                    "${dt.to.trimSeconds().convertHour()}"
+                    }
                 vEntityOpenHours.text = "Open Today: ${times.joinToString(", ")}"
             } else
                 vEntityOpenHours.text = "Closed"
@@ -282,6 +290,8 @@ class EntityDetailsActivity : AppCompatActivity() {
                 vEntityStar[i].setImageResource(R.drawable.ic_start_half)
             }
         }
+
+        vEntityYelpSign.visibility = if (rating.source == "YELP") View.VISIBLE else View.GONE
 
         vEntityRating.text =
             "${String.format("%.1f", rating.averageRating)}  (${rating.totalCount} Reviews)"
@@ -374,8 +384,8 @@ class EntityDetailsActivity : AppCompatActivity() {
                 )
             )
         }
-        if(parking.spacesTotal!=null) {
-            var view = TextView(this)
+        if (parking.spacesTotal != null) {
+            val view = TextView(this)
             view.text = "Total spaces: ${parking.spacesTotal}"
             view.setTextColor(0xFFFFFFFF.toInt())
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
@@ -389,20 +399,22 @@ class EntityDetailsActivity : AppCompatActivity() {
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
             )
-            view = TextView(this)
-            view.text = "Available: ${parking.spacesAvailable ?: "NO"}"
-            view.setTextColor(0xFFFFFFFF.toInt())
-            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            view.setPadding(dip(5), dip(3), dip(5), dip(3))
-            view.ellipsize = TextUtils.TruncateAt.END
-            view.setLines(1)
-            vEntityParkings.addView(
-                view,
-                LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+            if (parking.spacesAvailable != null) {
+                val view = TextView(this)
+                view.text = "Available: ${parking.spacesAvailable}"
+                view.setTextColor(0xFFFFFFFF.toInt())
+                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+                view.setPadding(dip(5), dip(3), dip(5), dip(3))
+                view.ellipsize = TextUtils.TruncateAt.END
+                view.setLines(1)
+                vEntityParkings.addView(
+                    view,
+                    LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -487,4 +499,19 @@ fun String.trimSeconds(): String {
         this.substring(0, this.lastIndexOf(':'))
     else
         this
+}
+
+fun String.convertHour(): String {
+    try {
+        var h = this.substring(0, this.lastIndexOf(':')).toInt()
+        val ampm = if (h <= 12) "AM" else "PM"
+        if (h > 12)
+            h -= 12
+
+        var half = if (this.endsWith(":00")) "" else this.substring(this.lastIndexOf(':'))
+
+        return "${h}${half} ${ampm}"
+    } catch (e: Exception) {
+        return this
+    }
 }
