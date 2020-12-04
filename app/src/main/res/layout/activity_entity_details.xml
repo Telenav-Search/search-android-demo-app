@@ -16,20 +16,20 @@
             android:id="@+id/entity_details_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
+            android:layout_gravity="center_vertical"
             android:paddingVertical="3dp"
-            android:src="@drawable/ic_back"
-            android:layout_gravity="center_vertical" />
+            android:paddingLeft="10dp"
+            android:src="@drawable/ic_back" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@color/colorPrimary"
             android:layout_gravity="center_vertical"
+            android:background="@color/colorPrimary"
+            android:paddingVertical="10dp"
             android:text="Details"
-            android:paddingVertical="10dp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <View
@@ -48,23 +48,24 @@
         android:id="@+id/entity_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:paddingHorizontal="10dp"
+        android:background="@color/colorPrimary"
         android:orientation="vertical"
-        android:background="@color/colorPrimary">
+        android:paddingHorizontal="10dp"
+        android:visibility="gone">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingVertical="10dp">
 
             <ImageView
                 android:id="@+id/entity_details_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="5dp"
+                android:layout_alignParentLeft="true"
                 android:layout_gravity="center_vertical"
+                android:paddingRight="5dp"
                 android:visibility="gone" />
 
             <TextView
@@ -72,16 +73,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_toLeftOf="@id/entity_favorite"
+                android:layout_toRightOf="@id/entity_details_icon"
                 android:textSize="16sp"
                 android:textStyle="bold" />
-        </LinearLayout>
+
+            <ImageView
+                android:id="@+id/entity_favorite"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="center_vertical"
+                android:background="?android:attr/selectableItemBackground"
+                android:paddingRight="5dp"
+                android:src="@drawable/ic_favorite_border" />
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/entity_stars"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="3dp"
             android:background="?android:attr/selectableItemBackground"
+            android:paddingVertical="3dp"
             android:visibility="gone">
 
             <ImageView
@@ -128,8 +141,8 @@
                 android:id="@+id/entity_yelp_sign"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginLeft="5dp"
                 android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
                 android:src="@drawable/ic_yelp"
                 app:tint="#AF230B" />
 
@@ -137,24 +150,24 @@
                 android:id="@+id/entity_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:paddingLeft="10dp" />
+                android:textStyle="bold" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/entity_details_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:paddingVertical="10dp"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="5dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingVertical="5dp">
 
             <Button
                 android:id="@+id/entity_details_call"
@@ -162,49 +175,49 @@
                 android:layout_height="wrap_content"
                 android:drawableLeft="@drawable/ic_call"
                 android:paddingLeft="5dp"
-                android:visibility="gone"
+                android:text="Call"
                 android:textSize="14sp"
-                android:text="Call" />
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/entity_details_url"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
                 android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
                 android:background="?android:attr/selectableItemBackground"
-                android:visibility="gone"
-                android:src="@drawable/ic_web_link" />
+                android:src="@drawable/ic_web_link"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/entity_details_twitter"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginLeft="5dp"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_twitter" />
+                android:layout_marginLeft="5dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_twitter"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/entity_details_facebook"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginLeft="5dp"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_facebook" />
+                android:layout_marginLeft="5dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_facebook"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/entity_details_yelp"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginLeft="5dp"
-                android:visibility="gone"
-                android:background="?android:attr/selectableItemBackground"
                 android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_yelp" />
+                android:layout_marginLeft="5dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_yelp"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -212,27 +225,27 @@
             android:id="@+id/entity_open_hours"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"
+            android:paddingVertical="5dp"
             android:textSize="18sp"
-            android:paddingVertical="5dp" />
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/entity_connectors"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:visibility="gone"
             android:background="#a0000000"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textSize="18sp"
+                android:text="Connectors:"
                 android:textColor="#fff"
-                android:textStyle="bold"
-                android:text="Connectors:" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
@@ -240,18 +253,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:visibility="gone"
             android:background="#a0000000"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textSize="18sp"
+                android:text="Price:"
                 android:textColor="#fff"
-                android:textStyle="bold"
-                android:text="Price:" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
@@ -259,20 +272,84 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:visibility="gone"
             android:background="#a0000000"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:textSize="18sp"
+                android:text="Parking:"
                 android:textColor="#fff"
-                android:textStyle="bold"
-                android:text="Parking:" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingVertical="10dp">
+
+            <LinearLayout
+                android:id="@+id/entity_details_set_home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight=".50"
+                android:background="?android:attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_gravity="center_vertical"
+                    android:paddingRight="5dp"
+                    android:src="@drawable/ic_home"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toLeftOf="@id/entity_favorite"
+                    android:layout_toRightOf="@id/entity_details_icon"
+                    android:text="Set as Home"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/entity_details_set_work"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight=".50"
+                android:background="?android:attr/selectableItemBackground"
+                android:orientation="horizontal"
+                android:paddingVertical="10dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_gravity="center_vertical"
+                    android:paddingRight="5dp"
+                    android:src="@drawable/ic_work"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toLeftOf="@id/entity_favorite"
+                    android:layout_toRightOf="@id/entity_details_icon"
+                    android:text="Set as Work"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -297,14 +374,14 @@
             android:id="@+id/entity_details_toggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
             android:layout_gravity="center_horizontal"
-            android:visibility="gone"
-            android:paddingBottom="3dp"
-            android:paddingHorizontal="10dp"
-            android:textColor="#fff"
             android:background="@drawable/toggler_bg"
-            android:text="EXPAND" />
+            android:paddingHorizontal="10dp"
+            android:paddingBottom="3dp"
+            android:text="EXPAND"
+            android:textColor="#fff"
+            android:textSize="14sp"
+            android:visibility="gone" />
     </FrameLayout>
 
 </LinearLayout>
