@@ -2,6 +2,7 @@ package telenav.demo.app.homepage
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.pm.PackageManager
@@ -30,7 +31,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.telenav.sdk.entity.api.Callback
+import com.telenav.sdk.core.Callback
+import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
@@ -50,6 +52,9 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
 
+    private lateinit var vAppModeSelect: View
+    private lateinit var modeSelectDialog: AlertDialog
+
     private var popupWindow: PopupWindow? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +65,10 @@ class HomePageActivity : AppCompatActivity() {
         vSearchInputClear = findViewById(R.id.search_input_clear)
 
         setupSearchField()
+
+        setupModeSelectDialog()
+        vAppModeSelect = findViewById(R.id.app_mode_select)
+        vAppModeSelect.setOnClickListener { showModeSelectDialog() }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -72,6 +81,17 @@ class HomePageActivity : AppCompatActivity() {
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun setupModeSelectDialog() {
+        modeSelectDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.search_mode_dialog_title)
+            .setItems(
+                R.array.search_modes
+            ) { _, which ->
+                val modes = resources.getStringArray(R.array.search_modes)
+                SDKRuntime.setNetworkAvailable(modes[which].equals("hybrid", true))
+            }.create()
     }
 
     private fun setupSearchField() {
@@ -218,6 +238,12 @@ class HomePageActivity : AppCompatActivity() {
     private fun hidePredictions() {
         popupWindow?.dismiss();
         popupWindow = null;
+    }
+
+    private fun showModeSelectDialog() {
+        hidePredictions()
+
+        modeSelectDialog.show()
     }
 
     override fun onResume() {

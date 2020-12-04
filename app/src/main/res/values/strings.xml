@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Telenav Demo App</string>
+    <string name="search_mode_dialog_title">Select SDK Search Mode</string>
+    <string-array name="search_modes">
+        <item>Hybrid</item>
+        <item>Onboard</item>
+    </string-array>
 </resources>
