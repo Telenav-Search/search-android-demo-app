@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
@@ -39,6 +40,7 @@ import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.R
 import telenav.demo.app.dip
+import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.searchlist.SearchListFragment
 import java.util.concurrent.Executor
 
@@ -52,7 +54,6 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
 
-    private lateinit var vAppModeSelect: View
     private lateinit var modeSelectDialog: AlertDialog
 
     private var popupWindow: PopupWindow? = null
@@ -67,8 +68,9 @@ class HomePageActivity : AppCompatActivity() {
         setupSearchField()
 
         setupModeSelectDialog()
-        vAppModeSelect = findViewById(R.id.app_mode_select)
-        vAppModeSelect.setOnClickListener { showModeSelectDialog() }
+
+        findViewById<View>(R.id.app_personal_info).setOnClickListener { showPersonalInfoActivity() }
+        findViewById<View>(R.id.app_mode_select).setOnClickListener { showModeSelectDialog() }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -244,6 +246,10 @@ class HomePageActivity : AppCompatActivity() {
         hidePredictions()
 
         modeSelectDialog.show()
+    }
+
+    private fun showPersonalInfoActivity() {
+        startActivity(Intent(this, PersonalInfoActivity::class.java))
     }
 
     override fun onResume() {
