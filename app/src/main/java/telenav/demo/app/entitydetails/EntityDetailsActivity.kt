@@ -1,5 +1,6 @@
 package telenav.demo.app.entitydetails
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -35,6 +37,7 @@ import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.homepage.getUIExecutor
+import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -42,6 +45,9 @@ class EntityDetailsActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
+    private lateinit var vEntitySetHomeTitle: TextView
+    private lateinit var vEntitySetWorkTitle: TextView
+    private lateinit var vEntityFavorite: ImageView
     private lateinit var vEntityName: TextView
     private lateinit var vEntityDetails: View
     private lateinit var vEntityAddress: TextView
@@ -63,6 +69,8 @@ class EntityDetailsActivity : AppCompatActivity() {
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
     private var lastKnowLocation: Location? = null
+
+    private var entity: Entity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +102,9 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityConnectors = findViewById(R.id.entity_connectors)
         vEntityPrices = findViewById(R.id.entity_prices)
         vEntityParkings = findViewById(R.id.entity_parking)
+        vEntitySetHomeTitle = findViewById(R.id.entity_details_set_home_title)
+        vEntitySetWorkTitle = findViewById(R.id.entity_details_set_work_title)
+        vEntityFavorite = findViewById(R.id.entity_favorite)
 
         vLoading.show()
         if (icon != 0) {
@@ -103,9 +114,69 @@ class EntityDetailsActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.entity_details_back).setOnClickListener { finish() }
 
+        findViewById<View>(R.id.entity_details_set_home).setOnClickListener { setAsHomeAddress(entity) }
+        findViewById<View>(R.id.entity_details_set_work).setOnClickListener { setAsWorkAddress(entity) }
+        vEntityFavorite.setOnClickListener { toggleFavorite(entity) }
+
         getLocationAndDetails(id)
         initMap()
 
+    }
+
+    private fun setAsHomeAddress(entity: Entity?) {
+        entity ?: return
+        val prefs =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with(prefs.edit()) {
+            putString(getString(R.string.saved_home_address_key), Gson().toJson(entity))
+            apply()
+        }
+        vEntitySetHomeTitle.text = getString(R.string.home_title)
+    }
+
+    private fun setAsWorkAddress(entity: Entity?) {
+        entity ?: return
+        val prefs =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with(prefs.edit()) {
+            putString(getString(R.string.saved_work_address_key), Gson().toJson(entity))
+            apply()
+        }
+        vEntitySetWorkTitle.text = getString(R.string.work_title)
+    }
+
+    private fun toggleFavorite(entity: Entity?) {
+        entity ?: return
+        val prefs =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
+        var favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
+            prefs.getString(
+                getString(R.string.saved_favorite_list_key),
+                ""
+            ), listType
+        )
+
+        if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }){
+            val newFavorite = favoriteEntities.filter { e -> e.id != entity.id }
+            with(prefs.edit()) {
+                putString(getString(R.string.saved_favorite_list_key), Gson().toJson(newFavorite))
+                apply()
+            }
+            vEntityFavorite.setImageResource(R.drawable.ic_favorite_border)
+        } else {
+            if(favoriteEntities == null){
+                favoriteEntities = arrayListOf(entity)
+            } else {
+                favoriteEntities.add(entity)
+            }
+            with(prefs.edit()) {
+                putString(getString(R.string.saved_favorite_list_key), Gson().toJson(favoriteEntities))
+                apply()
+            }
+            vEntityFavorite.setImageResource(R.drawable.ic_favorite)
+        }
     }
 
     private fun setToggler(opened: Boolean) {
@@ -194,6 +265,7 @@ class EntityDetailsActivity : AppCompatActivity() {
                         Log.w("test", "result ${Gson().toJson(response.results)}")
                         vLoading.hide()
                         if (response.results != null && response.results.size > 0) {
+                            entity = response.results[0]
                             showEntityOnMap(response.results[0])
                             showDetails(response.results[0])
                             setToggler(true)
@@ -253,7 +325,48 @@ class EntityDetailsActivity : AppCompatActivity() {
         if (entity.facets?.openHours != null)
             showOpenHours(entity.facets?.openHours!!)
 
+        checkAddress(entity)
+        checkFavorite(entity)
+
         vEntityDetails.visibility = View.VISIBLE
+    }
+
+    private fun checkAddress(entity: Entity) {
+        val prefs =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val storedHome = Gson().fromJson(
+            prefs.getString(getString(R.string.saved_home_address_key), ""),
+            Entity::class.java
+        )
+        val storedWork = Gson().fromJson(
+            prefs.getString(getString(R.string.saved_work_address_key), ""),
+            Entity::class.java
+        )
+        if (storedHome != null && storedHome.id == entity.id) {
+            vEntitySetHomeTitle.text = getString(R.string.home_title)
+        }
+        if (storedWork != null && storedWork.id == entity.id) {
+            vEntitySetWorkTitle.text = getString(R.string.work_title)
+        }
+    }
+
+    private fun checkFavorite(entity: Entity) {
+        val prefs =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        val listType: Type = object : TypeToken<List<Entity>>() {}.type
+        val favoriteEntities = Gson().fromJson<List<Entity>>(
+            prefs.getString(
+                getString(R.string.saved_favorite_list_key),
+                ""
+            ), listType
+        )
+
+        if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }){
+            vEntityFavorite.setImageResource(R.drawable.ic_favorite)
+        } else {
+            vEntityFavorite.setImageResource(R.drawable.ic_favorite_border)
+        }
     }
 
     private fun showOpenHours(openHours: FacetOpenHours) {

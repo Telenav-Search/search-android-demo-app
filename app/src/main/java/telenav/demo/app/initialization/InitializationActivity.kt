@@ -53,8 +53,8 @@ class InitializationActivity : AppCompatActivity() {
 
         try {
             EntityService.initialize(getSDKOptions(indexDataPath))
-            DataCollectorService.initialize(applicationContext, getSDKOptions())
-            OtaService.initialize(applicationContext, getSDKOptions())
+//            DataCollectorService.initialize(applicationContext, getSDKOptions())
+//            OtaService.initialize(applicationContext, getSDKOptions())
 //        registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
             startActivity(Intent(this, HomePageActivity::class.java))

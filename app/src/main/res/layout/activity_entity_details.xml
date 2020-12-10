@@ -311,6 +311,7 @@
                     android:src="@drawable/ic_home"/>
 
                 <TextView
+                    android:id="@+id/entity_details_set_home_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
@@ -340,6 +341,7 @@
                     android:src="@drawable/ic_work"/>
 
                 <TextView
+                    android:id="@+id/entity_details_set_work_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
