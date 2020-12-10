@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.datacollector.api.DataCollectorService
@@ -18,26 +19,26 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        EntityService.initialize(getSDKOptions())
-//        DataCollectorService.initialize(applicationContext, getSDKOptions())
+//        EntityService.initialize(getSDKOptions())
 //        OtaService.initialize(applicationContext, getSDKOptions())
 //        registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
     }
 }
 
-fun Context.getSDKOptions(): SDKOptions {
-    val dataPath = getExternalFilesDir(null)?.absolutePath;
-    val cachePath = getExternalCacheDir()?.absolutePath;
-
-    return SDKOptions.builder()
-        .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
-        .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
-        .setCloudEndPoint("https://restapistage.telenav.com")
-        .setSdkDataDir(dataPath)
-        .setSdkCacheDataDir(cachePath)
-        .setLocale(Locale.EN_US)
-        .build()
-}
+//fun Context.getSDKOptions(): SDKOptions {
+//    val dataPath = getExternalFilesDir(null)?.absolutePath;
+//    val cachePath = externalCacheDir?.absolutePath;
+//
+//    return SDKOptions.builder()
+//        .setUserId("demoApp")
+//        .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
+//        .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
+//        .setCloudEndPoint("https://restapistage.telenav.com")
+//        .setSdkDataDir(dataPath)
+//        .setSdkCacheDataDir(cachePath)
+//        .setLocale(Locale.EN_US)
+//        .build()
+//}
 
 class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
