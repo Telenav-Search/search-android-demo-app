@@ -5,5 +5,6 @@
         <item>Hybrid</item>
         <item>Onboard</item>
     </string-array>
+    <string name="permission_note">For Hybrid SDK to work with index files access must be provided.</string>
     <string name="initialization_note">In order to Hybrid SDK works, download an index file from Telenav and extract it to Telenav folder on internal storage. Or if you already have one you could select it as index data folder</string>
 </resources>

@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "telenav.demo.app"
         minSdkVersion 23
-        targetSdkVersion 24
+        targetSdkVersion 30
         versionCode 6
         versionName "0.5"
     }
@@ -54,14 +54,3 @@ dependencies {
     api 'com.google.android.gms:play-services-maps:17.0.0'
     api 'org.slf4j:slf4j-android:1.7.26'
 }
-
-//task copyIndexFile(type: Exec) {
-//    def adb = android.getAdbExe()
-//    def indexFolder = '/home/alexander_uskov/Desktop/entity'
-//    def dataFolder = '/storage/emulated/0/Android/data/telenav.demo.app/files'
-//
-//    def copyDataCommand = [adb, 'push', indexFolder, dataFolder]
-//    commandLine copyDataCommand
-//}
-//
-//preBuild.dependsOn copyIndexFile

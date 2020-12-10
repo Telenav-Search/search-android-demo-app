@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,8 @@ import java.io.File
 class InitializationActivity : AppCompatActivity() {
 
     private lateinit var vLoading: ContentLoadingProgressBar
+    private lateinit var vAccess: View
+    private lateinit var vInitialization: View
 
     private var indexDataPath = "";
 
@@ -31,16 +35,21 @@ class InitializationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_initialization)
 
+        vAccess = findViewById(R.id.initialization_access)
+        vInitialization = findViewById(R.id.initialization)
         vLoading = findViewById(R.id.initialization_loading)
-        vLoading.show()
+        showProgress()
 
         findViewById<View>(R.id.initialization_select_index).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
+        findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
+            startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
+        }
         checkStoragePermissions()
     }
 
     private fun initSDKs() {
-        vLoading.show()
+        showProgress()
 
         try {
             EntityService.initialize(getSDKOptions(indexDataPath))
@@ -53,7 +62,7 @@ class InitializationActivity : AppCompatActivity() {
         } catch (e: Throwable) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
             e.printStackTrace()
-            vLoading.hide()
+            hideProgress()
         }
     }
 
@@ -76,8 +85,12 @@ class InitializationActivity : AppCompatActivity() {
                 ),
                 1
             )
-        } else {
+        } else if (android.os.Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             vLoading.hide()
+            vInitialization.visibility = View.GONE
+            vAccess.visibility = View.VISIBLE
+        } else {
+            hideProgress()
         }
     }
 
@@ -91,14 +104,30 @@ class InitializationActivity : AppCompatActivity() {
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        vInitialization.visibility = View.VISIBLE
+        vAccess.visibility = View.GONE
+    }
+
+    private fun showProgress(){
+        vLoading.show()
+        vInitialization.visibility = View.GONE
+    }
+
+    private fun hideProgress(){
+        vLoading.hide()
+        vInitialization.visibility = View.VISIBLE
+    }
 }
 
-fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
+fun getSDKOptions(pathToIndex: String = ""): SDKOptions {
     var dataPath = "/storage/emulated/0/Telenav";
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
     }
-    val cachePath = getExternalCacheDir()?.absolutePath;
+    val cachePath = "$dataPath/cache";
 
     return SDKOptions.builder()
         .setUserId("telenavDemoApp")
