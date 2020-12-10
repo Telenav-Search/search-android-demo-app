@@ -15,9 +15,12 @@ import androidx.core.widget.ContentLoadingProgressBar
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.StartEngineEvent
+import com.telenav.sdk.datacollector.model.event.StopEngineEvent
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
 import java.io.File
@@ -53,9 +56,10 @@ class InitializationActivity : AppCompatActivity() {
 
         try {
             EntityService.initialize(getSDKOptions(indexDataPath))
-//            DataCollectorService.initialize(applicationContext, getSDKOptions())
-//            OtaService.initialize(applicationContext, getSDKOptions())
-//        registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
+            DataCollectorService.initialize(applicationContext, getSDKOptions())
+            OtaService.initialize(applicationContext, getSDKOptions())
+
+//            application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
             startActivity(Intent(this, HomePageActivity::class.java))
             finish()
@@ -122,12 +126,12 @@ class InitializationActivity : AppCompatActivity() {
     }
 }
 
-fun getSDKOptions(pathToIndex: String = ""): SDKOptions {
+fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
     var dataPath = "/storage/emulated/0/Telenav";
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
     }
-    val cachePath = "$dataPath/cache";
+    val cachePath = applicationContext.cacheDir.absolutePath;
 
     return SDKOptions.builder()
         .setUserId("telenavDemoApp")

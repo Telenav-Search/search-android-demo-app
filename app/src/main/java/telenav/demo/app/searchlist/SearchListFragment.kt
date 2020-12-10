@@ -89,7 +89,10 @@ class SearchListFragment : Fragment() {
         }
 
         view.findViewById<View>(R.id.search_back)
-            .setOnClickListener { (activity!! as HomePageActivity).removeTopFragment() }
+            .setOnClickListener {
+                activity ?: return@setOnClickListener
+                (activity as HomePageActivity).removeTopFragment()
+            }
 
         search(query, categoryId)
         initMap()
@@ -113,7 +116,8 @@ class SearchListFragment : Fragment() {
     }
 
     private fun search(query: String?, categoryId: String?) {
-        val location = (activity!! as HomePageActivity).lastKnownLocation ?: Location("");
+        activity ?: return
+        val location = (activity as HomePageActivity).lastKnownLocation ?: Location("");
         telenavService.searchRequest()
             .apply {
                 if (query != null)
@@ -135,6 +139,7 @@ class SearchListFragment : Fragment() {
                 activity?.getUIExecutor(),
                 object : Callback<EntitySearchResponse> {
                     override fun onSuccess(response: EntitySearchResponse) {
+                        activity ?: return
                         Log.w("test", Gson().toJson(response.results))
                         vSearchLoading.hide()
                         if (response.results != null && response.results.size > 0) {
@@ -172,7 +177,8 @@ class SearchListFragment : Fragment() {
             }
             it.isTrafficEnabled = true
 
-            val location = (activity!! as HomePageActivity).lastKnownLocation;
+            activity ?: return@getMapAsync
+            val location = (activity as HomePageActivity).lastKnownLocation;
             if (location != null) {
                 positionMap(location.latitude, location.longitude)
             }
@@ -210,8 +216,9 @@ class SearchListFragment : Fragment() {
 
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
+                activity ?: return@setOnInfoWindowClickListener
                 startActivity(
-                    Intent(activity!!, EntityDetailsActivity::class.java).apply {
+                    Intent(activity, EntityDetailsActivity::class.java).apply {
                         putExtra(EntityDetailsActivity.PARAM_ID, id)
                         if (arguments!!.containsKey(PARAM_ICON))
                             putExtra(
@@ -229,7 +236,7 @@ class SearchListFragment : Fragment() {
     }
 
     private fun createMarker(text: String): Bitmap {
-        val size = activity!!.dip(32)
+        val size = activity?.dip(32) ?: 1
         val centerX = (size / 2).toFloat()
         val centerY = (size / 2).toFloat()
         val newImage = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
