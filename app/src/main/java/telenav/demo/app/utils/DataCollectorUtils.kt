@@ -2,11 +2,13 @@ package telenav.demo.app.utils
 
 import android.content.Context
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorClient
 import com.telenav.sdk.datacollector.model.event.*
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.GeoPoint
 import telenav.demo.app.R
+import java.lang.reflect.Type
 
 fun Entity.getCoord(): GeoPoint? {
     return address?.geoCoordinates ?: place?.address?.geoCoordinates
@@ -22,14 +24,101 @@ fun DataCollectorClient.stopEngine() {
         .setEvent(StopEngineEvent.builder().build()).build().execute()
 }
 
+fun DataCollectorClient.addFavorite(context: Context, entity: Entity) {
+    val prefs =
+        context.getSharedPreferences(
+            context.getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+
+    val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
+    var favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
+        prefs.getString(
+            context.getString(R.string.saved_favorite_list_key),
+            ""
+        ), listType
+    )
+
+    when {
+        favoriteEntities == null -> {
+            favoriteEntities = arrayListOf(entity)
+        }
+        favoriteEntities.none { e -> e.id == entity.id } -> {
+            favoriteEntities.add(entity)
+        }
+        else -> {
+            return
+        }
+    }
+
+    with(prefs.edit()) {
+        putString(
+            context.getString(R.string.saved_favorite_list_key),
+            Gson().toJson(favoriteEntities)
+        )
+        apply()
+    }
+
+    sendEventRequest().setEvent(
+        FavoriteEvent.builder().setEntityId(entity.id)
+            .setActionType(FavoriteEvent.ActionType.ADD).build()
+    ).build().execute()
+}
+
+fun DataCollectorClient.deleteFavorite(context: Context, entity: Entity) {
+    val prefs =
+        context.getSharedPreferences(
+            context.getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+
+    val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
+    val favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
+        prefs.getString(
+            context.getString(R.string.saved_favorite_list_key),
+            ""
+        ), listType
+    )
+
+    if (favoriteEntities == null || favoriteEntities.none { e -> e.id == entity.id }) {
+        return
+    } else {
+        with(prefs.edit()) {
+            putString(
+                context.getString(R.string.saved_favorite_list_key),
+                Gson().toJson(favoriteEntities.filter { e -> e.id != entity.id })
+            )
+            apply()
+        }
+    }
+
+    sendEventRequest().setEvent(
+        FavoriteEvent.builder().setEntityId(entity.id)
+            .setActionType(FavoriteEvent.ActionType.DELETE).build()
+    ).build().execute()
+}
+
 fun DataCollectorClient.removeAllFavorites(context: Context) {
     val prefs =
         context.getSharedPreferences(
             context.getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         )
+
+
+    val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
+    val favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
+        prefs.getString(
+            context.getString(R.string.saved_favorite_list_key),
+            ""
+        ), listType
+    )
+    if(favoriteEntities == null || favoriteEntities.isEmpty()){
+        return
+    }
+
     with(prefs.edit()) {
-        remove(context.getString(telenav.demo.app.R.string.saved_favorite_list_key))
+        remove(context.getString(R.string.saved_favorite_list_key))
         apply()
     }
 
@@ -38,17 +127,10 @@ fun DataCollectorClient.removeAllFavorites(context: Context) {
 }
 
 fun DataCollectorClient.setHome(context: Context, entity: Entity) {
-    val coords = entity.getCoord();
-    val eventBuilder =
-        SetHomeEvent.builder()
-            .setLabel(entity.label).setEntityId(entity.id)
-            .setActionType(SetHomeEvent.ActionType.SET)
-    if (coords != null) {
-        eventBuilder.setLat(coords.latitude).setLon(coords.longitude)
-    }
+    val eventBuilder = getHomeEventBuilder(entity)
 
-    val setEvent = eventBuilder.build()
-    val removeEvent = SetHomeEvent.builder().setActionType(SetHomeEvent.ActionType.REMOVE).build()
+    val setEvent = eventBuilder.setActionType(SetHomeEvent.ActionType.SET).build()
+    val removeEvent = eventBuilder.setActionType(SetHomeEvent.ActionType.REMOVE).build()
 
     setAddress(
         context,
@@ -65,27 +147,28 @@ fun DataCollectorClient.removeHome(context: Context) {
             context.getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         )
+    val entity = Gson().fromJson(
+        prefs.getString(context.getString(R.string.saved_home_address_key), ""),
+        Entity::class.java
+    )
+
+    entity ?: return
+
     with(prefs.edit()) {
         remove(context.getString(R.string.saved_home_address_key))
         apply()
     }
 
     sendEventRequest()
-        .setEvent(SetHomeEvent.builder().setActionType(SetHomeEvent.ActionType.REMOVE).build()).build().execute()
+        .setEvent(getHomeEventBuilder(entity).setActionType(SetHomeEvent.ActionType.REMOVE).build())
+        .build().execute()
 }
 
 fun DataCollectorClient.setWork(context: Context, entity: Entity) {
-    val coords = entity.getCoord();
-    val eventBuilder =
-        SetWorkEvent.builder()
-            .setLabel(entity.label).setEntityId(entity.id)
-            .setActionType(SetWorkEvent.ActionType.SET)
-    if (coords != null) {
-        eventBuilder.setLat(coords.latitude).setLon(coords.longitude)
-    }
+    val eventBuilder = getWorkEventBuilder(entity)
 
-    val setEvent = eventBuilder.build()
-    val removeEvent = SetWorkEvent.builder().setActionType(SetWorkEvent.ActionType.REMOVE).build()
+    val setEvent = eventBuilder.setActionType(SetWorkEvent.ActionType.SET).build()
+    val removeEvent = eventBuilder.setActionType(SetWorkEvent.ActionType.REMOVE).build()
 
     setAddress(
         context,
@@ -102,13 +185,45 @@ fun DataCollectorClient.removeWork(context: Context) {
             context.getString(R.string.preference_file_key),
             Context.MODE_PRIVATE
         )
+    val entity = Gson().fromJson(
+        prefs.getString(context.getString(R.string.saved_work_address_key), ""),
+        Entity::class.java
+    )
+
+    entity ?: return
+
     with(prefs.edit()) {
         remove(context.getString(R.string.saved_work_address_key))
         apply()
     }
 
     sendEventRequest()
-        .setEvent(SetWorkEvent.builder().setActionType(SetWorkEvent.ActionType.REMOVE).build()).build().execute()
+        .setEvent(getWorkEventBuilder(entity).setActionType(SetWorkEvent.ActionType.REMOVE).build())
+        .build().execute()
+}
+
+private fun getHomeEventBuilder(entity: Entity): SetHomeEvent.Builder {
+    val coords = entity.getCoord();
+    val eventBuilder =
+        SetHomeEvent.builder()
+            .setLabel(entity.label ?: "").setEntityId(entity.id)
+    if (coords != null) {
+        eventBuilder.setLat(coords.latitude).setLon(coords.longitude)
+    }
+
+    return eventBuilder
+}
+
+private fun getWorkEventBuilder(entity: Entity): SetWorkEvent.Builder {
+    val coords = entity.getCoord();
+    val eventBuilder =
+        SetWorkEvent.builder()
+            .setLabel(entity.label ?: "").setEntityId(entity.id)
+    if (coords != null) {
+        eventBuilder.setLat(coords.latitude).setLon(coords.longitude)
+    }
+
+    return eventBuilder
 }
 
 private fun DataCollectorClient.setAddress(

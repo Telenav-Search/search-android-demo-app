@@ -5,8 +5,6 @@ import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.os.Bundle
 import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.StartEngineEvent
-import com.telenav.sdk.datacollector.model.event.StopEngineEvent
 import telenav.demo.app.utils.startEngine
 import telenav.demo.app.utils.stopEngine
 
@@ -23,7 +21,8 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         if (isAppLaunch) {
             isAppLaunch = false
             dataCollectorClient.startEngine()
-        }}
+        }
+    }
 
     override fun onActivityDestroyed(activity: Activity) {
         isActivityChangingConfigurations = activity.isChangingConfigurations

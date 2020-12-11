@@ -18,6 +18,7 @@ import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
 import telenav.demo.app.entitydetails.EntityDetailsActivity
+import telenav.demo.app.utils.deleteFavorite
 import telenav.demo.app.utils.removeAllFavorites
 import telenav.demo.app.utils.removeHome
 import telenav.demo.app.utils.removeWork
@@ -127,23 +128,7 @@ class PersonalInfoActivity : AppCompatActivity() {
     }
 
     private fun deleteFavoriteEntity(entity: Entity) {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-
-        val listType: Type = object : TypeToken<List<Entity>>() {}.type
-        val favoriteEntities = Gson().fromJson<List<Entity>>(
-            prefs.getString(
-                getString(R.string.saved_favorite_list_key),
-                ""
-            ), listType
-        )
-
-        val filteredList = favoriteEntities.filter { e -> e.id != entity.id }
-
-        with(prefs.edit()) {
-            putString(getString(R.string.saved_favorite_list_key), Gson().toJson(filteredList))
-            apply()
-        }
+        dataCollectorClient.deleteFavorite(this, entity)
         getPersonalData()
     }
 
@@ -173,7 +158,6 @@ class PersonalInfoActivity : AppCompatActivity() {
     }
 
     private fun fillHomeInfo(entity: Entity?) {
-        Log.w("test", "Home Entity ${Gson().toJson(entity)}")
         if (entity == null) {
             vHomeEmpty.visibility = View.VISIBLE
             vHomeEntity.visibility = View.GONE

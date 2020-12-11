@@ -38,6 +38,8 @@ import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.utils.addFavorite
+import telenav.demo.app.utils.deleteFavorite
 import telenav.demo.app.utils.setHome
 import telenav.demo.app.utils.setWork
 import java.lang.reflect.Type
@@ -75,6 +77,10 @@ class EntityDetailsActivity : AppCompatActivity() {
     private var lastKnowLocation: Location? = null
 
     private var entity: Entity? = null
+    private var isFavorite: Boolean = false
+    private var isHome: Boolean = false
+    private var isWork: Boolean = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,8 +124,16 @@ class EntityDetailsActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.entity_details_back).setOnClickListener { finish() }
 
-        findViewById<View>(R.id.entity_details_set_home).setOnClickListener { setAsHomeAddress(entity) }
-        findViewById<View>(R.id.entity_details_set_work).setOnClickListener { setAsWorkAddress(entity) }
+        findViewById<View>(R.id.entity_details_set_home).setOnClickListener {
+            setAsHomeAddress(
+                entity
+            )
+        }
+        findViewById<View>(R.id.entity_details_set_work).setOnClickListener {
+            setAsWorkAddress(
+                entity
+            )
+        }
         vEntityFavorite.setOnClickListener { toggleFavorite(entity) }
 
         getLocationAndDetails(id)
@@ -129,48 +143,28 @@ class EntityDetailsActivity : AppCompatActivity() {
 
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setHome(this, entity)
-        vEntitySetHomeTitle.text = getString(R.string.home_title)
+        if (!isHome) {
+            dataCollectorClient.setHome(this, entity)
+            vEntitySetHomeTitle.text = getString(R.string.home_title)
+        }
     }
 
     private fun setAsWorkAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setWork(this, entity)
-        vEntitySetWorkTitle.text = getString(R.string.work_title)
+        if (!isWork) {
+            dataCollectorClient.setWork(this, entity)
+            vEntitySetWorkTitle.text = getString(R.string.work_title)
+        }
     }
 
     private fun toggleFavorite(entity: Entity?) {
         entity ?: return
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-
-        val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
-        var favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
-            prefs.getString(
-                getString(R.string.saved_favorite_list_key),
-                ""
-            ), listType
-        )
-
-        if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }){
-            val newFavorite = favoriteEntities.filter { e -> e.id != entity.id }
-            with(prefs.edit()) {
-                putString(getString(R.string.saved_favorite_list_key), Gson().toJson(newFavorite))
-                apply()
-            }
-            vEntityFavorite.setImageResource(R.drawable.ic_favorite_border)
+        if (isFavorite) {
+            dataCollectorClient.deleteFavorite(this, entity)
         } else {
-            if(favoriteEntities == null){
-                favoriteEntities = arrayListOf(entity)
-            } else {
-                favoriteEntities.add(entity)
-            }
-            with(prefs.edit()) {
-                putString(getString(R.string.saved_favorite_list_key), Gson().toJson(favoriteEntities))
-                apply()
-            }
-            vEntityFavorite.setImageResource(R.drawable.ic_favorite)
+            dataCollectorClient.addFavorite(this, entity)
         }
+        checkFavorite(entity)
     }
 
     private fun setToggler(opened: Boolean) {
@@ -338,9 +332,11 @@ class EntityDetailsActivity : AppCompatActivity() {
         )
         if (storedHome != null && storedHome.id == entity.id) {
             vEntitySetHomeTitle.text = getString(R.string.home_title)
+            isHome = true
         }
         if (storedWork != null && storedWork.id == entity.id) {
             vEntitySetWorkTitle.text = getString(R.string.work_title)
+            isHome = false
         }
     }
 
@@ -356,11 +352,14 @@ class EntityDetailsActivity : AppCompatActivity() {
             ), listType
         )
 
-        if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }){
-            vEntityFavorite.setImageResource(R.drawable.ic_favorite)
-        } else {
-            vEntityFavorite.setImageResource(R.drawable.ic_favorite_border)
-        }
+        isFavorite =
+            if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }) {
+                vEntityFavorite.setImageResource(R.drawable.ic_favorite)
+                true
+            } else {
+                vEntityFavorite.setImageResource(R.drawable.ic_favorite_border)
+                false
+            }
     }
 
     private fun showOpenHours(openHours: FacetOpenHours) {
