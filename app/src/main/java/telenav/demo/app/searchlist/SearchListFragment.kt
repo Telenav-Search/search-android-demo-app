@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
+import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -40,9 +41,11 @@ import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.utils.entityMapClick
 
 class SearchListFragment : Fragment() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vSearchTitle: TextView
     private lateinit var vSearchEmpty: TextView
@@ -217,6 +220,7 @@ class SearchListFragment : Fragment() {
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
                 activity ?: return@setOnInfoWindowClickListener
+                dataCollectorClient.entityMapClick(id)
                 startActivity(
                     Intent(activity, EntityDetailsActivity::class.java).apply {
                         putExtra(EntityDetailsActivity.PARAM_ID, id)

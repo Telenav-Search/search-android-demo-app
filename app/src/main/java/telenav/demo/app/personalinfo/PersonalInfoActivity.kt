@@ -18,10 +18,7 @@ import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
 import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.utils.deleteFavorite
-import telenav.demo.app.utils.removeAllFavorites
-import telenav.demo.app.utils.removeHome
-import telenav.demo.app.utils.removeWork
+import telenav.demo.app.utils.*
 import java.lang.reflect.Type
 
 
@@ -171,6 +168,7 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vHomeName.text = name
         vHomeEntity.setOnClickListener {
+            dataCollectorClient.entityCachedClickHome(entity.id)
             startActivity(
                 Intent(
                     this,
@@ -222,6 +220,7 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vWorkName.text = name
         vWorkEntity.setOnClickListener {
+            dataCollectorClient.entityCachedClickWork(entity.id)
             startActivity(
                 Intent(
                     this,

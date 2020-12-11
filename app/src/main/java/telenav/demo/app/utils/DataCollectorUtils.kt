@@ -113,7 +113,7 @@ fun DataCollectorClient.removeAllFavorites(context: Context) {
             ""
         ), listType
     )
-    if(favoriteEntities == null || favoriteEntities.isEmpty()){
+    if (favoriteEntities == null || favoriteEntities.isEmpty()) {
         return
     }
 
@@ -253,4 +253,39 @@ private fun DataCollectorClient.setAddress(
     }
 
     sendEventRequest().setEvent(setEvent).build().execute()
+}
+
+fun DataCollectorClient.entitySearchListClick(entityId: String) {
+    sendEventRequest().setEvent(
+        EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setDisplayMode(EntityActionEvent.DisplayMode.LIST_VIEW).build()
+    ).build().execute()
+}
+
+fun DataCollectorClient.entityMapClick(entityId: String) {
+    sendEventRequest().setEvent(
+        EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setDisplayMode(EntityActionEvent.DisplayMode.MAP_VIEW).build()
+    ).build().execute()
+}
+
+fun DataCollectorClient.entityCachedClickHome(entityId: String) {
+    sendEventRequest().setEvent(
+        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.HOME).build()
+    ).build().execute()
+}
+
+fun DataCollectorClient.entityCachedClickWork(entityId: String) {
+    sendEventRequest().setEvent(
+        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.WORK).build()
+    ).build().execute()
+}
+
+fun DataCollectorClient.entityCachedClickFavorite(entityId: String) {
+    sendEventRequest().setEvent(
+        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.FAVORITE).build()
+    ).build().execute()
 }
