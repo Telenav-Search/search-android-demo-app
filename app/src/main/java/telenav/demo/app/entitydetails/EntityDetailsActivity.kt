@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -37,12 +38,15 @@ import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.utils.setHome
+import telenav.demo.app.utils.setWork
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
 
 class EntityDetailsActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
     private lateinit var vEntitySetHomeTitle: TextView
@@ -125,23 +129,13 @@ class EntityDetailsActivity : AppCompatActivity() {
 
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            putString(getString(R.string.saved_home_address_key), Gson().toJson(entity))
-            apply()
-        }
+        dataCollectorClient.setHome(this, entity)
         vEntitySetHomeTitle.text = getString(R.string.home_title)
     }
 
     private fun setAsWorkAddress(entity: Entity?) {
         entity ?: return
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            putString(getString(R.string.saved_work_address_key), Gson().toJson(entity))
-            apply()
-        }
+        dataCollectorClient.setWork(this, entity)
         vEntitySetWorkTitle.text = getString(R.string.work_title)
     }
 

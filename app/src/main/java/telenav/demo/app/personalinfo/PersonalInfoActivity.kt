@@ -13,14 +13,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
 import telenav.demo.app.entitydetails.EntityDetailsActivity
+import telenav.demo.app.utils.removeAllFavorites
+import telenav.demo.app.utils.removeHome
+import telenav.demo.app.utils.removeWork
 import java.lang.reflect.Type
 
 
 class PersonalInfoActivity : AppCompatActivity() {
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
 
@@ -107,32 +112,17 @@ class PersonalInfoActivity : AppCompatActivity() {
     }
 
     private fun deleteHomeData() {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            remove(getString(R.string.saved_home_address_key))
-            apply()
-        }
+        dataCollectorClient.removeHome(this)
         getPersonalData()
     }
 
     private fun deleteWorkData() {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            remove(getString(R.string.saved_work_address_key))
-            apply()
-        }
+        dataCollectorClient.removeWork(this)
         getPersonalData()
     }
 
     private fun deleteAllFavoriteEntities() {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        with(prefs.edit()) {
-            remove(getString(R.string.saved_favorite_list_key))
-            apply()
-        }
+        dataCollectorClient.removeAllFavorites(this)
         getPersonalData()
     }
 

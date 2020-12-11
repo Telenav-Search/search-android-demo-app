@@ -7,6 +7,8 @@ import android.os.Bundle
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.StartEngineEvent
 import com.telenav.sdk.datacollector.model.event.StopEngineEvent
+import telenav.demo.app.utils.startEngine
+import telenav.demo.app.utils.stopEngine
 
 class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
@@ -20,15 +22,13 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         activityCounter++
         if (isAppLaunch) {
             isAppLaunch = false
-            dataCollectorClient.sendEventRequest()
-                .setEvent(StartEngineEvent.builder().build()).build().execute()
+            dataCollectorClient.startEngine()
         }}
 
     override fun onActivityDestroyed(activity: Activity) {
         isActivityChangingConfigurations = activity.isChangingConfigurations
         if (!isAppLaunch && --activityCounter == 0 && !isActivityChangingConfigurations) {
-            dataCollectorClient.sendEventRequest()
-                .setEvent(StopEngineEvent.builder().build()).build().execute()
+            dataCollectorClient.stopEngine()
         }
     }
 

@@ -59,7 +59,7 @@ class InitializationActivity : AppCompatActivity() {
             DataCollectorService.initialize(applicationContext, getSDKOptions())
             OtaService.initialize(applicationContext, getSDKOptions())
 
-//            application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
+            application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
             startActivity(Intent(this, HomePageActivity::class.java))
             finish()
