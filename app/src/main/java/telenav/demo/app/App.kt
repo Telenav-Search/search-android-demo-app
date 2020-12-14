@@ -4,12 +4,25 @@ import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.os.Bundle
+import android.os.Looper
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import telenav.demo.app.utils.gpsProbe
 import telenav.demo.app.utils.startEngine
 import telenav.demo.app.utils.stopEngine
 
 class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult?) {
+            locationResult ?: return
+            dataCollectorClient.gpsProbe(locationResult.lastLocation)
+        }
+    }
 
     private var isAppLaunch = true
 
@@ -21,6 +34,7 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         if (isAppLaunch) {
             isAppLaunch = false
             dataCollectorClient.startEngine()
+            activity.applicationContext.setGPSListener(locationCallback)
         }
     }
 
@@ -28,6 +42,7 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         isActivityChangingConfigurations = activity.isChangingConfigurations
         if (!isAppLaunch && --activityCounter == 0 && !isActivityChangingConfigurations) {
             dataCollectorClient.stopEngine()
+            activity.applicationContext.stopGPSListener(locationCallback)
         }
     }
 
@@ -36,6 +51,31 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     override fun onActivityResumed(activity: Activity) {}
     override fun onActivityPaused(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+}
+
+fun Context.setGPSListener(locationCallback: LocationCallback) {
+    val locationRequest = LocationRequest.create()?.apply {
+        interval = 1000
+        fastestInterval = 200
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
+    try {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    } catch (e: SecurityException) {
+    }
+}
+
+fun Context.stopGPSListener(locationCallback: LocationCallback) {
+    try {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    } catch (e: SecurityException) {
+    }
 }
 
 fun Context.convertNumberToDistance(dist: Double): String {

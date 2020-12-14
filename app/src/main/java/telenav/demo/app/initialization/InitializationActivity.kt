@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
@@ -15,8 +16,6 @@ import androidx.core.widget.ContentLoadingProgressBar
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.StartEngineEvent
-import com.telenav.sdk.datacollector.model.event.StopEngineEvent
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
@@ -48,7 +47,7 @@ class InitializationActivity : AppCompatActivity() {
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
         }
-        checkStoragePermissions()
+        checkPermissions()
     }
 
     private fun initSDKs() {
@@ -79,8 +78,14 @@ class InitializationActivity : AppCompatActivity() {
         directoryPickerDialog.show()
     }
 
-    private fun checkStoragePermissions() {
-        if (!this.checkExternalStoragePermissions()) {
+    private fun checkPermissions() {
+        if (!this.checkLocationPermission())
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1
+            )
+        else if (!this.checkExternalStoragePermissions()) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(
@@ -89,7 +94,7 @@ class InitializationActivity : AppCompatActivity() {
                 ),
                 1
             )
-        } else if (android.os.Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+        } else if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             vLoading.hide()
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
@@ -103,9 +108,7 @@ class InitializationActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            checkStoragePermissions()
-
+        checkPermissions()
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
@@ -115,12 +118,12 @@ class InitializationActivity : AppCompatActivity() {
         vAccess.visibility = View.GONE
     }
 
-    private fun showProgress(){
+    private fun showProgress() {
         vLoading.show()
         vInitialization.visibility = View.GONE
     }
 
-    private fun hideProgress(){
+    private fun hideProgress() {
         vLoading.hide()
         vInitialization.visibility = View.VISIBLE
     }
@@ -143,6 +146,9 @@ fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
         .setLocale(Locale.EN_US)
         .build()
 }
+
+fun Context.checkLocationPermission(): Boolean =
+    checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
 
 fun Context.checkExternalStoragePermissions(): Boolean =
     checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&

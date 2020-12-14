@@ -1,6 +1,7 @@
 package telenav.demo.app.utils
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -270,7 +271,10 @@ fun DataCollectorClient.entityCall(entityId: String, displayMode: EntityActionEv
     ).build().execute()
 }
 
-fun DataCollectorClient.entityCachedClick(entityId: String, source: EntityCacheActionEvent.SourceType) {
+fun DataCollectorClient.entityCachedClick(
+    entityId: String,
+    source: EntityCacheActionEvent.SourceType
+) {
     Log.d("entityCachedClick", entityId)
     Log.d("entityCachedClick", source.name)
 //    sendEventRequest().setEvent(
@@ -279,11 +283,29 @@ fun DataCollectorClient.entityCachedClick(entityId: String, source: EntityCacheA
 //    ).build().execute()
 }
 
-fun DataCollectorClient.entityCachedCall(entityId: String, source: EntityCacheActionEvent.SourceType) {
+fun DataCollectorClient.entityCachedCall(
+    entityId: String,
+    source: EntityCacheActionEvent.SourceType
+) {
     Log.d("entityCachedCall", entityId)
     Log.d("entityCachedCall", source.name)
 //    sendEventRequest().setEvent(
 //        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CALL)
 //            .setEntityId(entityId).setSourceType(source).build()
 //    ).build().execute()
+}
+
+fun DataCollectorClient.gpsProbe(location: Location?) {
+    location ?: return
+    sendEventRequest().setEvent(
+        GpsProbeEvent.builder()
+            .setLat(location.latitude)
+            .setLon(location.longitude)
+            .setAltitude(location.altitude)
+            .setSpeed(location.speed.toDouble())
+            .setHorizontalAccuracy(location.accuracy.toDouble())
+            .setTimestamp(location.time)
+            .setHeadingAngle(location.bearing.toDouble())
+            .build()
+    ).build().execute()
 }
