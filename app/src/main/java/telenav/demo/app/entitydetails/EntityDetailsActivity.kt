@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityActionEvent
+import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -38,10 +40,7 @@ import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.homepage.getUIExecutor
-import telenav.demo.app.utils.addFavorite
-import telenav.demo.app.utils.deleteFavorite
-import telenav.demo.app.utils.setHome
-import telenav.demo.app.utils.setWork
+import telenav.demo.app.utils.*
 import java.lang.reflect.Type
 import java.util.*
 import kotlin.collections.ArrayList
@@ -80,6 +79,8 @@ class EntityDetailsActivity : AppCompatActivity() {
     private var isFavorite: Boolean = false
     private var isHome: Boolean = false
     private var isWork: Boolean = false
+    private lateinit var displayMode: String
+    private lateinit var source: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +89,8 @@ class EntityDetailsActivity : AppCompatActivity() {
 
         val id = intent.getStringExtra(PARAM_ID) ?: ""
         val icon = intent.getIntExtra(PARAM_ICON, 0)
+        displayMode = intent.getStringExtra(PARAM_DISPLAY_MODE) ?: EntityActionEvent.DisplayMode.LIST_VIEW.name
+        source = intent.getStringExtra(PARAM_SOURCE) ?: ""
 
         vLoading = findViewById(R.id.entity_details_loading)
         vEntityName = findViewById(R.id.entity_details_name)
@@ -278,6 +281,11 @@ class EntityDetailsActivity : AppCompatActivity() {
                 vEntityCall.visibility = View.VISIBLE
                 vEntityCall.text = "${entity.place.phoneNumbers[0]}"
                 vEntityCall.setOnClickListener {
+                    if (source.isNotEmpty()) {
+                        dataCollectorClient.entityCachedCall(entity.id, EntityCacheActionEvent.SourceType.valueOf(source))
+                    } else {
+                        dataCollectorClient.entityCall(entity.id, EntityActionEvent.DisplayMode.valueOf(displayMode))
+                    }
                     val intent = Intent(
                         Intent.ACTION_DIAL,
                         Uri.fromParts("tel", entity.place.phoneNumbers[0], null)
@@ -597,6 +605,8 @@ class EntityDetailsActivity : AppCompatActivity() {
     companion object {
         const val PARAM_ID = "id"
         const val PARAM_ICON = "icon"
+        const val PARAM_DISPLAY_MODE = "display_mode"
+        const val PARAM_SOURCE = "source"
     }
 }
 

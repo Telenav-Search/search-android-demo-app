@@ -1,6 +1,7 @@
 package telenav.demo.app.utils
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorClient
@@ -255,37 +256,34 @@ private fun DataCollectorClient.setAddress(
     sendEventRequest().setEvent(setEvent).build().execute()
 }
 
-fun DataCollectorClient.entitySearchListClick(entityId: String) {
+fun DataCollectorClient.entityClick(entityId: String, displayMode: EntityActionEvent.DisplayMode) {
     sendEventRequest().setEvent(
         EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setDisplayMode(EntityActionEvent.DisplayMode.LIST_VIEW).build()
+            .setEntityId(entityId).setDisplayMode(displayMode).build()
     ).build().execute()
 }
 
-fun DataCollectorClient.entityMapClick(entityId: String) {
+fun DataCollectorClient.entityCall(entityId: String, displayMode: EntityActionEvent.DisplayMode) {
     sendEventRequest().setEvent(
-        EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setDisplayMode(EntityActionEvent.DisplayMode.MAP_VIEW).build()
+        EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CALL)
+            .setEntityId(entityId).setDisplayMode(displayMode).build()
     ).build().execute()
 }
 
-fun DataCollectorClient.entityCachedClickHome(entityId: String) {
-    sendEventRequest().setEvent(
-        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.HOME).build()
-    ).build().execute()
+fun DataCollectorClient.entityCachedClick(entityId: String, source: EntityCacheActionEvent.SourceType) {
+    Log.d("entityCachedClick", entityId)
+    Log.d("entityCachedClick", source.name)
+//    sendEventRequest().setEvent(
+//        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
+//            .setEntityId(entityId).setSourceType(source).build()
+//    ).build().execute()
 }
 
-fun DataCollectorClient.entityCachedClickWork(entityId: String) {
-    sendEventRequest().setEvent(
-        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.WORK).build()
-    ).build().execute()
-}
-
-fun DataCollectorClient.entityCachedClickFavorite(entityId: String) {
-    sendEventRequest().setEvent(
-        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setSourceType(EntityCacheActionEvent.SourceType.FAVORITE).build()
-    ).build().execute()
+fun DataCollectorClient.entityCachedCall(entityId: String, source: EntityCacheActionEvent.SourceType) {
+    Log.d("entityCachedCall", entityId)
+    Log.d("entityCachedCall", source.name)
+//    sendEventRequest().setEvent(
+//        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CALL)
+//            .setEntityId(entityId).setSourceType(source).build()
+//    ).build().execute()
 }

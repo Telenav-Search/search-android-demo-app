@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
@@ -168,13 +169,14 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vHomeName.text = name
         vHomeEntity.setOnClickListener {
-            dataCollectorClient.entityCachedClickHome(entity.id)
+            dataCollectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.HOME)
             startActivity(
                 Intent(
                     this,
                     EntityDetailsActivity::class.java
                 ).apply {
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
+                    putExtra(EntityDetailsActivity.PARAM_SOURCE, EntityCacheActionEvent.SourceType.HOME.name)
                 })
         }
         if (entity.type == EntityType.ADDRESS) {
@@ -220,13 +222,14 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vWorkName.text = name
         vWorkEntity.setOnClickListener {
-            dataCollectorClient.entityCachedClickWork(entity.id)
+            dataCollectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.WORK)
             startActivity(
                 Intent(
                     this,
                     EntityDetailsActivity::class.java
                 ).apply {
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
+                    putExtra(EntityDetailsActivity.PARAM_SOURCE, EntityCacheActionEvent.SourceType.WORK.name)
                 })
         }
         if (entity.type == EntityType.ADDRESS) {

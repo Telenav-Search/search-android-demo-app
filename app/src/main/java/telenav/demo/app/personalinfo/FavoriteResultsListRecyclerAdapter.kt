@@ -10,14 +10,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import com.telenav.sdk.entity.model.base.Rating
 import telenav.demo.app.R
 import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.utils.entityCachedClickFavorite
+import telenav.demo.app.utils.entityCachedClick
 
-class FavoriteResultsListRecyclerAdapter(entities: List<Entity>, onDeleteListener: OnDeleteFavoriteResultListener) :
+class FavoriteResultsListRecyclerAdapter(
+    entities: List<Entity>,
+    onDeleteListener: OnDeleteFavoriteResultListener
+) :
     RecyclerView.Adapter<EntityHolder>() {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
@@ -39,12 +43,19 @@ class FavoriteResultsListRecyclerAdapter(entities: List<Entity>, onDeleteListene
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entityCachedClickFavorite(entity.id)
+            dataCollectorClient.entityCachedClick(
+                entity.id,
+                EntityCacheActionEvent.SourceType.FAVORITE
+            )
             holder.itemView.context.startActivity(
                 Intent(
                     holder.itemView.context,
                     EntityDetailsActivity::class.java
                 ).apply {
+                    putExtra(
+                        EntityDetailsActivity.PARAM_SOURCE,
+                        EntityCacheActionEvent.SourceType.FAVORITE.name
+                    )
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
                 })
             return@setOnClickListener

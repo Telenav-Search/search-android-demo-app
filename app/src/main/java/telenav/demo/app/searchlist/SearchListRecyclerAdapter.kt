@@ -10,13 +10,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import com.telenav.sdk.entity.model.base.Rating
 import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
 import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.utils.entitySearchListClick
+import telenav.demo.app.utils.entityClick
 
 class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
     RecyclerView.Adapter<EntityHolder>() {
@@ -39,13 +40,17 @@ class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entitySearchListClick(entity.id)
+            dataCollectorClient.entityClick(entity.id, EntityActionEvent.DisplayMode.LIST_VIEW)
             holder.itemView.context.startActivity(
                 Intent(
                     holder.itemView.context,
                     EntityDetailsActivity::class.java
                 ).apply {
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
+                    putExtra(
+                        EntityDetailsActivity.PARAM_DISPLAY_MODE,
+                        EntityActionEvent.DisplayMode.LIST_VIEW.name
+                    )
                     if (categoryIcon != 0)
                         putExtra(EntityDetailsActivity.PARAM_ICON, categoryIcon)
                 })

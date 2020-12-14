@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -41,7 +42,7 @@ import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.homepage.getUIExecutor
-import telenav.demo.app.utils.entityMapClick
+import telenav.demo.app.utils.entityClick
 
 class SearchListFragment : Fragment() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
@@ -220,10 +221,14 @@ class SearchListFragment : Fragment() {
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
                 activity ?: return@setOnInfoWindowClickListener
-                dataCollectorClient.entityMapClick(id)
+                dataCollectorClient.entityClick(entity.id, EntityActionEvent.DisplayMode.MAP_VIEW)
                 startActivity(
                     Intent(activity, EntityDetailsActivity::class.java).apply {
                         putExtra(EntityDetailsActivity.PARAM_ID, id)
+                        putExtra(
+                            EntityDetailsActivity.PARAM_DISPLAY_MODE,
+                            EntityActionEvent.DisplayMode.MAP_VIEW.name
+                        )
                         if (arguments!!.containsKey(PARAM_ICON))
                             putExtra(
                                 EntityDetailsActivity.PARAM_ICON,
