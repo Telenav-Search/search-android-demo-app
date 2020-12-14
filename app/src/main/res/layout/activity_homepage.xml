@@ -44,7 +44,7 @@
             android:layout_gravity="center_vertical"
             android:background="?android:attr/selectableItemBackground"
             android:paddingHorizontal="5dp"
-            android:src="@drawable/ic_person" />
+            android:src="@drawable/ic_places" />
 
         <ImageView
             android:id="@+id/app_mode_select"

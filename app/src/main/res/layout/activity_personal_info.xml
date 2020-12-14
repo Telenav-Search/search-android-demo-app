@@ -30,7 +30,7 @@
             android:layout_toRightOf="@id/personal_info_back"
             android:background="@color/colorPrimary"
             android:paddingVertical="10dp"
-            android:text="Personal Info"
+            android:text="My Places"
             android:textSize="16sp"
             android:textStyle="bold" />
 
