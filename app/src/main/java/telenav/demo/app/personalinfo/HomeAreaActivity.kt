@@ -171,7 +171,7 @@ class HomeAreaActivity : AppCompatActivity() {
             val location = lastKnownLocation
             if (location != null) {
                 val latLng = LatLng(location.latitude, location.longitude)
-                cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
+                cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 1f)
             }
         } else {
             val coordinates = status.areaGeometry.coordinates

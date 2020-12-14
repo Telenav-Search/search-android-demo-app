@@ -3,7 +3,6 @@ package telenav.demo.app.personalinfo
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -11,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
@@ -27,6 +27,9 @@ class PersonalInfoActivity : AppCompatActivity() {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
+
+    private lateinit var vHomeAndWork: View
+    private lateinit var vFavorite: View
 
     private lateinit var vHomeEmpty: TextView
     private lateinit var vHomeEntity: View
@@ -55,6 +58,9 @@ class PersonalInfoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_personal_info)
 
         vLoading = findViewById(R.id.personal_info_loading)
+
+        vHomeAndWork = findViewById(R.id.personal_info_home_and_work)
+        vFavorite = findViewById(R.id.personal_info_favorite)
 
         vHomeEmpty = findViewById(R.id.personal_home_empty)
         vHomeEntity = findViewById(R.id.personal_home_entity)
@@ -99,6 +105,27 @@ class PersonalInfoActivity : AppCompatActivity() {
         findViewById<View>(R.id.personal_home_delete).setOnClickListener { deleteHomeData() }
         findViewById<View>(R.id.personal_work_delete).setOnClickListener { deleteWorkData() }
         findViewById<View>(R.id.personal_favorite_delete_all).setOnClickListener { deleteAllFavoriteEntities() }
+
+        val tabLayout = findViewById<TabLayout>(R.id.personal_info_tabs)
+        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab) {
+                if(tab.position == 0 ) {
+                    vHomeAndWork.visibility = View.VISIBLE
+                } else {
+                    vFavorite.visibility = View.VISIBLE
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab) {
+                if(tab.position == 0 ) {
+                    vHomeAndWork.visibility = View.GONE
+                } else {
+                    vFavorite.visibility = View.GONE
+                }
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab) {}
+        })
     }
 
     override fun onResume() {
@@ -176,7 +203,10 @@ class PersonalInfoActivity : AppCompatActivity() {
                     EntityDetailsActivity::class.java
                 ).apply {
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
-                    putExtra(EntityDetailsActivity.PARAM_SOURCE, EntityCacheActionEvent.SourceType.HOME.name)
+                    putExtra(
+                        EntityDetailsActivity.PARAM_SOURCE,
+                        EntityCacheActionEvent.SourceType.HOME.name
+                    )
                 })
         }
         if (entity.type == EntityType.ADDRESS) {
@@ -229,7 +259,10 @@ class PersonalInfoActivity : AppCompatActivity() {
                     EntityDetailsActivity::class.java
                 ).apply {
                     putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
-                    putExtra(EntityDetailsActivity.PARAM_SOURCE, EntityCacheActionEvent.SourceType.WORK.name)
+                    putExtra(
+                        EntityDetailsActivity.PARAM_SOURCE,
+                        EntityCacheActionEvent.SourceType.WORK.name
+                    )
                 })
         }
         if (entity.type == EntityType.ADDRESS) {
