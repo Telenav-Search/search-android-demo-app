@@ -41,8 +41,8 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     override fun onActivityDestroyed(activity: Activity) {
         isActivityChangingConfigurations = activity.isChangingConfigurations
         if (!isAppLaunch && --activityCounter == 0 && !isActivityChangingConfigurations) {
-            dataCollectorClient.stopEngine()
             activity.applicationContext.stopGPSListener(locationCallback)
+            dataCollectorClient.stopEngine()
         }
     }
 
