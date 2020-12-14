@@ -80,6 +80,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment" />
 
         <TextView
+            android:id="@+id/home_area_last_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"

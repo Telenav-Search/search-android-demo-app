@@ -10,6 +10,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.ota.api.OtaService
 import telenav.demo.app.utils.gpsProbe
 import telenav.demo.app.utils.startEngine
 import telenav.demo.app.utils.stopEngine
@@ -43,6 +45,9 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         if (!isAppLaunch && --activityCounter == 0 && !isActivityChangingConfigurations) {
             activity.applicationContext.stopGPSListener(locationCallback)
             dataCollectorClient.stopEngine()
+            EntityService.shutdown()
+            DataCollectorService.shutdown()
+            OtaService.shutdown()
         }
     }
 
