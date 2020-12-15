@@ -32,6 +32,7 @@ class PersonalInfoActivity : AppCompatActivity() {
     private lateinit var vFavorite: View
 
     private lateinit var vHomeEmpty: TextView
+    private lateinit var vHomeDelete: View
     private lateinit var vHomeEntity: View
     private lateinit var vHomeName: TextView
     private lateinit var vHomeAddress: TextView
@@ -41,6 +42,7 @@ class PersonalInfoActivity : AppCompatActivity() {
     private lateinit var vHomeEntityStar: ArrayList<ImageView>
 
     private lateinit var vWorkEmpty: TextView
+    private lateinit var vWorkDelete: View
     private lateinit var vWorkEntity: View
     private lateinit var vWorkName: TextView
     private lateinit var vWorkAddress: TextView
@@ -50,6 +52,7 @@ class PersonalInfoActivity : AppCompatActivity() {
     private lateinit var vWorkEntityStar: ArrayList<ImageView>
 
     private lateinit var vFavoriteEmpty: TextView
+    private lateinit var vFavoriteDeleteAll: View
     private lateinit var vFavoriteList: RecyclerView
     private lateinit var vFavoriteListContainer: View
 
@@ -63,6 +66,7 @@ class PersonalInfoActivity : AppCompatActivity() {
         vFavorite = findViewById(R.id.personal_info_favorite)
 
         vHomeEmpty = findViewById(R.id.personal_home_empty)
+        vHomeDelete = findViewById(R.id.personal_home_delete)
         vHomeEntity = findViewById(R.id.personal_home_entity)
         vHomeName = findViewById(R.id.personal_home_entity_name)
         vHomeAddress = findViewById(R.id.personal_home_entity_address)
@@ -78,6 +82,7 @@ class PersonalInfoActivity : AppCompatActivity() {
         }
 
         vWorkEmpty = findViewById(R.id.personal_work_empty)
+        vWorkDelete = findViewById(R.id.personal_work_delete)
         vWorkEntity = findViewById(R.id.personal_work_entity)
         vWorkName = findViewById(R.id.personal_work_entity_name)
         vWorkAddress = findViewById(R.id.personal_work_entity_address)
@@ -93,6 +98,7 @@ class PersonalInfoActivity : AppCompatActivity() {
         }
 
         vFavoriteEmpty = findViewById(R.id.personal_favorite_empty)
+        vFavoriteDeleteAll = findViewById(R.id.personal_favorite_delete_all)
         vFavoriteList = findViewById(R.id.personal_favorite_list)
         vFavoriteListContainer = findViewById(R.id.personal_favorite_list_container)
 
@@ -102,9 +108,9 @@ class PersonalInfoActivity : AppCompatActivity() {
         findViewById<View>(R.id.personal_info_ota).setOnClickListener { showHomeAreaActivity() }
         findViewById<View>(R.id.personal_info_back).setOnClickListener { finish() }
 
-        findViewById<View>(R.id.personal_home_delete).setOnClickListener { deleteHomeData() }
-        findViewById<View>(R.id.personal_work_delete).setOnClickListener { deleteWorkData() }
-        findViewById<View>(R.id.personal_favorite_delete_all).setOnClickListener { deleteAllFavoriteEntities() }
+        vHomeDelete.setOnClickListener { deleteHomeData() }
+        vWorkDelete.setOnClickListener { deleteWorkData() }
+        vFavoriteDeleteAll.setOnClickListener { deleteAllFavoriteEntities() }
 
         val tabLayout = findViewById<TabLayout>(R.id.personal_info_tabs)
         tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
@@ -185,10 +191,12 @@ class PersonalInfoActivity : AppCompatActivity() {
     private fun fillHomeInfo(entity: Entity?) {
         if (entity == null) {
             vHomeEmpty.visibility = View.VISIBLE
+            vHomeDelete.visibility = View.GONE
             vHomeEntity.visibility = View.GONE
             return
         }
         vHomeEmpty.visibility = View.GONE
+        vHomeDelete.visibility = View.VISIBLE
         vHomeEntity.visibility = View.VISIBLE
 
         val name =
@@ -241,10 +249,12 @@ class PersonalInfoActivity : AppCompatActivity() {
     private fun fillWorkInfo(entity: Entity?) {
         if (entity == null) {
             vWorkEmpty.visibility = View.VISIBLE
+            vWorkDelete.visibility = View.GONE
             vWorkEntity.visibility = View.GONE
             return
         }
         vWorkEmpty.visibility = View.GONE
+        vWorkDelete.visibility = View.VISIBLE
         vWorkEntity.visibility = View.VISIBLE
 
         val name =
@@ -297,6 +307,7 @@ class PersonalInfoActivity : AppCompatActivity() {
     private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
         if (favoriteEntities == null || favoriteEntities.isEmpty()) {
             vFavoriteListContainer.visibility = View.GONE
+            vFavoriteDeleteAll.visibility = View.GONE
             vFavoriteEmpty.visibility = View.VISIBLE
             return
         }
@@ -310,5 +321,6 @@ class PersonalInfoActivity : AppCompatActivity() {
         )
         vFavoriteEmpty.visibility = View.GONE
         vFavoriteListContainer.visibility = View.VISIBLE
+        vFavoriteDeleteAll.visibility = View.VISIBLE
     }
 }

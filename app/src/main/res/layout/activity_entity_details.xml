@@ -29,7 +29,17 @@
             android:paddingVertical="10dp"
             android:text="Details"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/entity_details_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingHorizontal="5dp"
+            android:src="@drawable/ic_more" />
     </LinearLayout>
 
     <View
@@ -284,73 +294,6 @@
                 android:textColor="#fff"
                 android:textSize="18sp"
                 android:textStyle="bold" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingVertical="10dp">
-
-            <LinearLayout
-                android:id="@+id/entity_details_set_home"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_weight=".50"
-                android:background="?android:attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingVertical="10dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_gravity="center_vertical"
-                    android:paddingRight="5dp"
-                    android:src="@drawable/ic_home"/>
-
-                <TextView
-                    android:id="@+id/entity_details_set_home_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_toLeftOf="@id/entity_favorite"
-                    android:layout_toRightOf="@id/entity_details_icon"
-                    android:text="Set as Home"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/entity_details_set_work"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_weight=".50"
-                android:background="?android:attr/selectableItemBackground"
-                android:orientation="horizontal"
-                android:paddingVertical="10dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_gravity="center_vertical"
-                    android:paddingRight="5dp"
-                    android:src="@drawable/ic_work"/>
-
-                <TextView
-                    android:id="@+id/entity_details_set_work_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_toLeftOf="@id/entity_favorite"
-                    android:layout_toRightOf="@id/entity_details_icon"
-                    android:text="Set as Work"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>

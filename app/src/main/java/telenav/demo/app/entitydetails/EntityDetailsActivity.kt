@@ -1,5 +1,6 @@
 package telenav.demo.app.entitydetails
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -50,8 +51,6 @@ class EntityDetailsActivity : AppCompatActivity() {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
-    private lateinit var vEntitySetHomeTitle: TextView
-    private lateinit var vEntitySetWorkTitle: TextView
     private lateinit var vEntityFavorite: ImageView
     private lateinit var vEntityName: TextView
     private lateinit var vEntityDetails: View
@@ -77,11 +76,10 @@ class EntityDetailsActivity : AppCompatActivity() {
 
     private var entity: Entity? = null
     private var isFavorite: Boolean = false
-    private var isHome: Boolean = false
-    private var isWork: Boolean = false
     private lateinit var displayMode: String
     private lateinit var source: String
 
+    private lateinit var moreDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +87,8 @@ class EntityDetailsActivity : AppCompatActivity() {
 
         val id = intent.getStringExtra(PARAM_ID) ?: ""
         val icon = intent.getIntExtra(PARAM_ICON, 0)
-        displayMode = intent.getStringExtra(PARAM_DISPLAY_MODE) ?: EntityActionEvent.DisplayMode.LIST_VIEW.name
+        displayMode = intent.getStringExtra(PARAM_DISPLAY_MODE)
+            ?: EntityActionEvent.DisplayMode.LIST_VIEW.name
         source = intent.getStringExtra(PARAM_SOURCE) ?: ""
 
         vLoading = findViewById(R.id.entity_details_loading)
@@ -115,8 +114,6 @@ class EntityDetailsActivity : AppCompatActivity() {
         vEntityConnectors = findViewById(R.id.entity_connectors)
         vEntityPrices = findViewById(R.id.entity_prices)
         vEntityParkings = findViewById(R.id.entity_parking)
-        vEntitySetHomeTitle = findViewById(R.id.entity_details_set_home_title)
-        vEntitySetWorkTitle = findViewById(R.id.entity_details_set_work_title)
         vEntityFavorite = findViewById(R.id.entity_favorite)
 
         vLoading.show()
@@ -126,38 +123,37 @@ class EntityDetailsActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.entity_details_back).setOnClickListener { finish() }
-
-        findViewById<View>(R.id.entity_details_set_home).setOnClickListener {
-            setAsHomeAddress(
-                entity
-            )
-        }
-        findViewById<View>(R.id.entity_details_set_work).setOnClickListener {
-            setAsWorkAddress(
-                entity
-            )
+        findViewById<View>(R.id.entity_details_more).setOnClickListener {
+            moreDialog.show()
         }
         vEntityFavorite.setOnClickListener { toggleFavorite(entity) }
 
+        setupMoreDialog()
         getLocationAndDetails(id)
         initMap()
+    }
 
+    private fun setupMoreDialog() {
+        moreDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.entity_more_actions_dialog_title)
+            .setItems(
+                R.array.entity_more_actions
+            ) { _, which ->
+                when (which) {
+                    0 -> setAsHomeAddress(entity)
+                    1 -> setAsWorkAddress(entity)
+                }
+            }.create()
     }
 
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
-        if (!isHome) {
-            dataCollectorClient.setHome(this, entity)
-            vEntitySetHomeTitle.text = getString(R.string.home_title)
-        }
+        dataCollectorClient.setHome(this, entity)
     }
 
     private fun setAsWorkAddress(entity: Entity?) {
         entity ?: return
-        if (!isWork) {
-            dataCollectorClient.setWork(this, entity)
-            vEntitySetWorkTitle.text = getString(R.string.work_title)
-        }
+        dataCollectorClient.setWork(this, entity)
     }
 
     private fun toggleFavorite(entity: Entity?) {
@@ -282,9 +278,15 @@ class EntityDetailsActivity : AppCompatActivity() {
                 vEntityCall.text = "${entity.place.phoneNumbers[0]}"
                 vEntityCall.setOnClickListener {
                     if (source.isNotEmpty()) {
-                        dataCollectorClient.entityCachedCall(entity.id, EntityCacheActionEvent.SourceType.valueOf(source))
+                        dataCollectorClient.entityCachedCall(
+                            entity.id,
+                            EntityCacheActionEvent.SourceType.valueOf(source)
+                        )
                     } else {
-                        dataCollectorClient.entityCall(entity.id, EntityActionEvent.DisplayMode.valueOf(displayMode))
+                        dataCollectorClient.entityCall(
+                            entity.id,
+                            EntityActionEvent.DisplayMode.valueOf(displayMode)
+                        )
                     }
                     val intent = Intent(
                         Intent.ACTION_DIAL,
@@ -321,31 +323,9 @@ class EntityDetailsActivity : AppCompatActivity() {
         if (entity.facets?.openHours != null)
             showOpenHours(entity.facets?.openHours!!)
 
-        checkAddress(entity)
         checkFavorite(entity)
 
         vEntityDetails.visibility = View.VISIBLE
-    }
-
-    private fun checkAddress(entity: Entity) {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-        val storedHome = Gson().fromJson(
-            prefs.getString(getString(R.string.saved_home_address_key), ""),
-            Entity::class.java
-        )
-        val storedWork = Gson().fromJson(
-            prefs.getString(getString(R.string.saved_work_address_key), ""),
-            Entity::class.java
-        )
-        if (storedHome != null && storedHome.id == entity.id) {
-            vEntitySetHomeTitle.text = getString(R.string.home_title)
-            isHome = true
-        }
-        if (storedWork != null && storedWork.id == entity.id) {
-            vEntitySetWorkTitle.text = getString(R.string.work_title)
-            isHome = false
-        }
     }
 
     private fun checkFavorite(entity: Entity) {

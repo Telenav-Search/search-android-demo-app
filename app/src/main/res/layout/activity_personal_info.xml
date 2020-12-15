@@ -6,7 +6,7 @@
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
@@ -16,8 +16,7 @@
             android:id="@+id/personal_info_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
             android:paddingVertical="3dp"
             android:paddingLeft="10dp"
             android:src="@drawable/ic_back" />
@@ -25,9 +24,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/personal_info_ota"
-            android:layout_toRightOf="@id/personal_info_back"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:paddingVertical="10dp"
             android:text="My Places"
@@ -38,12 +36,11 @@
             android:id="@+id/personal_info_ota"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
             android:background="?android:attr/selectableItemBackground"
             android:paddingHorizontal="5dp"
             android:src="@drawable/ic_my_location" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -410,56 +407,27 @@
 
             <LinearLayout
                 android:id="@+id/personal_info_favorite"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <RelativeLayout
+                <TextView
+                    android:id="@+id/personal_favorite_delete_all"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingVertical="10dp">
-
-                    <ImageView
-                        android:id="@+id/personal_favorite_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_centerVertical="true"
-                        android:paddingRight="5dp"
-                        android:src="@drawable/ic_favorite" />
-
-                    <TextView
-                        android:id="@+id/personal_favorite_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toLeftOf="@id/personal_favorite_delete_all"
-                        android:layout_toRightOf="@id/personal_favorite_icon"
-                        android:text="Favorite Search Results"
-                        android:textSize="20sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/personal_favorite_delete_all"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:hint="Clear"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-                </RelativeLayout>
+                    android:gravity="end"
+                    android:hint="Clear all"
+                    android:padding="10dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/personal_favorite_empty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="empty"
-                    android:paddingHorizontal="10dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="20dp" />
+                    android:padding="20dp" />
 
                 <FrameLayout
                     android:id="@+id/personal_favorite_list_container"

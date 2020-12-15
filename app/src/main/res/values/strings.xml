@@ -5,6 +5,11 @@
         <item>Hybrid</item>
         <item>Onboard</item>
     </string-array>
+    <string name="entity_more_actions_dialog_title">More Actions</string>
+    <string-array name="entity_more_actions">
+        <item>Set As Home</item>
+        <item>Set As Work</item>
+    </string-array>
     <string name="permission_note">For Hybrid SDK to work with index files access must be provided.</string>
     <string name="initialization_note">In order to Hybrid SDK works, download an index file from Telenav and extract it to Telenav folder on internal storage. Or if you already have one you could select it as index data folder</string>
     <string name="home_title">This is your home</string>
