@@ -3,10 +3,10 @@ package telenav.demo.app.personalinfo
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,13 +15,12 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.widget.ContentLoadingProgressBar
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.gson.Gson
+import com.google.android.gms.maps.model.PolygonOptions
 import com.telenav.sdk.core.Callback
 import com.telenav.sdk.ota.api.OtaService
 import com.telenav.sdk.ota.model.AreaStatus
@@ -45,6 +44,7 @@ class HomeAreaActivity : AppCompatActivity() {
     private var homeArea: AreaStatus? = null
 
     var lastKnownLocation: Location? = null
+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
@@ -54,13 +54,14 @@ class HomeAreaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setGPSListener(locationCallback)
+
         setContentView(R.layout.activity_home_area)
 
         vLoading = findViewById(R.id.home_area_loading)
         vLoading.show()
 
         fMap = supportFragmentManager.findFragmentById(R.id.home_area_map) as SupportMapFragment
-        initMap()
 
         vLastUpdate = findViewById(R.id.home_area_last_update)
 
@@ -77,7 +78,6 @@ class HomeAreaActivity : AppCompatActivity() {
 
     private fun getHomeArea() {
         homeArea = homeAreaClient.statusRequest().execute()
-        positionMap(homeArea)
         vLoading.hide()
     }
 
@@ -91,7 +91,6 @@ class HomeAreaActivity : AppCompatActivity() {
             .asyncCall(object : Callback<AreaStatus?> {
 
                 override fun onSuccess(areaStatus: AreaStatus?) {
-                    Log.d("updateHomeArea", Gson().toJson(areaStatus))
                     homeArea = areaStatus
                     showUpdateNotification()
                     getUIExecutor().execute {
@@ -100,7 +99,6 @@ class HomeAreaActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(error: Throwable) {
-                    Log.d("updateHomeArea", "Execute update error: " + error.message)
                     showUpdateNotification(false)
                 }
             })
@@ -161,17 +159,17 @@ class HomeAreaActivity : AppCompatActivity() {
             }
             it.isTrafficEnabled = true
 
-            positionMap(homeArea)
+            map?.setOnMapLoadedCallback { positionMap(homeArea) }
         }
     }
 
     private fun positionMap(status: AreaStatus? = null) {
-        var cameraUpdate: CameraUpdate? = null
         if (status == null || status.areaGeometry == null) {
             val location = lastKnownLocation
             if (location != null) {
                 val latLng = LatLng(location.latitude, location.longitude)
-                cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 1f)
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17f)
+                map?.moveCamera(cameraUpdate)
             }
         } else {
             val coordinates = status.areaGeometry.coordinates
@@ -180,6 +178,7 @@ class HomeAreaActivity : AppCompatActivity() {
             var maxLat = coordinates[0].latitude
             var minLng = coordinates[0].longitude
             var maxLng = coordinates[0].longitude
+            val polygonPoints: MutableList<LatLng> = ArrayList()
 
             coordinates.forEach { geoPoint ->
                 if (geoPoint.latitude <= minLat) {
@@ -195,28 +194,33 @@ class HomeAreaActivity : AppCompatActivity() {
                 if (geoPoint.longitude >= maxLng) {
                     maxLng = geoPoint.longitude
                 }
+                polygonPoints.add(LatLng(geoPoint.latitude, geoPoint.longitude))
             }
 
             val bounds = LatLngBounds(
                 LatLng(minLat, minLng),
                 LatLng(maxLat, maxLng)
             )
-            cameraUpdate = CameraUpdateFactory.newLatLngZoom(bounds.center, 17f)
+            val cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 24)
+
+            map?.moveCamera(cameraUpdate)
+            map?.addPolygon(
+                PolygonOptions().addAll(polygonPoints).strokeColor(Color.BLUE)
+                    .fillColor(Color.argb(20, 0, 255, 0))
+            )
+
+            setLastUpdateTime(status)
         }
-        cameraUpdate ?: return
-        map?.moveCamera(cameraUpdate)
-        setLastUpdateTime(status)
     }
 
     override fun onResume() {
         super.onResume()
-        setGPSListener(locationCallback)
         initMap()
     }
 
-    override fun onPause() {
+    override fun onDestroy() {
+        super.onDestroy()
         stopGPSListener(locationCallback)
-        super.onPause()
     }
 
     companion object {
