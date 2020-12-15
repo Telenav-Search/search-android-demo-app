@@ -64,7 +64,6 @@ class FavoriteResultsListRecyclerAdapter(
             deleteListener.onDelete(entity)
             return@setOnClickListener
         }
-        holder.vNumber.text = "${position + 1}."
         if (entity.type == EntityType.ADDRESS) {
             holder.vAddress.visibility = View.GONE
         } else {
@@ -103,7 +102,6 @@ class FavoriteResultsListRecyclerAdapter(
 class EntityHolder(view: View) : RecyclerView.ViewHolder(view) {
     val vName = view.findViewById<TextView>(R.id.entity_name)
     val vDelete = view.findViewById<ImageView>(R.id.entity_delete)
-    val vNumber = view.findViewById<TextView>(R.id.entity_number)
     val vAddress = view.findViewById<TextView>(R.id.entity_address)
     val vEntityStars = view.findViewById<View>(R.id.entity_stars)
     val vEntityRating = view.findViewById<TextView>(R.id.entity_rating)
