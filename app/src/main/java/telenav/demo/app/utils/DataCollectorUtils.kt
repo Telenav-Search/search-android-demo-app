@@ -2,7 +2,6 @@ package telenav.demo.app.utils
 
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorClient
@@ -275,24 +274,20 @@ fun DataCollectorClient.entityCachedClick(
     entityId: String,
     source: EntityCacheActionEvent.SourceType
 ) {
-    Log.d("entityCachedClick", entityId)
-    Log.d("entityCachedClick", source.name)
-//    sendEventRequest().setEvent(
-//        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
-//            .setEntityId(entityId).setSourceType(source).build()
-//    ).build().execute()
+    sendEventRequest().setEvent(
+        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
+            .setEntityId(entityId).setSourceType(source).build()
+    ).build().execute()
 }
 
 fun DataCollectorClient.entityCachedCall(
     entityId: String,
     source: EntityCacheActionEvent.SourceType
 ) {
-    Log.d("entityCachedCall", entityId)
-    Log.d("entityCachedCall", source.name)
-//    sendEventRequest().setEvent(
-//        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CALL)
-//            .setEntityId(entityId).setSourceType(source).build()
-//    ).build().execute()
+    sendEventRequest().setEvent(
+        EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CALL)
+            .setEntityId(entityId).setSourceType(source).build()
+    ).build().execute()
 }
 
 fun DataCollectorClient.gpsProbe(location: Location?) {
