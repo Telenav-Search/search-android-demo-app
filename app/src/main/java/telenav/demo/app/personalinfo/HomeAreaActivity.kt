@@ -7,12 +7,12 @@ import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.widget.ContentLoadingProgressBar
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -35,8 +35,6 @@ import java.util.*
 class HomeAreaActivity : AppCompatActivity() {
     private val homeAreaClient by lazy { OtaService.getHomeAreaClient() }
 
-    private lateinit var vLoading: ContentLoadingProgressBar
-
     private lateinit var vLastUpdate: TextView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
@@ -46,20 +44,23 @@ class HomeAreaActivity : AppCompatActivity() {
     var lastKnownLocation: Location? = null
 
     private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
+        override fun onLocationResult(locationResult: LocationResult) {
+            val areaStatus = homeArea
+
+            val isHomeAreaSet = areaStatus != null && areaStatus.areaGeometry != null
+            val isFirstLocation = lastKnownLocation == null
+
             lastKnownLocation = locationResult.lastLocation
+            if (isFirstLocation && !isHomeAreaSet) {
+                Log.d("onLocationResult", "positionMap")
+                positionMap()
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setGPSListener(locationCallback)
-
         setContentView(R.layout.activity_home_area)
-
-        vLoading = findViewById(R.id.home_area_loading)
-        vLoading.show()
 
         fMap = supportFragmentManager.findFragmentById(R.id.home_area_map) as SupportMapFragment
 
@@ -72,13 +73,11 @@ class HomeAreaActivity : AppCompatActivity() {
             resetHomeArea()
         }
         findViewById<View>(R.id.home_area_back).setOnClickListener { finish() }
-
-        getHomeArea()
     }
 
     private fun getHomeArea() {
         homeArea = homeAreaClient.statusRequest().execute()
-        vLoading.hide()
+        setLastUpdateTime()
     }
 
     private fun updateHomeArea() {
@@ -94,7 +93,8 @@ class HomeAreaActivity : AppCompatActivity() {
                     homeArea = areaStatus
                     showUpdateNotification()
                     getUIExecutor().execute {
-                        positionMap(homeArea)
+                        positionMap()
+                        setLastUpdateTime()
                     }
                 }
 
@@ -108,6 +108,7 @@ class HomeAreaActivity : AppCompatActivity() {
         homeAreaClient.resetRequest().execute()
         homeArea = null
         positionMap()
+        setLastUpdateTime()
     }
 
     private fun showUpdateNotification(isSuccessful: Boolean = true) {
@@ -137,7 +138,8 @@ class HomeAreaActivity : AppCompatActivity() {
         }
     }
 
-    private fun setLastUpdateTime(status: AreaStatus? = null) {
+    private fun setLastUpdateTime() {
+        val status = homeArea
         var dateString = "Never"
 
         if (status != null && status.lastUpdatedTime > 0) {
@@ -159,11 +161,15 @@ class HomeAreaActivity : AppCompatActivity() {
             }
             it.isTrafficEnabled = true
 
-            map?.setOnMapLoadedCallback { positionMap(homeArea) }
+            map?.setOnMapLoadedCallback {
+                positionMap()
+            }
         }
     }
 
-    private fun positionMap(status: AreaStatus? = null) {
+    private fun positionMap() {
+        val status = homeArea
+
         if (status == null || status.areaGeometry == null) {
             val location = lastKnownLocation
             if (location != null) {
@@ -208,19 +214,18 @@ class HomeAreaActivity : AppCompatActivity() {
                 PolygonOptions().addAll(polygonPoints).strokeColor(Color.BLUE)
                     .fillColor(Color.argb(20, 0, 255, 0))
             )
-
         }
-
-        setLastUpdateTime(status)
     }
 
     override fun onResume() {
         super.onResume()
+        getHomeArea()
         initMap()
+        setGPSListener(locationCallback)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
         stopGPSListener(locationCallback)
     }
 
