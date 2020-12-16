@@ -10,8 +10,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.entity.api.EntityService
-import com.telenav.sdk.ota.api.OtaService
 import telenav.demo.app.utils.gpsProbe
 import telenav.demo.app.utils.startEngine
 import telenav.demo.app.utils.stopEngine
@@ -31,28 +29,26 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
     private var isActivityChangingConfigurations = false
     private var activityCounter = 1
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+    override fun onActivityStarted(activity: Activity) {
         activityCounter++
-        if (isAppLaunch) {
+        if ((isAppLaunch || activityCounter == 1) && !isActivityChangingConfigurations) {
             isAppLaunch = false
             dataCollectorClient.startEngine()
             activity.applicationContext.setGPSListener(locationCallback)
         }
     }
 
-    override fun onActivityDestroyed(activity: Activity) {
+    override fun onActivityStopped(activity: Activity) {
+        activityCounter--
         isActivityChangingConfigurations = activity.isChangingConfigurations
-        if (!isAppLaunch && --activityCounter == 0 && !isActivityChangingConfigurations) {
+        if (!isAppLaunch && activityCounter == 0 && !isActivityChangingConfigurations) {
             activity.applicationContext.stopGPSListener(locationCallback)
             dataCollectorClient.stopEngine()
-            EntityService.shutdown()
-            DataCollectorService.shutdown()
-            OtaService.shutdown()
         }
     }
 
-    override fun onActivityStarted(activity: Activity) {}
-    override fun onActivityStopped(activity: Activity) {}
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+    override fun onActivityDestroyed(activity: Activity) {}
     override fun onActivityResumed(activity: Activity) {}
     override fun onActivityPaused(activity: Activity) {}
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
