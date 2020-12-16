@@ -209,8 +209,9 @@ class HomeAreaActivity : AppCompatActivity() {
                     .fillColor(Color.argb(20, 0, 255, 0))
             )
 
-            setLastUpdateTime(status)
         }
+
+        setLastUpdateTime(status)
     }
 
     override fun onResume() {
