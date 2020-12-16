@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.ContentLoadingProgressBar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
@@ -25,8 +24,6 @@ import java.lang.reflect.Type
 
 class PersonalInfoActivity : AppCompatActivity() {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-
-    private lateinit var vLoading: ContentLoadingProgressBar
 
     private lateinit var vHomeAndWork: View
     private lateinit var vFavorite: View
@@ -59,8 +56,6 @@ class PersonalInfoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_personal_info)
-
-        vLoading = findViewById(R.id.personal_info_loading)
 
         vHomeAndWork = findViewById(R.id.personal_info_home_and_work)
         vFavorite = findViewById(R.id.personal_info_favorite)
@@ -104,7 +99,6 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vFavoriteList.layoutManager = LinearLayoutManager(this)
 
-        vLoading.show()
         findViewById<View>(R.id.personal_info_ota).setOnClickListener { showHomeAreaActivity() }
         findViewById<View>(R.id.personal_info_back).setOnClickListener { finish() }
 
@@ -113,9 +107,9 @@ class PersonalInfoActivity : AppCompatActivity() {
         vFavoriteDeleteAll.setOnClickListener { deleteAllFavoriteEntities() }
 
         val tabLayout = findViewById<TabLayout>(R.id.personal_info_tabs)
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
-                if(tab.position == 0 ) {
+                if (tab.position == 0) {
                     vHomeAndWork.visibility = View.VISIBLE
                 } else {
                     vFavorite.visibility = View.VISIBLE
@@ -123,7 +117,7 @@ class PersonalInfoActivity : AppCompatActivity() {
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab) {
-                if(tab.position == 0 ) {
+                if (tab.position == 0) {
                     vHomeAndWork.visibility = View.GONE
                 } else {
                     vFavorite.visibility = View.GONE
