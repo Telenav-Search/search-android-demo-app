@@ -1,6 +1,5 @@
 package telenav.demo.app.homepage
 
-import android.content.Intent
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.telenav.sdk.entity.model.base.Category
 import telenav.demo.app.R
-import telenav.demo.app.searchlist.SearchListFragment
 import java.util.*
 
 class CategoriesRecyclerAdapter(
@@ -100,6 +98,6 @@ class CategoryHolder(view: View) : RecyclerView.ViewHolder(view) {
 }
 
 class CategoryNode(val level: Int, val category: Category) {
-    val expandable = category.childNodes != null
+    val expandable = category.childNodes != null && category.childNodes.isNotEmpty()
     var expanded = false
 }
