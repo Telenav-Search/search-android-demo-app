@@ -30,9 +30,12 @@ import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
-import telenav.demo.app.*
+import telenav.demo.app.R
+import telenav.demo.app.dip
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.searchlist.SearchListFragment
+import telenav.demo.app.setGPSListener
+import telenav.demo.app.stopGPSListener
 import java.util.concurrent.Executor
 
 
@@ -51,6 +54,7 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInputClear: View
 
     private lateinit var modeSelectDialog: AlertDialog
+    private var currentMode: Int = 0
 
     private var popupWindow: PopupWindow? = null
 
@@ -84,11 +88,16 @@ class HomePageActivity : AppCompatActivity() {
     private fun setupModeSelectDialog() {
         modeSelectDialog = AlertDialog.Builder(this)
             .setTitle(R.string.search_mode_dialog_title)
-            .setItems(
-                R.array.search_modes
+            .setSingleChoiceItems(
+                R.array.search_modes, 0
             ) { _, which ->
+                currentMode = which
+            }
+            .setPositiveButton(R.string.search_mode_dialog_ok) { _, _ ->
                 val modes = resources.getStringArray(R.array.search_modes)
-                SDKRuntime.setNetworkAvailable(modes[which].equals("hybrid", true))
+                SDKRuntime.setNetworkAvailable(modes[currentMode].equals("hybrid", true))
+            }
+            .setNegativeButton(R.string.search_mode_dialog_cancel) { _, _ ->
             }.create()
     }
 
