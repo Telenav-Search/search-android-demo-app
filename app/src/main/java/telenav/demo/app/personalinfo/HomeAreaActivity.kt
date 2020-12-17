@@ -24,8 +24,10 @@ import com.google.android.gms.maps.model.PolygonOptions
 import com.telenav.sdk.core.Callback
 import com.telenav.sdk.ota.api.OtaService
 import com.telenav.sdk.ota.model.AreaStatus
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import telenav.demo.app.R
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.setGPSListener
 import telenav.demo.app.stopGPSListener
 import java.text.SimpleDateFormat
@@ -36,6 +38,9 @@ class HomeAreaActivity : AppCompatActivity() {
     private val homeAreaClient by lazy { OtaService.getHomeAreaClient() }
 
     private lateinit var vLastUpdate: TextView
+    private lateinit var vUpdateInProgress: View
+    private lateinit var vUpdate: View
+    private lateinit var vReset: View
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
 
@@ -65,22 +70,49 @@ class HomeAreaActivity : AppCompatActivity() {
         fMap = supportFragmentManager.findFragmentById(R.id.home_area_map) as SupportMapFragment
 
         vLastUpdate = findViewById(R.id.home_area_last_update)
+        vUpdateInProgress = findViewById(R.id.home_area_updating)
+        vUpdate = findViewById(R.id.home_area_update)
+        vReset = findViewById(R.id.home_area_clear)
 
-        findViewById<View>(R.id.home_area_update).setOnClickListener {
+        vUpdate.setOnClickListener {
             updateHomeArea()
         }
-        findViewById<View>(R.id.home_area_clear).setOnClickListener {
+        vReset.setOnClickListener {
             resetHomeArea()
         }
         findViewById<View>(R.id.home_area_back).setOnClickListener { finish() }
+
+        updateUI()
+    }
+
+    private fun getUpdateStatus(): Boolean {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+        return prefs.getBoolean(getString(R.string.saved_update_status), false)
+    }
+
+    private fun setUpdateStatus(status: Boolean) {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+        with(prefs.edit()) {
+            putBoolean(getString(R.string.saved_update_status), status)
+            apply()
+        }
     }
 
     private fun getHomeArea() {
         homeArea = homeAreaClient.statusRequest().execute()
-        setLastUpdateTime()
+        updateUI()
     }
 
     private fun updateHomeArea() {
+        setUpdateStatus(true)
         homeAreaClient.updateRequest()
             .setCurrentLocation(
                 lastKnownLocation?.latitude ?: .0,
@@ -91,24 +123,32 @@ class HomeAreaActivity : AppCompatActivity() {
 
                 override fun onSuccess(areaStatus: AreaStatus?) {
                     homeArea = areaStatus
-                    showUpdateNotification()
-                    getUIExecutor().execute {
-                        positionMap()
-                        setLastUpdateTime()
-                    }
+                    showUpdateNotification(true)
+                    finalize()
                 }
 
                 override fun onFailure(error: Throwable) {
                     showUpdateNotification(false)
+                    finalize()
+                }
+
+                private fun finalize() {
+                    setUpdateStatus(false)
+                    EventBus.getDefault().post(HomeAreaUpdateEvent())
                 }
             })
+        updateUI()
     }
 
     private fun resetHomeArea() {
         homeAreaClient.resetRequest().execute()
         homeArea = null
-        positionMap()
-        setLastUpdateTime()
+        updateUI()
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: HomeAreaUpdateEvent) {
+        getHomeArea()
     }
 
     private fun showUpdateNotification(isSuccessful: Boolean = true) {
@@ -136,6 +176,30 @@ class HomeAreaActivity : AppCompatActivity() {
         with(NotificationManagerCompat.from(applicationContext)) {
             notify(100, builder.build())
         }
+    }
+
+    private fun updateUI() {
+        val areaStatus = homeArea
+        val isUpdating = getUpdateStatus()
+
+        if (isUpdating) {
+            vUpdateInProgress.visibility = View.VISIBLE
+            vLastUpdate.visibility = View.GONE
+            vUpdate.visibility = View.GONE
+            vReset.visibility = View.GONE
+        } else {
+            vUpdateInProgress.visibility = View.GONE
+            vLastUpdate.visibility = View.VISIBLE
+            vUpdate.visibility = View.VISIBLE
+            if (areaStatus != null) {
+                vReset.visibility = View.VISIBLE
+            } else {
+                vReset.visibility = View.GONE
+            }
+        }
+
+        setLastUpdateTime()
+        positionMap()
     }
 
     private fun setLastUpdateTime() {
@@ -217,19 +281,23 @@ class HomeAreaActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this);
         getHomeArea()
         initMap()
         setGPSListener(locationCallback)
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this);
         stopGPSListener(locationCallback)
     }
 
     companion object {
         const val CHANNEL_ID = R.string.app_name
     }
+
+    class HomeAreaUpdateEvent
 }

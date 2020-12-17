@@ -54,6 +54,16 @@ class InitializationActivity : AppCompatActivity() {
     private fun initSDKs() {
         showProgress()
 
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+        with(prefs.edit()) {
+            remove(getString(R.string.saved_update_status))
+            apply()
+        }
+
         try {
             Thread {
                 getUIExecutor().execute {
