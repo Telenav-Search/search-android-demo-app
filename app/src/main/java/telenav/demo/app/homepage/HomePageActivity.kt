@@ -89,7 +89,7 @@ class HomePageActivity : AppCompatActivity() {
         modeSelectDialog = AlertDialog.Builder(this)
             .setTitle(R.string.search_mode_dialog_title)
             .setSingleChoiceItems(
-                R.array.search_modes, 0
+                R.array.search_modes, currentMode
             ) { _, which ->
                 currentMode = which
             }

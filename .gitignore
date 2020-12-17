@@ -8,3 +8,4 @@ build/
 tags
 tags.*
 /app/release/
+/app/debug/
