@@ -22,6 +22,7 @@ import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
+import telenav.demo.app.homepage.getUIExecutor
 import java.io.File
 
 
@@ -54,14 +55,17 @@ class InitializationActivity : AppCompatActivity() {
         showProgress()
 
         try {
-            EntityService.initialize(getSDKOptions(indexDataPath))
-            DataCollectorService.initialize(applicationContext, getSDKOptions())
-            OtaService.initialize(applicationContext, getSDKOptions())
+            Thread {
+                EntityService.initialize(getSDKOptions(indexDataPath))
+                DataCollectorService.initialize(applicationContext, getSDKOptions())
+                OtaService.initialize(applicationContext, getSDKOptions())
+                application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
-            application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
-
-            startActivity(Intent(this, HomePageActivity::class.java))
-            finish()
+                getUIExecutor().execute {
+                    startActivity(Intent(this, HomePageActivity::class.java))
+                    finish()
+                }
+            }.start()
         } catch (e: Throwable) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
             e.printStackTrace()
