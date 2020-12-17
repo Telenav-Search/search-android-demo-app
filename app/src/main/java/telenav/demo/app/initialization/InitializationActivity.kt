@@ -28,7 +28,7 @@ import java.io.File
 
 class InitializationActivity : AppCompatActivity() {
 
-    private lateinit var vLoading: ContentLoadingProgressBar
+    private lateinit var vLoading: View
     private lateinit var vAccess: View
     private lateinit var vInitialization: View
 
@@ -56,12 +56,12 @@ class InitializationActivity : AppCompatActivity() {
 
         try {
             Thread {
-                EntityService.initialize(getSDKOptions(indexDataPath))
-                DataCollectorService.initialize(applicationContext, getSDKOptions())
-                OtaService.initialize(applicationContext, getSDKOptions())
-                application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
-
                 getUIExecutor().execute {
+                    EntityService.initialize(getSDKOptions(indexDataPath))
+                    DataCollectorService.initialize(this, getSDKOptions())
+                    OtaService.initialize(this, getSDKOptions())
+                    application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
+
                     startActivity(Intent(this, HomePageActivity::class.java))
                     finish()
                 }
@@ -99,7 +99,7 @@ class InitializationActivity : AppCompatActivity() {
                 1
             )
         } else if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
-            vLoading.hide()
+            vLoading.visibility = View.GONE
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
         } else {
@@ -123,12 +123,12 @@ class InitializationActivity : AppCompatActivity() {
     }
 
     private fun showProgress() {
-        vLoading.show()
+        vLoading.visibility = View.VISIBLE
         vInitialization.visibility = View.GONE
     }
 
     private fun hideProgress() {
-        vLoading.hide()
+        vLoading.visibility = View.GONE
         vInitialization.visibility = View.VISIBLE
     }
 }
