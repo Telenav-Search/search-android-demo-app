@@ -53,9 +53,7 @@
                 android:id="@+id/entity_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:lines="1"
-                android:ellipsize="end" />
+                android:textSize="18sp" />
 
             <LinearLayout
                 android:id="@+id/entity_stars"
