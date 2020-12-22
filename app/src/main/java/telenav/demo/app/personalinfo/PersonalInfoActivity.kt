@@ -51,7 +51,6 @@ class PersonalInfoActivity : AppCompatActivity() {
     private lateinit var vFavoriteEmpty: TextView
     private lateinit var vFavoriteDeleteAll: View
     private lateinit var vFavoriteList: RecyclerView
-    private lateinit var vFavoriteListContainer: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,7 +94,6 @@ class PersonalInfoActivity : AppCompatActivity() {
         vFavoriteEmpty = findViewById(R.id.personal_favorite_empty)
         vFavoriteDeleteAll = findViewById(R.id.personal_favorite_delete_all)
         vFavoriteList = findViewById(R.id.personal_favorite_list)
-        vFavoriteListContainer = findViewById(R.id.personal_favorite_list_container)
 
         vFavoriteList.layoutManager = LinearLayoutManager(this)
 
@@ -300,7 +298,7 @@ class PersonalInfoActivity : AppCompatActivity() {
 
     private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
         if (favoriteEntities == null || favoriteEntities.isEmpty()) {
-            vFavoriteListContainer.visibility = View.GONE
+            vFavoriteList.visibility = View.GONE
             vFavoriteDeleteAll.visibility = View.GONE
             vFavoriteEmpty.visibility = View.VISIBLE
             return
@@ -314,7 +312,7 @@ class PersonalInfoActivity : AppCompatActivity() {
             }
         )
         vFavoriteEmpty.visibility = View.GONE
-        vFavoriteListContainer.visibility = View.VISIBLE
+        vFavoriteList.visibility = View.VISIBLE
         vFavoriteDeleteAll.visibility = View.VISIBLE
     }
 }

@@ -403,7 +403,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:visibility="gone"
+                android:descendantFocusability="blocksDescendants">
 
                 <TextView
                     android:id="@+id/personal_favorite_delete_all"
@@ -422,19 +423,13 @@
                     android:hint="empty"
                     android:padding="20dp" />
 
-                <FrameLayout
-                    android:id="@+id/personal_favorite_list_container"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/personal_favorite_list"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:visibility="gone">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/personal_favorite_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:nestedScrollingEnabled="false" />
-                </FrameLayout>
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
             </LinearLayout>
 
         </LinearLayout>
