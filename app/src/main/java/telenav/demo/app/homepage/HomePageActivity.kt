@@ -53,7 +53,6 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
 
-    private lateinit var modeSelectDialog: AlertDialog
     private var currentMode: Int = 0
 
     private var popupWindow: PopupWindow? = null
@@ -66,8 +65,6 @@ class HomePageActivity : AppCompatActivity() {
         vSearchInputClear = findViewById(R.id.search_input_clear)
 
         setupSearchField()
-
-        setupModeSelectDialog()
 
         findViewById<View>(R.id.app_personal_info).setOnClickListener { showPersonalInfoActivity() }
         findViewById<View>(R.id.app_mode_select).setOnClickListener { showModeSelectDialog() }
@@ -83,22 +80,6 @@ class HomePageActivity : AppCompatActivity() {
             return true
         }
         return super.onKeyDown(keyCode, event)
-    }
-
-    private fun setupModeSelectDialog() {
-        modeSelectDialog = AlertDialog.Builder(this)
-            .setTitle(R.string.search_mode_dialog_title)
-            .setSingleChoiceItems(
-                R.array.search_modes, currentMode
-            ) { _, which ->
-                currentMode = which
-            }
-            .setPositiveButton(R.string.search_mode_dialog_ok) { _, _ ->
-                val modes = resources.getStringArray(R.array.search_modes)
-                SDKRuntime.setNetworkAvailable(modes[currentMode].equals("hybrid", true))
-            }
-            .setNegativeButton(R.string.search_mode_dialog_cancel) { _, _ ->
-            }.create()
     }
 
     private fun setupSearchField() {
@@ -250,7 +231,20 @@ class HomePageActivity : AppCompatActivity() {
     private fun showModeSelectDialog() {
         hidePredictions()
 
-        modeSelectDialog.show()
+        var newMode: Int = 0
+        AlertDialog.Builder(this)
+            .setTitle(R.string.search_mode_dialog_title)
+            .setSingleChoiceItems(
+                R.array.search_modes, currentMode
+            ) { _,  which ->
+                newMode = which
+            }.setPositiveButton(R.string.search_mode_dialog_ok) { _, which ->
+                currentMode = newMode
+                val modes = resources.getStringArray(R.array.search_modes)
+                SDKRuntime.setNetworkAvailable(modes[currentMode].equals("hybrid", true))
+            }
+            .setNegativeButton(R.string.search_mode_dialog_cancel) { _, _ ->
+            }.create().show()
     }
 
     private fun showPersonalInfoActivity() {
