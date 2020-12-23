@@ -12,7 +12,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.widget.ContentLoadingProgressBar
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.datacollector.api.DataCollectorService
@@ -20,6 +19,7 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import telenav.demo.app.AppLifecycleCallbacks
+import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
@@ -144,17 +144,17 @@ class InitializationActivity : AppCompatActivity() {
 }
 
 fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
-    var dataPath = "/storage/emulated/0/Telenav";
+    var dataPath = BuildConfig.telenav_data_dir;
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
     }
     val cachePath = applicationContext.cacheDir.absolutePath;
 
     return SDKOptions.builder()
-        .setUserId("telenavDemoApp")
-        .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
-        .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
-        .setCloudEndPoint("https://restapistage.telenav.com")
+        .setUserId(BuildConfig.telenav_user_id)
+        .setApiKey(BuildConfig.telenav_api_key)
+        .setApiSecret(BuildConfig.telenav_api_secret)
+        .setCloudEndPoint(BuildConfig.telenav_cloud_endpoint)
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)

@@ -11,6 +11,13 @@ android {
         targetSdkVersion 30
         versionCode 6
         versionName "0.5"
+
+        buildConfigField  "String", "telenav_data_dir", "\"/storage/emulated/0/Telenav\""
+
+        buildConfigField  "String", "telenav_user_id", "\"$System.env.TELENAV_USER_ID\""
+        buildConfigField  "String", "telenav_api_key", "\"$System.env.TELENAV_API_KEY\""
+        buildConfigField  "String", "telenav_api_secret", "\"$System.env.TELENAV_API_SECTRET\""
+        buildConfigField  "String", "telenav_cloud_endpoint", "\"$System.env.TELENAV_CLOUD_ENDPOINT\""
     }
 
     buildFeatures {
