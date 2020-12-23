@@ -167,8 +167,6 @@
                             android:id="@+id/personal_home_entity_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:lines="1"
                             android:textSize="18sp" />
 
                         <LinearLayout
@@ -324,8 +322,6 @@
                             android:id="@+id/personal_work_entity_address"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:lines="1"
                             android:textSize="18sp" />
 
                         <LinearLayout
