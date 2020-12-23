@@ -122,19 +122,18 @@ class HomeAreaActivity : AppCompatActivity() {
             .asyncCall(object : Callback<AreaStatus?> {
 
                 override fun onSuccess(areaStatus: AreaStatus?) {
-                    homeArea = areaStatus
                     showUpdateNotification(true)
-                    finalize()
+                    finalize(areaStatus)
                 }
 
                 override fun onFailure(error: Throwable) {
                     showUpdateNotification(false)
-                    finalize()
+                    finalize(null)
                 }
 
-                private fun finalize() {
+                private fun finalize(areaStatus: AreaStatus?) {
                     setUpdateStatus(false)
-                    EventBus.getDefault().post(HomeAreaUpdateEvent())
+                    EventBus.getDefault().post(HomeAreaUpdateEvent(areaStatus))
                 }
             })
         updateUI()
@@ -147,8 +146,9 @@ class HomeAreaActivity : AppCompatActivity() {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    fun onMessageEvent(event: HomeAreaUpdateEvent) {
-        getHomeArea()
+    fun onHomeAreaUpdateEvent(event: HomeAreaUpdateEvent) {
+        homeArea = event.areaStatus
+        updateUI()
     }
 
     private fun showUpdateNotification(isSuccessful: Boolean = true) {
@@ -234,6 +234,7 @@ class HomeAreaActivity : AppCompatActivity() {
     private fun positionMap() {
         val status = homeArea
 
+        map?.clear()
         if (status == null || status.areaGeometry == null) {
             val location = lastKnownLocation
             if (location != null) {
@@ -299,5 +300,7 @@ class HomeAreaActivity : AppCompatActivity() {
         const val CHANNEL_ID = R.string.app_name
     }
 
-    class HomeAreaUpdateEvent
+    class HomeAreaUpdateEvent(status: AreaStatus?) {
+        val areaStatus: AreaStatus? = status
+    }
 }
