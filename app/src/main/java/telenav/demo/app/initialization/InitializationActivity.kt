@@ -24,6 +24,7 @@ import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
 import java.io.File
+import java.util.*
 
 
 class InitializationActivity : AppCompatActivity() {
@@ -59,17 +60,23 @@ class InitializationActivity : AppCompatActivity() {
                 getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE
             )
+
+        var deviceID = prefs.getString(getString(R.string.saved_device_id), "");
+        if (deviceID == null || deviceID.isEmpty()) {
+            deviceID = UUID.randomUUID().toString()
+        }
         with(prefs.edit()) {
             remove(getString(R.string.saved_update_status))
+            putString(getString(R.string.saved_device_id), deviceID)
             apply()
         }
 
         try {
             Thread {
                 getUIExecutor().execute {
-                    EntityService.initialize(getSDKOptions(indexDataPath))
-                    DataCollectorService.initialize(this, getSDKOptions())
-                    OtaService.initialize(this, getSDKOptions())
+                    EntityService.initialize(getSDKOptions(deviceID, indexDataPath))
+                    DataCollectorService.initialize(this, getSDKOptions(deviceID))
+                    OtaService.initialize(this, getSDKOptions(deviceID))
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
                     startActivity(Intent(this, HomePageActivity::class.java))
@@ -143,7 +150,7 @@ class InitializationActivity : AppCompatActivity() {
     }
 }
 
-fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
+fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOptions {
     var dataPath = BuildConfig.telenav_data_dir;
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
@@ -151,6 +158,7 @@ fun Context.getSDKOptions(pathToIndex: String = ""): SDKOptions {
     val cachePath = applicationContext.cacheDir.absolutePath;
 
     return SDKOptions.builder()
+        .setDeviceGuid(deviceId)
         .setUserId(BuildConfig.telenav_user_id)
         .setApiKey(BuildConfig.telenav_api_key)
         .setApiSecret(BuildConfig.telenav_api_secret)

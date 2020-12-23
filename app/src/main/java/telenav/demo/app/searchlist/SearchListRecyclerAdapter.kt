@@ -19,7 +19,11 @@ import telenav.demo.app.convertNumberToDistance
 import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.utils.entityClick
 
-class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
+class SearchListRecyclerAdapter(
+    entities: List<Entity>,
+    private val categoryIcon: Int,
+    private val referenceId: String
+) :
     RecyclerView.Adapter<EntityHolder>() {
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
@@ -40,7 +44,11 @@ class SearchListRecyclerAdapter(entities: List<Entity>, val categoryIcon: Int) :
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entityClick(entity.id, EntityActionEvent.DisplayMode.LIST_VIEW)
+            dataCollectorClient.entityClick(
+                referenceId,
+                entity.id,
+                EntityActionEvent.DisplayMode.LIST_VIEW
+            )
             holder.itemView.context.startActivity(
                 Intent(
                     holder.itemView.context,

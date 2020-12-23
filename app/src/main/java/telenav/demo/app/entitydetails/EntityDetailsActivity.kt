@@ -78,6 +78,7 @@ class EntityDetailsActivity : AppCompatActivity() {
     private var isFavorite: Boolean = false
     private lateinit var displayMode: String
     private lateinit var source: String
+    private lateinit var referenceId: String
 
     private lateinit var moreDialog: AlertDialog
 
@@ -90,6 +91,7 @@ class EntityDetailsActivity : AppCompatActivity() {
         displayMode = intent.getStringExtra(PARAM_DISPLAY_MODE)
             ?: EntityActionEvent.DisplayMode.LIST_VIEW.name
         source = intent.getStringExtra(PARAM_SOURCE) ?: ""
+        referenceId = intent.getStringExtra(PARAM_REFERENCE_ID) ?: ""
 
         vLoading = findViewById(R.id.entity_details_loading)
         vEntityName = findViewById(R.id.entity_details_name)
@@ -284,6 +286,7 @@ class EntityDetailsActivity : AppCompatActivity() {
                         )
                     } else {
                         dataCollectorClient.entityCall(
+                            referenceId,
                             entity.id,
                             EntityActionEvent.DisplayMode.valueOf(displayMode)
                         )
@@ -587,6 +590,7 @@ class EntityDetailsActivity : AppCompatActivity() {
         const val PARAM_ICON = "icon"
         const val PARAM_DISPLAY_MODE = "display_mode"
         const val PARAM_SOURCE = "source"
+        const val PARAM_REFERENCE_ID = "reference_id"
     }
 }
 

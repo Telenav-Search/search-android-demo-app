@@ -256,17 +256,23 @@ private fun DataCollectorClient.setAddress(
     sendEventRequest().setEvent(setEvent).build().execute()
 }
 
-fun DataCollectorClient.entityClick(entityId: String, displayMode: EntityActionEvent.DisplayMode) {
+fun DataCollectorClient.entityClick(
+    referenceId: String,
+    entityId: String,
+    displayMode: EntityActionEvent.DisplayMode
+) {
     sendEventRequest().setEvent(
         EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
-            .setEntityId(entityId).setDisplayMode(displayMode).build()
+            .setReferenceId(referenceId).setEntityId(entityId).setDisplayMode(displayMode).build()
     ).build().execute()
 }
 
-fun DataCollectorClient.entityCall(entityId: String, displayMode: EntityActionEvent.DisplayMode) {
+fun DataCollectorClient.entityCall(
+    referenceId: String, entityId: String, displayMode: EntityActionEvent.DisplayMode
+) {
     sendEventRequest().setEvent(
         EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CALL)
-            .setEntityId(entityId).setDisplayMode(displayMode).build()
+            .setReferenceId(referenceId).setEntityId(entityId).setDisplayMode(displayMode).build()
     ).build().execute()
 }
 
@@ -298,9 +304,7 @@ fun DataCollectorClient.gpsProbe(location: Location?) {
             .setLon(location.longitude)
             .setAltitude(location.altitude)
             .setSpeed(location.speed.toDouble())
-            .setHorizontalAccuracy(location.accuracy.toDouble())
             .setTimestamp(location.time)
-            .setHeadingAngle(location.bearing.toDouble())
             .build()
     ).build().execute()
 }

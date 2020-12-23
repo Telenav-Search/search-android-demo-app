@@ -59,6 +59,8 @@ class SearchListFragment : Fragment() {
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
 
+    private var referenceId: String = ""
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -146,10 +148,12 @@ class SearchListFragment : Fragment() {
                         activity ?: return
                         Log.w("test", Gson().toJson(response.results))
                         vSearchLoading.hide()
+                        referenceId = response.referenceId
                         if (response.results != null && response.results.size > 0) {
                             vSearchList.adapter = SearchListRecyclerAdapter(
                                 response.results,
-                                arguments!!.getInt(PARAM_ICON, 0)
+                                arguments!!.getInt(PARAM_ICON, 0),
+                                response.referenceId
                             )
                             vSearchListContainer.visibility = View.VISIBLE
                             setToggler(true)
@@ -221,7 +225,11 @@ class SearchListFragment : Fragment() {
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
                 activity ?: return@setOnInfoWindowClickListener
-                dataCollectorClient.entityClick(entity.id, EntityActionEvent.DisplayMode.MAP_VIEW)
+                dataCollectorClient.entityClick(
+                    referenceId,
+                    entity.id,
+                    EntityActionEvent.DisplayMode.MAP_VIEW
+                )
                 startActivity(
                     Intent(activity, EntityDetailsActivity::class.java).apply {
                         putExtra(EntityDetailsActivity.PARAM_ID, id)
