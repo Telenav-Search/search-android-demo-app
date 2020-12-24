@@ -2,9 +2,12 @@ package telenav.demo.app.utils
 
 import android.content.Context
 import android.location.Location
+import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.core.Callback
 import com.telenav.sdk.datacollector.api.DataCollectorClient
+import com.telenav.sdk.datacollector.model.SendEventResponse
 import com.telenav.sdk.datacollector.model.event.*
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.GeoPoint
@@ -16,13 +19,29 @@ fun Entity.getCoord(): GeoPoint? {
 }
 
 fun DataCollectorClient.startEngine() {
-    sendEventRequest()
-        .setEvent(StartEngineEvent.builder().build()).build().execute()
+    sendEventRequest().setEvent(StartEngineEvent.builder().build())
+        .asyncCall(object : Callback<SendEventResponse> {
+            override fun onSuccess(response: SendEventResponse) {
+                Log.d("StartEngineEvent", Gson().toJson(response))
+            }
+
+            override fun onFailure(e: Throwable) {
+                e.printStackTrace()
+            }
+        })
 }
 
 fun DataCollectorClient.stopEngine() {
-    sendEventRequest()
-        .setEvent(StopEngineEvent.builder().build()).build().execute()
+    sendEventRequest().setEvent(StopEngineEvent.builder().build())
+        .asyncCall(object : Callback<SendEventResponse> {
+            override fun onSuccess(response: SendEventResponse) {
+                Log.d("StopEngineEvent", Gson().toJson(response))
+            }
+
+            override fun onFailure(e: Throwable) {
+                e.printStackTrace()
+            }
+        })
 }
 
 fun DataCollectorClient.addFavorite(context: Context, entity: Entity) {
@@ -63,7 +82,15 @@ fun DataCollectorClient.addFavorite(context: Context, entity: Entity) {
     sendEventRequest().setEvent(
         FavoriteEvent.builder().setEntityId(entity.id)
             .setActionType(FavoriteEvent.ActionType.ADD).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("FavoriteEvent.ADD", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.deleteFavorite(context: Context, entity: Entity) {
@@ -96,7 +123,15 @@ fun DataCollectorClient.deleteFavorite(context: Context, entity: Entity) {
     sendEventRequest().setEvent(
         FavoriteEvent.builder().setEntityId(entity.id)
             .setActionType(FavoriteEvent.ActionType.DELETE).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("FavoriteEvent.DELETE", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.removeAllFavorites(context: Context) {
@@ -123,8 +158,16 @@ fun DataCollectorClient.removeAllFavorites(context: Context) {
         apply()
     }
 
-    sendEventRequest()
-        .setEvent(RemoveAllFavoritesEvent.builder().build()).build().execute()
+    sendEventRequest().setEvent(RemoveAllFavoritesEvent.builder().build())
+        .asyncCall(object : Callback<SendEventResponse> {
+            override fun onSuccess(response: SendEventResponse) {
+                Log.d("RemoveAllFavoritesEvent", Gson().toJson(response))
+            }
+
+            override fun onFailure(e: Throwable) {
+                e.printStackTrace()
+            }
+        })
 }
 
 fun DataCollectorClient.setHome(context: Context, entity: Entity) {
@@ -160,9 +203,17 @@ fun DataCollectorClient.removeHome(context: Context) {
         apply()
     }
 
-    sendEventRequest()
-        .setEvent(getHomeEventBuilder(entity).setActionType(SetHomeEvent.ActionType.REMOVE).build())
-        .build().execute()
+    sendEventRequest().setEvent(
+        getHomeEventBuilder(entity).setActionType(SetHomeEvent.ActionType.REMOVE).build()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("RemoveAddressEvent", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.setWork(context: Context, entity: Entity) {
@@ -198,9 +249,17 @@ fun DataCollectorClient.removeWork(context: Context) {
         apply()
     }
 
-    sendEventRequest()
-        .setEvent(getWorkEventBuilder(entity).setActionType(SetWorkEvent.ActionType.REMOVE).build())
-        .build().execute()
+    sendEventRequest().setEvent(
+        getWorkEventBuilder(entity).setActionType(SetWorkEvent.ActionType.REMOVE).build()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("RemoveAddressEvent", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 private fun getHomeEventBuilder(entity: Entity): SetHomeEvent.Builder {
@@ -248,12 +307,26 @@ private fun DataCollectorClient.setAddress(
     }
 
     if (modify) {
-        sendEventRequest()
-            .setEvent(removeEvent)
-            .build().execute()
+        sendEventRequest().setEvent(removeEvent).asyncCall(object : Callback<SendEventResponse> {
+            override fun onSuccess(response: SendEventResponse) {
+                Log.d("RemoveAddressEvent", Gson().toJson(response))
+            }
+
+            override fun onFailure(e: Throwable) {
+                e.printStackTrace()
+            }
+        })
     }
 
-    sendEventRequest().setEvent(setEvent).build().execute()
+    sendEventRequest().setEvent(setEvent).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("SetAddressEvent", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.entityClick(
@@ -264,7 +337,15 @@ fun DataCollectorClient.entityClick(
     sendEventRequest().setEvent(
         EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CLICK)
             .setReferenceId(referenceId).setEntityId(entityId).setDisplayMode(displayMode).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("EntityActionEvent.CLICK", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.entityCall(
@@ -273,7 +354,15 @@ fun DataCollectorClient.entityCall(
     sendEventRequest().setEvent(
         EntityActionEvent.builder().setActionType(EntityActionEvent.ActionType.CALL)
             .setReferenceId(referenceId).setEntityId(entityId).setDisplayMode(displayMode).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("EntityActionEvent.CALL", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.entityCachedClick(
@@ -283,7 +372,15 @@ fun DataCollectorClient.entityCachedClick(
     sendEventRequest().setEvent(
         EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CLICK)
             .setEntityId(entityId).setSourceType(source).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("EntityCacheActionEvent.CLICK", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.entityCachedCall(
@@ -293,7 +390,15 @@ fun DataCollectorClient.entityCachedCall(
     sendEventRequest().setEvent(
         EntityCacheActionEvent.builder().setActionType(EntityCacheActionEvent.ActionType.CALL)
             .setEntityId(entityId).setSourceType(source).build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("EntityCacheActionEvente.CALL", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
 
 fun DataCollectorClient.gpsProbe(location: Location?) {
@@ -306,5 +411,13 @@ fun DataCollectorClient.gpsProbe(location: Location?) {
             .setSpeed(location.speed.toDouble())
             .setTimestamp(location.time)
             .build()
-    ).build().execute()
+    ).asyncCall(object : Callback<SendEventResponse> {
+        override fun onSuccess(response: SendEventResponse) {
+            Log.d("GpsProbeEvent", Gson().toJson(response))
+        }
+
+        override fun onFailure(e: Throwable) {
+            e.printStackTrace()
+        }
+    })
 }
