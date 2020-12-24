@@ -392,7 +392,7 @@ fun DataCollectorClient.entityCachedCall(
             .setEntityId(entityId).setSourceType(source).build()
     ).asyncCall(object : Callback<SendEventResponse> {
         override fun onSuccess(response: SendEventResponse) {
-            Log.d("EntityCacheActionEvente.CALL", Gson().toJson(response))
+            Log.d("EntityCacheActionEvent.CALL", Gson().toJson(response))
         }
 
         override fun onFailure(e: Throwable) {
