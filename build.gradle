@@ -22,8 +22,8 @@ allprojects {
 
         maven {
             credentials {
-                username 'lineate_dev'
-                password 'B@dgPXnt62$D8ps4'
+                username "\"${telenav_jfrog_user}\""
+                password "\"${telenav_jfrog_password}\""
             }
             url 'https://telenav.jfrog.io/artifactory/telenav-maven-releases/'
             authentication {
