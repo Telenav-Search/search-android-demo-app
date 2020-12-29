@@ -60,6 +60,7 @@ class FavoriteResultsListRecyclerAdapter(
                 })
             return@setOnClickListener
         }
+        holder.vNumber.text = "${position + 1}."
         holder.vDelete.setOnClickListener {
             deleteListener.onDelete(entity)
             return@setOnClickListener
@@ -100,6 +101,7 @@ class FavoriteResultsListRecyclerAdapter(
 }
 
 class EntityHolder(view: View) : RecyclerView.ViewHolder(view) {
+    val vNumber = view.findViewById<TextView>(R.id.entity_number)
     val vName = view.findViewById<TextView>(R.id.entity_name)
     val vDelete = view.findViewById<ImageView>(R.id.entity_delete)
     val vAddress = view.findViewById<TextView>(R.id.entity_address)
