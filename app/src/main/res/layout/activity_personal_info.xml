@@ -39,7 +39,7 @@
             android:layout_gravity="center_vertical"
             android:background="?android:attr/selectableItemBackground"
             android:paddingHorizontal="5dp"
-            android:src="@drawable/ic_my_location" />
+            android:src="@drawable/ic_cloud_update" />
     </LinearLayout>
 
     <View
