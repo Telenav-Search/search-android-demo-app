@@ -56,8 +56,8 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
 
 fun Context.setGPSListener(locationCallback: LocationCallback) {
     val locationRequest = LocationRequest.create()?.apply {
-        interval = 1000
-        fastestInterval = 200
+        interval = 15000
+        fastestInterval = 15000
         priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
     try {
