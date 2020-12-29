@@ -109,7 +109,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@id/personal_home_delete"
                         android:layout_toRightOf="@id/personal_home_icon"
-                        android:text="Home address"
+                        android:text="Home"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 
@@ -264,7 +264,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@id/personal_work_delete"
                         android:layout_toRightOf="@id/personal_work_icon"
-                        android:text="Work address"
+                        android:text="Work"
                         android:textSize="20sp"
                         android:textStyle="bold" />
 

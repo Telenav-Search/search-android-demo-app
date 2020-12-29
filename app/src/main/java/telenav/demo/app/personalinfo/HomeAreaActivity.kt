@@ -204,14 +204,23 @@ class HomeAreaActivity : AppCompatActivity() {
 
     private fun setLastUpdateTime() {
         val status = homeArea
-        var dateString = "Never"
+        var dateString = ""
+        var size = 0.0
 
         if (status != null && status.lastUpdatedTime > 0) {
-            val formatter = SimpleDateFormat("dd/MM/yyyy")
+            val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
             dateString = formatter.format(Date(status.lastUpdatedTime))
         }
 
-        vLastUpdate.text = getString(R.string.home_area_last_update, dateString)
+        if (status != null && status.areaDataSizeInBytes > 0) {
+            size = status.areaDataSizeInBytes / (1024.0 * 1024.0)
+        }
+
+        if (dateString.isNotEmpty()) {
+            vLastUpdate.text = getString(R.string.home_area_last_update, dateString, size)
+        } else {
+            vLastUpdate.text = getString(R.string.home_area_last_update_na)
+        }
     }
 
     private fun initMap() {
