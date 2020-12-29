@@ -80,7 +80,7 @@ fun Context.stopGPSListener(locationCallback: LocationCallback) {
 }
 
 fun Context.convertNumberToDistance(dist: Double): String {
-    val km = dist / 1000.0;
+    val km = dist / 1000.0
 
     val iso = resources.configuration.locale.getISO3Country()
     return if (iso.equals("usa", true) || iso.equals("mmr", true)) {

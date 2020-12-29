@@ -18,6 +18,7 @@
     <string name="work_title">This is your work</string>
     <string name="preference_file_key">telenav.demo.app.storage</string>
     <string name="saved_index_data_path_key">index_data_path</string>
+    <string name="saved_search_mode_key">search_mode</string>
     <string name="saved_home_address_key">home_address</string>
     <string name="saved_work_address_key">work_address</string>
     <string name="saved_favorite_list_key">favorite_list</string>

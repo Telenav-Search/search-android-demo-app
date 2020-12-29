@@ -36,7 +36,7 @@ class FavoriteResultsListRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: EntityHolder, position: Int) {
-        val entity = list[position];
+        val entity = list[position]
         Log.w("test", "Entity ${Gson().toJson(entity)}")
         val name =
             if (entity.type == EntityType.ADDRESS) entity.address.formattedAddress else entity.place.name

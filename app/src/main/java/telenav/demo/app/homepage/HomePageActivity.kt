@@ -1,7 +1,6 @@
 package telenav.demo.app.homepage
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.location.Location
@@ -25,7 +24,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.telenav.sdk.core.Callback
-import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
@@ -35,6 +33,7 @@ import telenav.demo.app.dip
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.searchlist.SearchListFragment
 import telenav.demo.app.setGPSListener
+import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.stopGPSListener
 import java.util.concurrent.Executor
 
@@ -53,8 +52,6 @@ class HomePageActivity : AppCompatActivity() {
     private lateinit var vSearchInput: EditText
     private lateinit var vSearchInputClear: View
 
-    private var currentMode: Int = 0
-
     private var popupWindow: PopupWindow? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +64,7 @@ class HomePageActivity : AppCompatActivity() {
         setupSearchField()
 
         findViewById<View>(R.id.app_personal_info).setOnClickListener { showPersonalInfoActivity() }
-        findViewById<View>(R.id.app_mode_select).setOnClickListener { showModeSelectDialog() }
+        findViewById<View>(R.id.app_mode_select).setOnClickListener { showSettingsActivity() }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -215,40 +212,25 @@ class HomePageActivity : AppCompatActivity() {
                     vSearchInput.setText(text)
                 } else
                     vSearchInput.setText(word.predictWord + ' ')
-                vSearchInput.setSelection(vSearchInput.text.length);
+                vSearchInput.setSelection(vSearchInput.text.length)
                 hidePredictions()
             }
         }
 
-        popupWindow!!.showAsDropDown(vSearchInput);
+        popupWindow!!.showAsDropDown(vSearchInput)
     }
 
     private fun hidePredictions() {
-        popupWindow?.dismiss();
-        popupWindow = null;
-    }
-
-    private fun showModeSelectDialog() {
-        hidePredictions()
-
-        var newMode: Int = 0
-        AlertDialog.Builder(this)
-            .setTitle(R.string.search_mode_dialog_title)
-            .setSingleChoiceItems(
-                R.array.search_modes, currentMode
-            ) { _,  which ->
-                newMode = which
-            }.setPositiveButton(R.string.search_mode_dialog_ok) { _, which ->
-                currentMode = newMode
-                val modes = resources.getStringArray(R.array.search_modes)
-                SDKRuntime.setNetworkAvailable(modes[currentMode].equals("hybrid", true))
-            }
-            .setNegativeButton(R.string.search_mode_dialog_cancel) { _, _ ->
-            }.create().show()
+        popupWindow?.dismiss()
+        popupWindow = null
     }
 
     private fun showPersonalInfoActivity() {
         startActivity(Intent(this, PersonalInfoActivity::class.java))
+    }
+
+    private fun showSettingsActivity() {
+        startActivity(Intent(this, SettingsActivity::class.java))
     }
 
     override fun onResume() {

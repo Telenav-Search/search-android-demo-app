@@ -21,7 +21,7 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onCategory
     }
 
     override fun onBindViewHolder(holder: CategoryHolder, position: Int) {
-        val category = list[position];
+        val category = list[position]
         holder.vName.text = category.name
         holder.vExpand.visibility = View.GONE
         holder.vSearch.visibility = View.GONE

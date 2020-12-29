@@ -32,6 +32,9 @@
             android:name=".homepage.HomePageActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".settings.SettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".initialization.InitializationActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden">

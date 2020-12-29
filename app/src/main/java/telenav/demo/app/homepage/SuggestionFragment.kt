@@ -52,7 +52,7 @@ class SuggestionFragment : Fragment() {
 
     private fun requestSuggestions() {
         val text = arguments!!.getString("text")
-        val location = (activity!! as HomePageActivity).lastKnownLocation ?: Location("");
+        val location = (activity!! as HomePageActivity).lastKnownLocation ?: Location("")
         Log.w("test", "${location.latitude} ${location.longitude}")
 
         telenavService.suggestionPredictionRequest()

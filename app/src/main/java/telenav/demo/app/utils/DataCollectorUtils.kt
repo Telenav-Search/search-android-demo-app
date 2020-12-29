@@ -263,7 +263,7 @@ fun DataCollectorClient.removeWork(context: Context) {
 }
 
 private fun getHomeEventBuilder(entity: Entity): SetHomeEvent.Builder {
-    val coords = entity.getCoord();
+    val coords = entity.getCoord()
     val eventBuilder =
         SetHomeEvent.builder()
             .setLabel(entity.label ?: "").setEntityId(entity.id)
@@ -275,7 +275,7 @@ private fun getHomeEventBuilder(entity: Entity): SetHomeEvent.Builder {
 }
 
 private fun getWorkEventBuilder(entity: Entity): SetWorkEvent.Builder {
-    val coords = entity.getCoord();
+    val coords = entity.getCoord()
     val eventBuilder =
         SetWorkEvent.builder()
             .setLabel(entity.label ?: "").setEntityId(entity.id)

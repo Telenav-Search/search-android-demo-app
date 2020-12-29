@@ -24,7 +24,7 @@ class SuggestionRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: SuggestionHolder, position: Int) {
-        val item = list[position];
+        val item = list[position]
         holder.vName.text = item.formattedLabel
         holder.itemView.setOnClickListener { clickListener(item) }
         holder.vDistanceTo.text =

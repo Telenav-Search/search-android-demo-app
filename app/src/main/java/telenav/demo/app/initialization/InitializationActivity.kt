@@ -14,11 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
+import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,6 +27,7 @@ import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.model.SearchMode
 import java.io.File
 import java.util.*
 
@@ -37,7 +38,8 @@ class InitializationActivity : AppCompatActivity() {
     private lateinit var vAccess: View
     private lateinit var vInitialization: View
 
-    private var indexDataPath = "";
+    private var indexDataPath = ""
+    private var searchMode = SearchMode.HYBRID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,20 +61,31 @@ class InitializationActivity : AppCompatActivity() {
         checkPermissions()
     }
 
-    private fun checkIndexPath() {
+    private fun getSavedIndexPath() {
         val prefs =
             getSharedPreferences(
                 getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE
             )
 
-        val dataPath = prefs.getString(getString(R.string.saved_index_data_path_key), "");
+        val dataPath = prefs.getString(getString(R.string.saved_index_data_path_key), "")
         if (dataPath != null && dataPath.isNotEmpty()) {
             indexDataPath = dataPath
             initSDKs()
         } else {
             hideProgress()
         }
+    }
+
+    private fun getSavedSearchMode() {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+
+        val mode = prefs.getInt(getString(R.string.saved_search_mode_key), 1)
+        searchMode = SearchMode.fromInt(mode)
     }
 
     private fun initSDKs() {
@@ -84,7 +97,7 @@ class InitializationActivity : AppCompatActivity() {
                 Context.MODE_PRIVATE
             )
 
-        var deviceID = prefs.getString(getString(R.string.saved_device_id), "");
+        var deviceID = prefs.getString(getString(R.string.saved_device_id), "")
         if (deviceID == null || deviceID.isEmpty()) {
             deviceID = UUID.randomUUID().toString()
         }
@@ -98,15 +111,16 @@ class InitializationActivity : AppCompatActivity() {
             GlobalScope.launch {
                 delay(100L)
 
-                EntityService.initialize(getSDKOptions(deviceID, indexDataPath))
+                val sdkOptions = getSDKOptions(deviceID, indexDataPath)
+
+                EntityService.initialize(sdkOptions)
 
                 getUIExecutor().execute {
-                    DataCollectorService.initialize(
-                        this@InitializationActivity,
-                        getSDKOptions(deviceID)
-                    )
-                    OtaService.initialize(this@InitializationActivity, getSDKOptions(deviceID))
+                    DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                    OtaService.initialize(this@InitializationActivity, sdkOptions)
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
+
+                    SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
 
                     startActivity(Intent(this@InitializationActivity, HomePageActivity::class.java))
                     finish()
@@ -149,7 +163,8 @@ class InitializationActivity : AppCompatActivity() {
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
         } else {
-            checkIndexPath()
+            getSavedSearchMode()
+            getSavedIndexPath()
         }
     }
 
@@ -180,11 +195,11 @@ class InitializationActivity : AppCompatActivity() {
 }
 
 fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOptions {
-    var dataPath = BuildConfig.telenav_data_dir;
+    var dataPath = BuildConfig.telenav_data_dir
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
     }
-    val cachePath = applicationContext.cacheDir.absolutePath;
+    val cachePath = applicationContext.cacheDir.absolutePath
 
     saveIndexDataPath(dataPath)
 
@@ -212,6 +227,19 @@ fun Context.saveIndexDataPath(pathToIndex: String = "") {
         )
     with(prefs.edit()) {
         putString(getString(R.string.saved_index_data_path_key), pathToIndex)
+        apply()
+    }
+}
+
+fun Context.saveSearchMode(searchMode: SearchMode = SearchMode.HYBRID) {
+
+    val prefs =
+        getSharedPreferences(
+            getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+    with(prefs.edit()) {
+        putInt(getString(R.string.saved_search_mode_key), searchMode.value)
         apply()
     }
 }

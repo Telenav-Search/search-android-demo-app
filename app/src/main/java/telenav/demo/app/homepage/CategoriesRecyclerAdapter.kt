@@ -23,9 +23,9 @@ class CategoriesRecyclerAdapter(
         Collections.sort(categories, object : Comparator<Category> {
             override fun compare(c1: Category, c2: Category): Int {
                 if (c2.childNodes != null && c1.childNodes == null)
-                    return 1;
+                    return 1
                 if (c2.childNodes == null && c1.childNodes != null)
-                    return -1;
+                    return -1
                 return c1.name.compareTo(c2.name)
             }
         })
@@ -49,29 +49,29 @@ class CategoriesRecyclerAdapter(
     }
 
     override fun onBindViewHolder(holder: CategoryHolder, position: Int) {
-        val node = list[position];
+        val node = list[position]
         holder.vName.text = node.category.name
         holder.vExpand.visibility = if (node.expandable) View.VISIBLE else View.GONE
         holder.vSearch.visibility = if (!node.expandable) View.VISIBLE else View.GONE
         holder.vExpand.rotation = if (node.expanded) 90f else 0f
-        holder.vName.setTypeface(null, if (node.expandable) Typeface.BOLD else Typeface.NORMAL);
+        holder.vName.setTypeface(null, if (node.expandable) Typeface.BOLD else Typeface.NORMAL)
         holder.vItem.setOnClickListener {
             if (!node.expandable) {
                 clickListener(node.category)
                 return@setOnClickListener
             }
-            node.expanded = !node.expanded;
+            node.expanded = !node.expanded
             if (node.expanded) {
                 list =
                     list.subList(0, position + 1) + node.category.childNodes.map { cat: Category ->
                         CategoryNode(node.level + 1, cat)
                     } + list.subList(position + 1, list.size)
             } else {
-                var index = -1;
+                var index = -1
                 for (i in position + 1 until list.size)
                     if (list[i].level <= node.level) {
-                        index = i;
-                        break;
+                        index = i
+                        break
                     }
                 if (index == -1)
                     list = list.subList(0, position + 1)

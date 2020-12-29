@@ -123,7 +123,7 @@ class SearchListFragment : Fragment() {
 
     private fun search(query: String?, categoryId: String?) {
         activity ?: return
-        val location = (activity as HomePageActivity).lastKnownLocation ?: Location("");
+        val location = (activity as HomePageActivity).lastKnownLocation ?: Location("")
         telenavService.searchRequest()
             .apply {
                 if (query != null)
