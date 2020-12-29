@@ -65,11 +65,22 @@
             android:id="@+id/home_area_last_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
             android:layout_gravity="center_horizontal"
-            android:padding="10dp"
             android:background="@color/colorPrimary"
-            android:text="Last updated: Never" />
+            android:padding="10dp"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/home_area_update_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/colorPrimary"
+            android:padding="10dp"
+            android:textColor="@android:color/holo_red_dark"
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:id="@+id/home_area_updating"
@@ -77,7 +88,8 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <androidx.core.widget.ContentLoadingProgressBar
                 style="?android:attr/progressBarStyleSmallTitle"

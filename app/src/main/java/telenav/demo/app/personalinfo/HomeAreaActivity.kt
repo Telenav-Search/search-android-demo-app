@@ -38,6 +38,7 @@ class HomeAreaActivity : AppCompatActivity() {
     private val homeAreaClient by lazy { OtaService.getHomeAreaClient() }
 
     private lateinit var vLastUpdate: TextView
+    private lateinit var vUpdateError: TextView
     private lateinit var vUpdateInProgress: View
     private lateinit var vUpdate: View
     private lateinit var vReset: View
@@ -45,6 +46,7 @@ class HomeAreaActivity : AppCompatActivity() {
     private var map: GoogleMap? = null
 
     private var homeArea: AreaStatus? = null
+    private var updateError: Throwable? = null
 
     var lastKnownLocation: Location? = null
 
@@ -69,6 +71,8 @@ class HomeAreaActivity : AppCompatActivity() {
 
         fMap = supportFragmentManager.findFragmentById(R.id.home_area_map) as SupportMapFragment
 
+        vLastUpdate = findViewById(R.id.home_area_last_update)
+        vUpdateError = findViewById(R.id.home_area_update_error)
         vLastUpdate = findViewById(R.id.home_area_last_update)
         vUpdateInProgress = findViewById(R.id.home_area_updating)
         vUpdate = findViewById(R.id.home_area_update)
@@ -123,17 +127,17 @@ class HomeAreaActivity : AppCompatActivity() {
 
                 override fun onSuccess(areaStatus: AreaStatus?) {
                     showUpdateNotification(true)
-                    finalize(areaStatus)
+                    finalize(areaStatus, null)
                 }
 
                 override fun onFailure(error: Throwable) {
-                    showUpdateNotification(false)
-                    finalize(null)
+                    showUpdateNotification(false, error.message ?: "")
+                    finalize(null, error)
                 }
 
-                private fun finalize(areaStatus: AreaStatus?) {
+                private fun finalize(areaStatus: AreaStatus?, error: Throwable?) {
                     setUpdateStatus(false)
-                    EventBus.getDefault().post(HomeAreaUpdateEvent(areaStatus))
+                    EventBus.getDefault().post(HomeAreaUpdateEvent(areaStatus, error))
                 }
             })
         updateUI()
@@ -148,17 +152,22 @@ class HomeAreaActivity : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onHomeAreaUpdateEvent(event: HomeAreaUpdateEvent) {
         homeArea = event.areaStatus
+        updateError = event.error
         updateUI()
     }
 
-    private fun showUpdateNotification(isSuccessful: Boolean = true) {
-        val message =
-            if (isSuccessful) "Home Area Updated Successfully" else "Home Area Update Failed"
+    private fun showUpdateNotification(isSuccessful: Boolean = true, message: String = "") {
+        var text =
+            if (isSuccessful) "Home Area Updated Successfully!" else "Home Area Update Failed!"
+
+        if (message.isNotEmpty()) text += " $message"
+
+
         val channelId = getString(CHANNEL_ID)
         val builder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_sync)
             .setContentTitle("Update Home Area")
-            .setContentText(message)
+            .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -185,20 +194,23 @@ class HomeAreaActivity : AppCompatActivity() {
         if (isUpdating) {
             vUpdateInProgress.visibility = View.VISIBLE
             vLastUpdate.visibility = View.GONE
+            vUpdateError.visibility = View.GONE
             vUpdate.visibility = View.GONE
             vReset.visibility = View.GONE
         } else {
             vUpdateInProgress.visibility = View.GONE
-            vLastUpdate.visibility = View.VISIBLE
             vUpdate.visibility = View.VISIBLE
             if (areaStatus != null) {
                 vReset.visibility = View.VISIBLE
             } else {
                 vReset.visibility = View.GONE
             }
+            if (updateError != null) {
+                setErrorMessage()
+            } else {
+                setLastUpdateTime()
+            }
         }
-
-        setLastUpdateTime()
         positionMap()
     }
 
@@ -221,6 +233,17 @@ class HomeAreaActivity : AppCompatActivity() {
         } else {
             vLastUpdate.text = getString(R.string.home_area_last_update_na)
         }
+        vLastUpdate.visibility = View.VISIBLE
+    }
+
+    private fun setErrorMessage() {
+        val error = updateError
+
+        if (error?.message != null) {
+            vUpdateError.text = error.message
+        }
+
+        vUpdateError.visibility = View.VISIBLE
     }
 
     private fun initMap() {
@@ -293,7 +316,7 @@ class HomeAreaActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this)
         getHomeArea()
         initMap()
         setGPSListener(locationCallback)
@@ -301,7 +324,7 @@ class HomeAreaActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        EventBus.getDefault().unregister(this);
+        EventBus.getDefault().unregister(this)
         stopGPSListener(locationCallback)
     }
 
@@ -309,7 +332,5 @@ class HomeAreaActivity : AppCompatActivity() {
         const val CHANNEL_ID = R.string.app_name
     }
 
-    class HomeAreaUpdateEvent(status: AreaStatus?) {
-        val areaStatus: AreaStatus? = status
-    }
+    class HomeAreaUpdateEvent(val areaStatus: AreaStatus?, val error: Throwable?)
 }
