@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -166,6 +167,14 @@ class SearchListFragment : Fragment() {
                         vSearchLoading.hide()
                         vSearchError.visibility = View.VISIBLE
                         Log.e("testapp", "onFailure", p1)
+                        val context = this@SearchListFragment.context
+                        if (context != null) {
+                            Toast.makeText(
+                                context,
+                                p1?.message ?: "",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
             )
