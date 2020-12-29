@@ -18,6 +18,10 @@ import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
@@ -42,14 +46,33 @@ class InitializationActivity : AppCompatActivity() {
         vAccess = findViewById(R.id.initialization_access)
         vInitialization = findViewById(R.id.initialization)
         vLoading = findViewById(R.id.initialization_loading)
-        showProgress()
 
         findViewById<View>(R.id.initialization_select_index).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
         checkPermissions()
+    }
+
+    private fun checkIndexPath() {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+
+        val dataPath = prefs.getString(getString(R.string.saved_index_data_path_key), "");
+        if (dataPath != null && dataPath.isNotEmpty()) {
+            indexDataPath = dataPath
+            initSDKs()
+        } else {
+            hideProgress()
+        }
     }
 
     private fun initSDKs() {
@@ -72,17 +95,23 @@ class InitializationActivity : AppCompatActivity() {
         }
 
         try {
-            Thread {
+            GlobalScope.launch {
+                delay(100L)
+
+                EntityService.initialize(getSDKOptions(deviceID, indexDataPath))
+
                 getUIExecutor().execute {
-                    EntityService.initialize(getSDKOptions(deviceID, indexDataPath))
-                    DataCollectorService.initialize(this, getSDKOptions(deviceID))
-                    OtaService.initialize(this, getSDKOptions(deviceID))
+                    DataCollectorService.initialize(
+                        this@InitializationActivity,
+                        getSDKOptions(deviceID)
+                    )
+                    OtaService.initialize(this@InitializationActivity, getSDKOptions(deviceID))
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
-                    startActivity(Intent(this, HomePageActivity::class.java))
+                    startActivity(Intent(this@InitializationActivity, HomePageActivity::class.java))
                     finish()
                 }
-            }.start()
+            }
         } catch (e: Throwable) {
             Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
             e.printStackTrace()
@@ -120,7 +149,7 @@ class InitializationActivity : AppCompatActivity() {
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
         } else {
-            hideProgress()
+            checkIndexPath()
         }
     }
 
@@ -157,6 +186,8 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
     }
     val cachePath = applicationContext.cacheDir.absolutePath;
 
+    saveIndexDataPath(dataPath)
+
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
         .setUserId("telenavDemoApp")
@@ -167,6 +198,22 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)
         .build()
+}
+
+fun Context.saveIndexDataPath(pathToIndex: String = "") {
+    if (pathToIndex.isEmpty()) {
+        return
+    }
+
+    val prefs =
+        getSharedPreferences(
+            getString(R.string.preference_file_key),
+            Context.MODE_PRIVATE
+        )
+    with(prefs.edit()) {
+        putString(getString(R.string.saved_index_data_path_key), pathToIndex)
+        apply()
+    }
 }
 
 fun Context.checkLocationPermission(): Boolean =
