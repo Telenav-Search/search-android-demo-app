@@ -27,7 +27,6 @@ import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
-import telenav.demo.app.model.SearchMode
 import java.io.File
 import java.util.*
 

@@ -200,7 +200,7 @@ class HomeAreaActivity : AppCompatActivity() {
         } else {
             vUpdateInProgress.visibility = View.GONE
             vUpdate.visibility = View.VISIBLE
-            if (areaStatus != null) {
+            if (areaStatus != null && areaStatus.areaGeometry != null) {
                 vReset.visibility = View.VISIBLE
             } else {
                 vReset.visibility = View.GONE
@@ -221,7 +221,7 @@ class HomeAreaActivity : AppCompatActivity() {
 
         if (status != null && status.lastUpdatedTime > 0) {
             val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-            dateString = formatter.format(Date(status.lastUpdatedTime))
+            dateString = formatter.format(Date(status.lastUpdatedTime*1000))
         }
 
         if (status != null && status.areaDataSizeInBytes > 0) {
@@ -264,10 +264,10 @@ class HomeAreaActivity : AppCompatActivity() {
     }
 
     private fun positionMap() {
-        val status = homeArea
+        val areaStatus = homeArea
 
         map?.clear()
-        if (status == null || status.areaGeometry == null) {
+        if (areaStatus == null || areaStatus.areaGeometry == null) {
             val location = lastKnownLocation
             if (location != null) {
                 val latLng = LatLng(location.latitude, location.longitude)
@@ -275,7 +275,7 @@ class HomeAreaActivity : AppCompatActivity() {
                 map?.moveCamera(cameraUpdate)
             }
         } else {
-            val coordinates = status.areaGeometry.coordinates
+            val coordinates = areaStatus.areaGeometry.coordinates
 
             var minLat = coordinates[0].latitude
             var maxLat = coordinates[0].latitude

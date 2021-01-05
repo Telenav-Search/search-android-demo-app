@@ -11,7 +11,7 @@ import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import telenav.demo.app.R
 import telenav.demo.app.initialization.saveIndexDataPath
 import telenav.demo.app.initialization.saveSearchMode
-import telenav.demo.app.model.SearchMode
+import telenav.demo.app.initialization.SearchMode
 import java.io.File
 
 
