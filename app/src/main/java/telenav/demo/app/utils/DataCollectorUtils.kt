@@ -403,21 +403,21 @@ fun DataCollectorClient.entityCachedCall(
 
 fun DataCollectorClient.gpsProbe(location: Location?) {
     location ?: return
-    sendEventRequest().setEvent(
-        GpsProbeEvent.builder()
-            .setLat(location.latitude)
-            .setLon(location.longitude)
-            .setAltitude(location.altitude)
-            .setSpeed(location.speed.toDouble())
-            .setTimestamp(location.time)
-            .build()
-    ).asyncCall(object : Callback<SendEventResponse> {
-        override fun onSuccess(response: SendEventResponse) {
-            Log.d("GpsProbeEvent", Gson().toJson(response))
-        }
-
-        override fun onFailure(e: Throwable) {
-            e.printStackTrace()
-        }
-    })
+//    sendEventRequest().setEvent(
+//        GpsProbeEvent.builder()
+//            .setLat(location.latitude)
+//            .setLon(location.longitude)
+//            .setAltitude(location.altitude)
+//            .setSpeed(location.speed.toDouble())
+//            .setTimestamp(location.time)
+//            .build()
+//    ).asyncCall(object : Callback<SendEventResponse> {
+//        override fun onSuccess(response: SendEventResponse) {
+//            Log.d("GpsProbeEvent", Gson().toJson(response))
+//        }
+//
+//        override fun onFailure(e: Throwable) {
+//            e.printStackTrace()
+//        }
+//    })
 }

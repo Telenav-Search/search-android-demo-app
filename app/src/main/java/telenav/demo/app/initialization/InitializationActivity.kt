@@ -1,21 +1,31 @@
 package telenav.demo.app.initialization
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datasource.api.DataSourceCenter
+import com.telenav.sdk.datasource.api.error.DataSourceException
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
@@ -52,6 +62,58 @@ class InitializationActivity : AppCompatActivity() {
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+
+            val request: NetworkRequest = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .build()
+
+            connectivityManager.registerNetworkCallback(request, object : ConnectivityManager.NetworkCallback() {
+
+                override fun onAvailable(network: Network) {
+                    super.onAvailable(network)
+                    Log.i("sdk", "Network available")
+                    SDKRuntime.setNetworkAvailable(true)
+                }
+
+                override fun onLost(network: Network) {
+                    super.onLost(network)
+                    Log.i("sdk", "Network Lost")
+                    SDKRuntime.setNetworkAvailable(false)
+                }
+
+                override fun onUnavailable() {
+                    super.onUnavailable()
+                    Log.i("sdk", "Network unavailable")
+                    SDKRuntime.setNetworkAvailable(false)
+                }
+            })
+
+        } else {
+            val filter = IntentFilter()
+            filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
+
+            registerReceiver(object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    if (intent.action == ConnectivityManager.CONNECTIVITY_ACTION) {
+                        val networkActive = isNetworkActive(context)
+                        Log.i("sdk", "Network status changed : $networkActive")
+                        SDKRuntime.setNetworkAvailable(networkActive)
+                    }
+                }
+
+                private fun isNetworkActive(context: Context): Boolean {
+                    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    val networkInfo = cm.activeNetworkInfo
+                    return networkInfo != null && networkInfo.isAvailable && networkInfo.isConnected
+                }
+
+            }, filter)
         }
     }
 
@@ -115,7 +177,15 @@ class InitializationActivity : AppCompatActivity() {
                 EntityService.initialize(sdkOptions)
 
                 getUIExecutor().execute {
+
                     DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                    try {
+                        DataSourceCenter.initialize(this@InitializationActivity)
+                    } catch (e: DataSourceException) {
+                        Log.e("sdk", e.stackTraceToString())
+                    }
+                    DataSourceCenter.start()
+
                     OtaService.initialize(this@InitializationActivity, sdkOptions)
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
@@ -204,13 +274,18 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
 
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
-        .setUserId("telenavDemoApp")
+        .setUserId("TelenavDemoApp-u001")
         .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
         .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
         .setCloudEndPoint("https://restapistage.telenav.com")
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)
+        .setDeviceGuid("TelenavDemoApp-d001")
+        .setApplicationInfo(
+            ApplicationInfo.builder("TelenavDemoApp", "150")
+                .build()
+        )
         .build()
 }
 
