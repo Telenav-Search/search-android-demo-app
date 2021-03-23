@@ -21,10 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.gson.Gson
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
@@ -33,10 +30,9 @@ import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.entity.model.base.Polygon
 import com.telenav.sdk.entity.model.prediction.Suggestion
-import com.telenav.sdk.entity.model.search.CategoryFilter
-import com.telenav.sdk.entity.model.search.EntitySearchResponse
-import com.telenav.sdk.entity.model.search.SearchFilters
+import com.telenav.sdk.entity.model.search.*
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.entitydetails.EntityDetailsActivity
@@ -57,6 +53,7 @@ class SearchListFragment : Fragment() {
     private lateinit var vSearchListContainer: View
     private lateinit var vSearchIcon: ImageView
     private lateinit var vSearchToggle: TextView
+    private lateinit var vRedoButton: TextView
     private lateinit var fMap: SupportMapFragment
     private var map: GoogleMap? = null
 
@@ -86,6 +83,7 @@ class SearchListFragment : Fragment() {
         vSearchList = view.findViewById(R.id.search_list)
         vSearchListContainer = view.findViewById(R.id.search_list_container)
         vSearchToggle = view.findViewById(R.id.search_toggle)
+        vRedoButton = view.findViewById(R.id.redo_button)
         vSearchLoading.show()
 
         vSearchTitle.text = title
@@ -100,13 +98,16 @@ class SearchListFragment : Fragment() {
                 activity ?: return@setOnClickListener
                 (activity as HomePageActivity).removeTopFragment()
             }
-
-        search(query, categoryId)
-        initMap()
+        view.findViewById<View>(R.id.redo_button)
+                .setOnClickListener {
+                    initMap(query, categoryId, true)
+                }
+        initMap(query, categoryId)
     }
 
     private fun setToggler(opened: Boolean) {
         vSearchToggle.visibility = View.VISIBLE
+        vRedoButton.visibility = View.VISIBLE
         if (opened) {
             vSearchToggle.text = "COLLAPSE"
             vSearchToggle.setOnClickListener {
@@ -122,65 +123,88 @@ class SearchListFragment : Fragment() {
         }
     }
 
-    private fun search(query: String?, categoryId: String?) {
+    private fun search(query: String?, categoryId: String?, nearLeft: LatLng? = null,
+                       farRight: LatLng? = null) {
+       /* val polygon: Polygon = Polygon.builder()
+            .addPoint(reg?.farLeft?.latitude ?: 0.0, reg?.farLeft?.longitude ?: 0.0)
+            .addPoint(reg?.farRight?.latitude ?: 0.0, reg?.farRight?.longitude ?: 0.0)
+            .build()*/
+
+     /*   val geoFilter: PolygonGeoFilter = PolygonGeoFilter
+            .builder(polygon)
+            .build()*/
         activity ?: return
         val location = (activity as HomePageActivity).lastKnownLocation ?: Location("")
-        telenavService.searchRequest()
-            .apply {
-                if (query != null)
-                    setQuery(query)
-            }
-            .apply {
-                if (categoryId != null)
-                    setFilters(
-                        SearchFilters.builder()
-                            .setCategoryFilter(
-                                CategoryFilter.builder().addCategory(categoryId).build()
-                            )
-                            .build()
-                    )
-            }
-            .setLocation(location.latitude, location.longitude)
-            .setLimit(20)
-            .asyncCall(
-                activity?.getUIExecutor(),
-                object : Callback<EntitySearchResponse> {
-                    override fun onSuccess(response: EntitySearchResponse) {
-                        activity ?: return
-                        Log.w("test", Gson().toJson(response.results))
-                        vSearchLoading.hide()
-                        referenceId = response.referenceId
-                        if (response.results != null && response.results.size > 0) {
-                            vSearchList.adapter = SearchListRecyclerAdapter(
-                                response.results,
-                                arguments!!.getInt(PARAM_ICON, 0),
-                                response.referenceId
-                            )
-                            vSearchListContainer.visibility = View.VISIBLE
-                            setToggler(true)
-                            showMapEntities(response.results)
-                        } else
-                            vSearchEmpty.visibility = View.VISIBLE
-                    }
-
-                    override fun onFailure(p1: Throwable?) {
-                        vSearchLoading.hide()
-                        vSearchError.visibility = View.VISIBLE
-                        Log.e("testapp", "onFailure", p1)
-                        val context = this@SearchListFragment.context
-                        if (context != null) {
-                            Toast.makeText(
-                                context,
-                                p1?.message ?: "",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                }
+        val filters = SearchFilters.builder()
+        if (categoryId != null) {
+            filters.setCategoryFilter(
+                    CategoryFilter.builder().addCategory(categoryId).build()
             )
+        }
+        if (nearLeft != null && farRight != null) {
+            val bBox: BBox = BBox
+                    .builder()
+                    .setBottomLeft(nearLeft.latitude, nearLeft.longitude)
+                    .setTopRight(farRight.latitude, farRight.longitude)
+                    .build()
+            val geoFilter: BBoxGeoFilter = BBoxGeoFilter
+                    .builder(bBox)
+                    .build()
+            filters.setGeoFilter(geoFilter)
+        }
+        telenavService.searchRequest()
+                .apply {
+                    if (query != null)
+                        setQuery(query)
+                }
+                .apply {
+                    setFilters(filters.build())
+                }
+                .setLocation(location.latitude, location.longitude)
+                .setLimit(30)
+                .asyncCall(
+                        activity?.getUIExecutor(),
+                        object : Callback<EntitySearchResponse> {
+                            override fun onSuccess(response: EntitySearchResponse) {
+                                activity ?: return
+                                Log.w("test", Gson().toJson(response.results))
+                                vSearchLoading.hide()
+                                referenceId = response.referenceId
+                                if (response.results != null && response.results.size > 0) {
+                                    vSearchList.adapter = SearchListRecyclerAdapter(
+                                            response.results,
+                                            arguments!!.getInt(PARAM_ICON, 0),
+                                            response.referenceId
+                                    )
+                                    vSearchListContainer.visibility = View.VISIBLE
+                                    setToggler(true)
+                                    showMapEntities(response.results)
+                                } else
+                                    vSearchEmpty.visibility = View.VISIBLE
+                            }
+
+                            override fun onFailure(p1: Throwable?) {
+                                vSearchLoading.hide()
+                                vSearchError.visibility = View.VISIBLE
+                                Log.e("testapp", "onFailure", p1)
+                                val context = this@SearchListFragment.context
+                                if (context != null) {
+                                    Toast.makeText(
+                                            context,
+                                            p1?.message ?: "",
+                                            Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                )
     }
 
-    private fun initMap() {
+    private fun initMap(query: String?, categoryId: String?, isRedoSearch: Boolean = false) {
+        var visibleRegion: VisibleRegion? = null
+        if (isRedoSearch) {
+            visibleRegion = map?.projection?.visibleRegion
+        }
         fMap = SupportMapFragment()
         childFragmentManager.beginTransaction().replace(R.id.search_map, fMap).commit()
 
@@ -199,6 +223,7 @@ class SearchListFragment : Fragment() {
             if (location != null) {
                 positionMap(location.latitude, location.longitude)
             }
+            search(query, categoryId, visibleRegion?.nearLeft, visibleRegion?.farRight)
         }
     }
 
