@@ -27,7 +27,7 @@ Telenav (NASDAQ: TNAV) is a leading provider of connected car and location-based
 ## Installation
 Clone this repository and import into **Android Studio**
 ```bash
-git clone git@github.com:Telenav-Search/telenav-sdk-demo-app.git
+git clone git@github.com:Telenav-Search/search-android-demo-app.git
 ```
 
 ## Configuration
