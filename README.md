@@ -1,4 +1,4 @@
-# Telenav SDK Demo App
+# Telenav Android SDK Demo App
 
 This is a sample app provided to show developers what Telenav SDKs looks like in action, and help them see a real example of integrating Telenav SDKs into their applications.
 
