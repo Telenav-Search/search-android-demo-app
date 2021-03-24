@@ -1,4 +1,4 @@
-# Telenav Android SDK Demo App
+# Android Demo App of Telenav Vivid Entity SDK 
 
 This is a sample app provided to show developers what Telenav SDKs looks like in action, and help them see a real example of integrating Telenav SDKs into their applications.
 
