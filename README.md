@@ -56,7 +56,7 @@ You also can unzip it anywhere on the device and chose it as data folder on app 
 
 ### Device Requirements:
 
-PLease note that Telenav SDKs only works with `armeabi-v7a`, `arm64-v8a` and `and x86_64` devices
+PLease note that Telenav SDKs (hybrid & edge version) only works with `armeabi-v7a`, `arm64-v8a` and `and x86_64` devices.
 
 ## Support
 Please feel free to submit issues with any bugs or other unforeseen issues you experience. We work diligently to ensure that the `master` branch is always bug-free and easy to clone and run from Android Studio. If you experience problems, open an issue describing the problem and how to reproduce it, and we'll be sure to take a look at it.
