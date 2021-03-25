@@ -107,12 +107,26 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:layout_gravity="center_horizontal"
-            android:visibility="gone"
+            android:visibility="visible"
             android:paddingBottom="3dp"
             android:paddingHorizontal="10dp"
             android:textColor="#fff"
             android:background="@drawable/toggler_bg"
             android:text="EXPAND" />
+
+        <TextView
+            android:id="@+id/redo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:layout_marginTop="30dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="visible"
+            android:paddingVertical="5dp"
+            android:paddingHorizontal="13dp"
+            android:textColor="@color/blue"
+            android:background="@drawable/rec_blue"
+            android:text="@string/redo_search_in_this_area" />
     </FrameLayout>
 
 </LinearLayout>
