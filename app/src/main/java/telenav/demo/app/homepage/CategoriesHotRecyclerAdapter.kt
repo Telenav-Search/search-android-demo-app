@@ -1,13 +1,11 @@
 package telenav.demo.app.homepage
 
-import android.content.Intent
 import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import telenav.demo.app.R
-import telenav.demo.app.searchlist.SearchListFragment
 
 class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onCategoryClicked: (category:HotCategory) -> Unit) :
     RecyclerView.Adapter<CategoryHolder>() {
@@ -30,7 +28,7 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onCategory
             null,
             if (category.id.isEmpty()) Typeface.NORMAL else Typeface.BOLD
         )
-        holder.vIcon.setImageResource(category.icon)
+        holder.vIcon.setImageResource(category.iconPurple)
         holder.vItem.setOnClickListener {
             onCategoryClicked(category)
         }

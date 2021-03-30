@@ -25,11 +25,10 @@ import kotlinx.coroutines.launch
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
-import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.map.MapActivity
 import java.io.File
 import java.util.*
-
 
 class InitializationActivity : AppCompatActivity() {
 
@@ -121,7 +120,7 @@ class InitializationActivity : AppCompatActivity() {
 
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
 
-                    startActivity(Intent(this@InitializationActivity, HomePageActivity::class.java))
+                    startActivity(Intent(this@InitializationActivity, MapActivity::class.java))
                     finish()
                 }
             }
@@ -155,6 +154,12 @@ class InitializationActivity : AppCompatActivity() {
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
                 ),
+                1
+            )
+        } else if (!this.checkCallPermission()) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CALL_PHONE),
                 1
             )
         } else if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
@@ -245,6 +250,9 @@ fun Context.saveSearchMode(searchMode: SearchMode = SearchMode.HYBRID) {
 
 fun Context.checkLocationPermission(): Boolean =
     checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
+
+fun Context.checkCallPermission(): Boolean =
+    checkCallingOrSelfPermission("android.permission.CALL_PHONE") == PackageManager.PERMISSION_GRANTED
 
 fun Context.checkExternalStoragePermissions(): Boolean =
     checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&

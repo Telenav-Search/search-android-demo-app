@@ -172,9 +172,9 @@ class SearchListFragment : Fragment() {
                                 referenceId = response.referenceId
                                 if (response.results != null && response.results.size > 0) {
                                     vSearchList.adapter = SearchListRecyclerAdapter(
-                                            response.results,
-                                            arguments!!.getInt(PARAM_ICON, 0),
-                                            response.referenceId
+                                        response.results,
+                                        arguments!!.getInt(PARAM_ICON, 0),
+                                        null
                                     )
                                     vSearchListContainer.visibility = View.VISIBLE
                                     setToggler(true)
@@ -340,7 +340,7 @@ class SearchListFragment : Fragment() {
             SearchListFragment().apply {
                 arguments = Bundle().apply {
                     putString(PARAM_CATEGORY, category.id)
-                    putInt(PARAM_ICON, category.icon)
+                    putInt(PARAM_ICON, category.iconPurple)
                     putString(PARAM_TITLE, category.name)
                 }
             }

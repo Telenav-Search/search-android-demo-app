@@ -37,7 +37,6 @@ import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.stopGPSListener
 import java.util.concurrent.Executor
 
-
 class HomePageActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
     var lastKnownLocation: Location? = null

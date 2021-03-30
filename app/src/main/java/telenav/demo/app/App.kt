@@ -1,58 +1,47 @@
 package telenav.demo.app
 
-import android.app.Activity
-import android.app.Application.ActivityLifecycleCallbacks
+import android.app.Application
 import android.content.Context
-import android.os.Bundle
 import android.os.Looper
+import android.preference.PreferenceManager
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import telenav.demo.app.utils.gpsProbe
-import telenav.demo.app.utils.startEngine
-import telenav.demo.app.utils.stopEngine
+import com.telenav.sdk.core.Locale
+import com.telenav.sdk.core.SDKOptions
+import com.telenav.sdk.entity.api.EntityService
 
-class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+class App : Application() {
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
-            dataCollectorClient.gpsProbe(locationResult.lastLocation)
+    companion object {
+        var application: App? = null
+        private const val TAG = "ApplicationClass"
+
+        const val FILTER_NUMBER = "number_of_results"
+        const val FILTER_STARS = "stars"
+        const val FILTER_PRICE_LEVEL = "price_level"
+        const val FILTER_NUMBER_VALUE = 10
+
+        fun writeToSharedPreferences(keyName: String, filterNr: Int) {
+            val prefs =
+                PreferenceManager.getDefaultSharedPreferences(application?.applicationContext)
+                    .edit()
+            prefs.putInt(keyName, filterNr)
+            prefs.apply()
+        }
+
+        fun readFromSharedPreferences(keyName: String): Int {
+            val prefs =
+                PreferenceManager.getDefaultSharedPreferences(application?.applicationContext)
+            return prefs.getInt(keyName, FILTER_NUMBER_VALUE)
         }
     }
 
-    private var isAppLaunch = true
-
-    private var isActivityChangingConfigurations = false
-    private var activityCounter = 1
-
-    override fun onActivityStarted(activity: Activity) {
-        activityCounter++
-        if ((isAppLaunch || activityCounter == 1) && !isActivityChangingConfigurations) {
-            isAppLaunch = false
-            dataCollectorClient.startEngine()
-            activity.applicationContext.setGPSListener(locationCallback)
-        }
+    init {
+        application = this
     }
-
-    override fun onActivityStopped(activity: Activity) {
-        activityCounter--
-        isActivityChangingConfigurations = activity.isChangingConfigurations
-        if (!isAppLaunch && activityCounter == 0 && !isActivityChangingConfigurations) {
-            activity.applicationContext.stopGPSListener(locationCallback)
-            dataCollectorClient.stopEngine()
-        }
-    }
-
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-    override fun onActivityDestroyed(activity: Activity) {}
-    override fun onActivityResumed(activity: Activity) {}
-    override fun onActivityPaused(activity: Activity) {}
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 }
+
 
 fun Context.setGPSListener(locationCallback: LocationCallback) {
     val locationRequest = LocationRequest.create()?.apply {

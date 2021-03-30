@@ -29,4 +29,29 @@
     <string name="channel_name">Home Area Update Notification Channel</string>
     <string name="channel_description">Home Area Update Notification Channel</string>
     <string name="redo_search_in_this_area">Redo Search in This Area</string>
+
+    <!-- filters-->
+    <string name="open_now">Open now</string>
+    <string name="hint_number_of_results">Number of results</string>
+    <string name="apply_filter">Apply</string>
+    <string name="search_label">Search..</string>
+    <string name="filters_label">Filters >></string>
+    <string name="appwidget_text">SEARCH SDK</string>
+    <string name="configure">Configure Telenav Search SDK widget</string>
+    <string name="add_widget">Add widget</string>
+    <string name="email_placeholder">visitor@email.com</string>
+
+    <string name="suggestions_label">Suggestions: </string>
+    <string name="no_suggestion">No suggestions found</string>
+    <string name="suggestion_error_loading">Suggestions loading error</string>
+
+    <string name="dollar">$</string>
+    <string name="star_1">1</string>
+    <string name="star_2">2</string>
+    <string name="star_3">3</string>
+    <string name="star_4">4</string>
+    <string name="star_5">5</string>
+    <string name="tts_no_results_found">No results found</string>
+    <string name="tts_number_of_results">results were found</string>
+    <string name="tts_and">and</string>
 </resources>

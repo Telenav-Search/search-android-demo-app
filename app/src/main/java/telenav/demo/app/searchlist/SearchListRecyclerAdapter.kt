@@ -1,6 +1,5 @@
 package telenav.demo.app.searchlist
 
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -9,25 +8,23 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import com.telenav.sdk.entity.model.base.Rating
 import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
-import telenav.demo.app.entitydetails.EntityDetailsActivity
-import telenav.demo.app.utils.entityClick
 
 class SearchListRecyclerAdapter(
     entities: List<Entity>,
-    private val categoryIcon: Int,
-    private val referenceId: String
+    val categoryIcon: Int,
+    val onClickListener: OnEntityClickListener?
 ) :
     RecyclerView.Adapter<EntityHolder>() {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-
     var list: List<Entity> = entities
+
+    interface OnEntityClickListener {
+        fun onEntityClick(entity: Entity)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityHolder {
         val view = LayoutInflater.from((parent.context))
@@ -44,25 +41,20 @@ class SearchListRecyclerAdapter(
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entityClick(
-                referenceId,
-                entity.id,
-                EntityActionEvent.DisplayMode.LIST_VIEW
-            )
-            holder.itemView.context.startActivity(
-                Intent(
-                    holder.itemView.context,
-                    EntityDetailsActivity::class.java
-                ).apply {
-                    putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
-                    putExtra(
-                        EntityDetailsActivity.PARAM_DISPLAY_MODE,
-                        EntityActionEvent.DisplayMode.LIST_VIEW.name
-                    )
-                    if (categoryIcon != 0)
-                        putExtra(EntityDetailsActivity.PARAM_ICON, categoryIcon)
-                })
-            return@setOnClickListener
+            //todo this is the old implementation in case we need it
+//            holder.itemView.context.startActivity(
+//                Intent(
+//                    holder.itemView.context,
+//                    EntityDetailsActivity::class.java
+//                ).apply {
+//                    putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
+//                    if (categoryIcon != 0)
+//                        putExtra(EntityDetailsActivity.PARAM_ICON, categoryIcon)
+//                })
+//            return@setOnClickListener
+            //Log.w("SearchListRecyclerAdapter", "Entity ${Gson().toJson(entity)}")
+            onClickListener?.onEntityClick(entity)
+
         }
         holder.vDistanceTo.text =
             holder.vDistanceTo.context.convertNumberToDistance(entity.distance)

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="telenav.demo.app.search.filters.FiltersViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/translucent_white"
+        android:paddingBottom="@dimen/general_padding_large">
+
+        <TextView
+            android:id="@+id/apply_filters"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/general_margin_medium"
+            android:layout_marginBottom="@dimen/general_margin_medium"
+            android:text="@string/apply_filter"
+            android:textAllCaps="true"
+            android:textColor="@color/telenav_indigo_mid_tone"
+            android:textSize="@dimen/action_text_text_size"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/search_results_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/general_margin_medium"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            android:padding="@dimen/general_padding_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/apply_filters">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:hintTextColor="@android:color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/nr_of_results_et"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/white"
+                    android:cursorVisible="true"
+                    android:hint="@string/hint_number_of_results"
+                    android:inputType="number"
+                    android:text="20"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textCursorDrawable="@color/action_text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/open_time_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/general_margin_medium"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            android:padding="@dimen/general_padding_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search_results_number">
+
+            <CheckBox
+                android:id="@+id/open_now"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/telenav_indigo_mid_tone"
+                android:text="@string/open_now" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/stars_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/general_margin_medium"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            android:padding="@dimen/general_padding_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/open_time_layout">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:id="@+id/stars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/general_margin_medium"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/star_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/star_margin"
+                        android:layout_marginEnd="@dimen/star_margin"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_star_full"
+                        app:tint="@color/start_yellow" />
+
+                    <ImageView
+                        android:id="@+id/star_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/star_margin"
+                        android:layout_marginEnd="@dimen/star_margin"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_star_full"
+                        app:tint="@color/start_yellow" />
+
+                    <ImageView
+                        android:id="@+id/star_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/star_margin"
+                        android:layout_marginEnd="@dimen/star_margin"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_star_full"
+                        app:tint="@color/start_yellow" />
+
+                    <ImageView
+                        android:id="@+id/star_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/star_margin"
+                        android:layout_marginEnd="@dimen/star_margin"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_star_full"
+                        app:tint="@color/start_yellow" />
+
+                    <ImageView
+                        android:id="@+id/star_4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/star_margin"
+                        android:layout_marginEnd="@dimen/star_margin"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_star_full"
+                        app:tint="@color/start_yellow" />
+
+                </LinearLayout>
+
+                <RadioGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/stars"
+                    android:layout_marginTop="@dimen/general_margin_medium"
+                    android:orientation="horizontal"
+                    android:weightSum="5">
+
+                    <RadioButton
+                        android:id="@+id/star_0_rb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="@color/telenav_indigo_mid_tone"
+                        android:text="@string/star_1" />
+
+                    <RadioButton
+                        android:id="@+id/star_1_rb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="@color/telenav_indigo_mid_tone"
+                        android:text="@string/star_2" />
+
+                    <RadioButton
+                        android:id="@+id/star_2_rb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="@color/telenav_indigo_mid_tone"
+                        android:text="@string/star_3" />
+
+                    <RadioButton
+                        android:id="@+id/star_3_rb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="@color/telenav_indigo_mid_tone"
+                        android:text="@string/star_4" />
+
+                    <RadioButton
+                        android:id="@+id/star_4_rb"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:buttonTint="@color/telenav_indigo_mid_tone"
+                        android:text="@string/star_5" />
+
+
+                </RadioGroup>
+
+            </RelativeLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/price_level_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/general_margin_medium"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            android:padding="@dimen/general_padding_medium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stars_layout">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <CheckBox
+                    android:id="@+id/price_level_one_dollar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/telenav_indigo_mid_tone"
+                    android:text="@{@string/dollar}" />
+
+                <CheckBox
+                    android:id="@+id/price_level_two_dollars"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/telenav_indigo_mid_tone"
+                    android:text="@{@string/dollar+@string/dollar}" />
+
+                <CheckBox
+                    android:id="@+id/price_level_three_dollars"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:buttonTint="@color/telenav_indigo_mid_tone"
+                    android:text="@{@string/dollar+@string/dollar+@string/dollar}" />
+
+                <CheckBox
+                    android:id="@+id/price_level_four_dollars"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/telenav_indigo_mid_tone"
+                    android:text="@{@string/dollar+@string/dollar+@string/dollar+@string/dollar}" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/search_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/general_margin_medium"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/price_level_layout">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/labels_chip_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/general_padding_medium" />
+
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
