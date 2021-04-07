@@ -54,4 +54,6 @@
     <string name="tts_no_results_found">No results found</string>
     <string name="tts_number_of_results">results were found</string>
     <string name="tts_and">and</string>
+    <string name="set_as_home">Set As Home</string>
+    <string name="set_as_work">Set As Work</string>
 </resources>

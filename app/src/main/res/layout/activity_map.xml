@@ -48,10 +48,26 @@
         android:src="@drawable/ic_touch"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/redo_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_marginTop="50dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:paddingVertical="5dp"
+        android:paddingHorizontal="13dp"
+        android:textColor="@color/blue"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/rec_blue"
+        android:text="@string/redo_search_in_this_area" />
+
     <telenav.demo.app.widgets.SearchButton
         android:id="@+id/fab_search"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_10"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:clickable="true"

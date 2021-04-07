@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
-import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -19,10 +18,7 @@ import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionRespons
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import com.telenav.sdk.entity.model.prediction.WordPrediction
-import com.telenav.sdk.entity.model.search.CategoryFilter
-import com.telenav.sdk.entity.model.search.EntitySearchResponse
-import com.telenav.sdk.entity.model.search.PolygonGeoFilter
-import com.telenav.sdk.entity.model.search.SearchFilters
+import com.telenav.sdk.entity.model.search.*
 import com.telenav.sdk.entity.utils.EntityJsonConverter
 import telenav.demo.app.App
 import telenav.demo.app.homepage.HotCategory
@@ -32,14 +28,13 @@ import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
 
 private const val TAG = "SearchViewModel"
-private const val SEARCH_LIMIT_WITH_FILTERS = 40
+private const val SEARCH_LIMIT_WITH_FILTERS = 30
 
 @Suppress("DEPRECATION")
 class SearchViewModel : ViewModel() {
 
     var filters: List<Any>? = null
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     var categories = MutableLiveData<List<Category>>().apply { listOf<HotCategory>() }
 
     var searchResults = MutableLiveData<List<Any>>().apply { listOf<Any>() }
@@ -179,7 +174,6 @@ class SearchViewModel : ViewModel() {
                 object : Callback<EntityGetDetailResponse> {
                     override fun onSuccess(response: EntityGetDetailResponse) {
                         Log.w("TAG", "result ${Gson().toJson(response.results)}")
-
                     }
 
                     override fun onFailure(p1: Throwable?) {
@@ -194,38 +188,46 @@ class SearchViewModel : ViewModel() {
         query: String?,
         categoryId: String?,
         location: Location,
-        executor: Executor, ) {
+        executor: Executor,
+        nearLeft: LatLng? = null,
+        farRight: LatLng? = null) {
         loading.postValue(true)
-
-        val searchLimit = if (filters.isNullOrEmpty()) {
-            App.readFromSharedPreferences(App.FILTER_NUMBER)
-        } else {
-            SEARCH_LIMIT_WITH_FILTERS
+        val filtersSearch = SearchFilters.builder()
+        if (categoryId != null) {
+            filtersSearch.setCategoryFilter(
+                    CategoryFilter.builder().addCategory(categoryId).build()
+            )
         }
-
+        if (nearLeft != null && farRight != null) {
+            val bBox: BBox = BBox
+                    .builder()
+                    .setBottomLeft(nearLeft.latitude, nearLeft.longitude)
+                    .setTopRight(farRight.latitude, farRight.longitude)
+                    .build()
+            val geoFilter: BBoxGeoFilter = BBoxGeoFilter
+                    .builder(bBox)
+                    .build()
+            filtersSearch.setGeoFilter(geoFilter)
+        }
         telenavEntityClient.searchRequest()
             .apply {
                 if (query != null)
                     setQuery(query)
-            }
-            .apply {
-                if (categoryId != null)
-                    setFilters(
-                        SearchFilters.builder()
-                            .setCategoryFilter(
-                                CategoryFilter.builder().addCategory(categoryId).build()
-                            )
-                            .build()
-                    )
-            }
+            }.apply {
+                    setFilters(filtersSearch.build())
+                }
             .setLocation(location.latitude, location.longitude)
-            .setLimit(searchLimit)
+            .setLimit(SEARCH_LIMIT_WITH_FILTERS)
             .asyncCall(
                 executor,
                 object : Callback<EntitySearchResponse> {
                     override fun onSuccess(response: EntitySearchResponse) {
                         Log.w(TAG, Gson().toJson(response.results))
-                        handleSearchResponse(!filters.isNullOrEmpty(), response.results)
+                        App.writeStringToSharedPreferences(
+                            App.LAST_ENTITY_RESPONSE_REF_ID,
+                            response.referenceId
+                        )
+                        handleSearchResponse(filters != null, response.results)
                     }
 
                     override fun onFailure(p1: Throwable?) {
@@ -240,51 +242,71 @@ class SearchViewModel : ViewModel() {
     private fun handleSearchResponse(filtersAvailable: Boolean, results: List<Entity>) {
         if (filtersAvailable) {
             searchResults.value = applyFilters(results)
+        } else {
+            searchResults.postValue(results)
         }
         loading.postValue(false)
+    }
 
-        if (App.readFromSharedPreferences(App.FILTER_NUMBER) > results.size) {
-            searchResults.postValue(results)
-        } else {
-            searchResults.postValue(
-                results.subList(
-                    0,
-                    App.readFromSharedPreferences(App.FILTER_NUMBER)
-                )
-            )
+    private fun filterByOpen(results: List<Entity>): ArrayList<Entity> {
+        val filteredResults = arrayListOf<Entity>()
+        results.forEach { entity ->
+            entity.facets.openHours?.isOpenNow?.let {
+                filteredResults.add(entity)
+            }
         }
+        return filteredResults
+    }
+
+    private fun filterByStar(results: List<Entity>, filter: StarsFilter): ArrayList<Entity> {
+        val filteredResults = arrayListOf<Entity>()
+        results.forEach { entity ->
+            if (entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() >= 0.0 &&
+                entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() < 1.0
+            ) {
+                filteredResults.add(entity)
+            }
+        }
+        return filteredResults
+    }
+
+    private fun filterByPrice(results: List<Entity>, filter: PriceLevel): ArrayList<Entity> {
+        val filteredResults = arrayListOf<Entity>()
+        results.forEach { entity ->
+            if (entity.facets.priceInfo.priceLevel == filter.priceLevel.priceLevel) {
+                filteredResults.add(entity)
+            }
+        }
+        return filteredResults
     }
 
     private fun applyFilters(results: List<Entity>): List<Entity> {
-        val filteredResults = arrayListOf<Entity>()
-
+        var filteredResults = results.toMutableList()
+        if (filteredResults.size == 0) {
+            return filteredResults
+        }
+        if (filters?.size == 0) {
+            return results.subList(
+                0,
+                App.readFromSharedPreferences(App.FILTER_NUMBER)
+            )
+        }
         filters?.forEach { it ->
             if (it is OpenNowFilter) {
-                results.forEach { entity ->
-                    entity.facets.openHours?.isOpenNow?.let {
-                        filteredResults.add(entity)
-                    }
-                }
-
+                filteredResults = filterByOpen(results)
             }
             if (it is StarsFilter) {
-                results.forEach { entity ->
-                    if (entity.facets.rating[0].averageRating - it.stars.starsNumber.toDouble() >= 0.0 &&
-                        entity.facets.rating[0].averageRating - it.stars.starsNumber.toDouble() < 1.0
-                    ) {
-                        filteredResults.add(entity)
-                    }
-                }
-
+                filteredResults = filterByStar(results, it)
             }
-
             if (it is PriceLevel) {
-                results.forEach { entity ->
-                    if (entity.facets.priceInfo.priceLevel == it.priceLevel.priceLevel) {
-                        filteredResults.add(entity)
-                    }
-                }
+                filteredResults = filterByPrice(results, it)
             }
+        }
+        if (filteredResults.size > App.readFromSharedPreferences(App.FILTER_NUMBER)) {
+            return filteredResults.subList(
+                0,
+                App.readFromSharedPreferences(App.FILTER_NUMBER)
+            )
         }
         return filteredResults
     }

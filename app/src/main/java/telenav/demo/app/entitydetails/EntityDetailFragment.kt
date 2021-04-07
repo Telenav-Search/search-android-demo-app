@@ -2,6 +2,7 @@ package telenav.demo.app.entitydetails
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -12,10 +13,20 @@ import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.gson.Gson
+import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.entity.api.Callback
+import com.telenav.sdk.entity.api.EntityClient
+import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import kotlinx.android.synthetic.main.entity_detail_fragment_layout.*
 import telenav.demo.app.R
+import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.setHome
+import telenav.demo.app.utils.setWork
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 class EntityDetailFragment : RoundedBottomSheetLayout() {
@@ -23,6 +34,10 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
     private lateinit var viewModel: EntityDetailViewModel
     private lateinit var entityDetailView: View
     private lateinit var searchResult: SearchResult
+    private var entity: Entity? = null
+    private var isFavorite: Boolean = false
+    private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -43,6 +58,7 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
 
         viewModel.getSearchResultLiveData().observe(viewLifecycleOwner, Observer {
             searchResult = it
+            searchResult.id?.let { it1 -> getDetails(it1) }
             entity_name_field.text = it.name
 
             if (!it.categoryName.isNullOrEmpty()) {
@@ -89,6 +105,14 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
             entity_crowd_density.text = "Crowd density ${crowdDensity}%"
         })
 
+        as_home.setOnClickListener {
+            setAsHomeAddress(entity)
+        }
+
+        as_work.setOnClickListener {
+            setAsWorkAddress(entity)
+        }
+
         book_button.setOnClickListener {
             Toast.makeText(this.context, "Booked now", Toast.LENGTH_SHORT).show()
         }
@@ -134,5 +158,39 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
             )
             startActivity(browserIntent)
         }
+    }
+
+    private fun setAsHomeAddress(entity: Entity?) {
+        entity ?: return
+        dataCollectorClient.setHome(requireActivity(), entity)
+    }
+
+    private fun setAsWorkAddress(entity: Entity?) {
+        entity ?: return
+        dataCollectorClient.setWork(requireActivity(), entity)
+    }
+
+    private fun getDetails(id: String) {
+        Log.w("test", "getDetails ${id}")
+        telenavService.detailRequest
+            .setEntityIds(listOf(id))
+            .asyncCall(
+                requireActivity().getUIExecutor(),
+                object : Callback<EntityGetDetailResponse> {
+                    override fun onSuccess(response: EntityGetDetailResponse) {
+                        Log.w("test", "result ${Gson().toJson(response.results)}")
+                        if (response.results != null && response.results.size > 0) {
+                            entity = response.results[0]
+                            /*showEntityOnMap(response.results[0])
+                            showDetails(response.results[0])
+                            setToggler(true)*/
+                        }
+                    }
+
+                    override fun onFailure(p1: Throwable?) {
+                        Log.e("testapp", "onFailure", p1)
+                    }
+                }
+            )
     }
 }

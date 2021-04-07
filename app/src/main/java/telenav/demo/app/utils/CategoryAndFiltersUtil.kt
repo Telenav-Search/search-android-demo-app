@@ -226,6 +226,7 @@ object CategoryAndFiltersUtil {
         }
 
         val searchResult = SearchResult.build(entityResult.place.name,  categoryName) {
+            id = entityResult.id
             address = entityResult.place.address.formattedAddress
 
                 if (entityResult.place.phoneNumbers.isNotEmpty()) {

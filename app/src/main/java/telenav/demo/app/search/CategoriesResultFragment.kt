@@ -1,6 +1,5 @@
 package telenav.demo.app.search
 
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,38 +7,42 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.widget.ContentLoadingProgressBar
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
-import com.telenav.sdk.entity.model.base.Category
+import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
-import com.telenav.sdk.entity.model.search.CategoryFilter
-import com.telenav.sdk.entity.model.search.EntitySearchResponse
-import com.telenav.sdk.entity.model.search.SearchFilters
 import telenav.demo.app.R
+import telenav.demo.app.databinding.FragmentCategoriesBinding
 import telenav.demo.app.homepage.CategoriesRecyclerAdapter
 import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 private const val TAG = "CategoriesResultFragment"
 
 open class CategoriesResultFragment : RoundedBottomSheetLayout() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val viewModel: SearchViewModel by viewModels()
     private lateinit var vCategories: View
     private lateinit var vCategoryTree: RecyclerView
     private lateinit var vCategoryLoading: ContentLoadingProgressBar
     private lateinit var vCategoryError: TextView
+    private var vCatId: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_categories, container, false)
+        val binding = FragmentCategoriesBinding.inflate(inflater, container, false)
+        binding.viewModel = viewModel
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,6 +54,17 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
 
         vCategoryTree.layoutManager = LinearLayoutManager(activity)
         requestCategories()
+        (activity as MapActivity).setFiltersSub()
+        viewModel.searchResults.observe(this, Observer {
+            (activity as MapActivity).displaySearchResults(
+                it as List<Entity>?,
+                vCatId
+            )
+            (activity!! as MapActivity).showSearchHotCategoriesFragment(
+                it as List<Entity>, vCatId
+            )
+            fragmentManager?.beginTransaction()?.remove(this)?.commit()
+        })
     }
 
     private fun requestCategories() {
@@ -64,8 +78,15 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
                     vCategories.visibility = View.VISIBLE
                     vCategoryTree.adapter =
                         CategoriesRecyclerAdapter(response.results) { category ->
-
-                            search(category)
+                            vCatId = category.name
+                            (activity!! as MapActivity).setLastSearch(category.id)
+                            (activity!! as MapActivity).redoButtonLogic()
+                            val loc = (activity!! as MapActivity).lastKnownLocation
+                            activity?.getUIExecutor()?.let {
+                                viewModel.search(null, category.id, loc,
+                                    it
+                                )
+                            }
                         }
                 }
 
@@ -78,47 +99,8 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
         )
     }
 
-    private fun search(category: Category) {
-        val location = (activity!! as MapActivity).lastKnownLocation ?: Location("")
-        vCategoryLoading.show()
-        telenavService.searchRequest()
-            .apply {
-                setFilters(
-                    SearchFilters.builder()
-                        .setCategoryFilter(
-                            CategoryFilter.builder().addCategory(category.id).build()
-                        )
-                        .build()
-                )
-            }
-            .setLocation(location.latitude, location.longitude)
-            .setLimit(20)
-            .asyncCall(
-                activity?.getUIExecutor(),
-                object : Callback<EntitySearchResponse> {
-                    override fun onSuccess(response: EntitySearchResponse) {
-                        Log.w("test", Gson().toJson(response.results))
-                        vCategoryLoading.hide()
-                        if (response.results != null && response.results.size > 0) {
-
-                            (activity as MapActivity).displaySearchResults(
-                                response.results,
-                                category.id
-                            )
-                            (activity as MapActivity).showSearchHotCategoriesFragment(
-                                response.results,
-                                category.id
-                            )
-                            dismiss()
-                        }
-                    }
-
-                    override fun onFailure(p1: Throwable?) {
-                        vCategoryLoading.hide()
-                        Log.e("testapp", "onFailure", p1)
-                    }
-                }
-            )
+    fun setFilters(filters: List<Filter>?) {
+        viewModel.filters = filters
     }
 
     companion object {

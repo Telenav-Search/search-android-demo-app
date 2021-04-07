@@ -40,6 +40,7 @@ import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.search.filters.FiltersFragment
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
+import java.util.concurrent.Executor
 
 private const val TAG = "SearchBottomFragment"
 
@@ -47,12 +48,10 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
 
     companion object {
         const val CATEGORY_SEARCH = 0
-        const val POLYGON_SEARCH = 1
     }
 
     private val viewModel: SearchViewModel by viewModels()
     private var searchType: Int = CATEGORY_SEARCH
-    private var polygonCoordinates: List<LatLng> = arrayListOf()
     private var lastLaunchedPrediction: String = ""
     private lateinit var currentSearchHotCategory: String
     private var popupWindow: PopupWindow? = null
@@ -165,7 +164,9 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
 
         search.setOnEditorActionListener(OnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                val loc = (activity!! as MapActivity).lastKnownLocation ?: Location("")
+                val loc = (activity!! as MapActivity).lastKnownLocation
+                (activity!! as MapActivity).setLastSearch(search.text.toString())
+                (activity!! as MapActivity).redoButtonLogic()
                 activity?.getUIExecutor()?.let {
                     currentSearchHotCategory = search.text.toString()
                     viewModel.search(search.text.toString(), null,loc,
@@ -193,7 +194,9 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
             }
             suggestionsList.adapter = SuggestionRecyclerAdapter(it) { suggestion ->
                 Log.d("test", "click suggestion ${Gson().toJson(suggestion)}")
-                val loc = (activity!! as MapActivity).lastKnownLocation ?: Location("")
+                val loc = (activity!! as MapActivity).lastKnownLocation
+                (activity!! as MapActivity).setLastSearch(suggestion.formattedLabel)
+                (activity!! as MapActivity).redoButtonLogic()
                 activity?.getUIExecutor()?.let {
                     currentSearchHotCategory = suggestion.formattedLabel
                     viewModel.search(suggestion.formattedLabel, null, loc,
@@ -270,21 +273,17 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
         chip.setOnClickListener {
             if (hotCategory.id.isEmpty()) {
                 (activity as MapActivity).showSubcategoriesFragment()
+                fragmentManager?.beginTransaction()?.remove(this)?.commit()
             } else {
                 currentSearchHotCategory = hotCategory.id
-                val location = (activity!! as MapActivity).lastKnownLocation ?: Location("")
+                val location = (activity!! as MapActivity).lastKnownLocation
                 activity?.getUIExecutor()?.let { executor ->
                     when (searchType) {
                         CATEGORY_SEARCH -> {
+                            (activity!! as MapActivity).setLastSearch(hotCategory.id)
+                            (activity!! as MapActivity).redoButtonLogic()
                             viewModel.search(
                                 null, hotCategory.id, location, executor
-                            )
-                        }
-                        POLYGON_SEARCH -> {
-                            viewModel.polygonSearch(
-                                hotCategory.id,
-                                executor,
-                                polygonCoordinates
                             )
                         }
                     }

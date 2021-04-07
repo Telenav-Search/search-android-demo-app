@@ -59,11 +59,17 @@ class FiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.apply_filters -> {
+                val number = nr_of_results_et.text.toString()
+                if (!number.isEmpty()) {
+                    App.writeToSharedPreferences(
+                        App.FILTER_NUMBER,
+                        Integer.parseInt(number.toString())
+                    )
+                }
                 (activity as MapActivity).setFilters(getFilters())
                 dismiss()
             }
 
-            //clicks on stars
             R.id.star_0_rb -> {
                 starsFilter.stars = Stars.ONE
                 setStarsViewBasedOnRating(
@@ -149,13 +155,7 @@ class FiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
 
     private fun initNrOfResults() {
         nr_of_results_et.setText(App.readFromSharedPreferences(App.FILTER_NUMBER).toString())
-        nr_of_results_et.doOnTextChanged { text, start, before, count ->
-                App.writeToSharedPreferences(
-                    App.FILTER_NUMBER,
-                    Integer.parseInt(text.toString())
-                )
-            }
-        }
+    }
 
     // init info on the screen: labels on chips, search results number
     private fun initChips() {

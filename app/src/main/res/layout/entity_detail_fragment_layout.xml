@@ -190,10 +190,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_15"
-        android:layout_marginBottom="@dimen/padding_20"
+        android:layout_marginBottom="@dimen/padding_15"
         android:paddingStart="@dimen/padding_20"
         android:paddingEnd="@dimen/padding_10"
         android:text="Crowd density 76%"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_20"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/as_home"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:paddingStart="@dimen/padding_20"
+            android:text="@string/set_as_home"/>
+
+        <TextView
+            android:id="@+id/as_work"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_alignParentEnd="true"
+            android:paddingEnd="@dimen/padding_10"
+            android:text="@string/set_as_work"/>
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/action_buttons_layout"

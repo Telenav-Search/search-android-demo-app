@@ -5,7 +5,8 @@
     android:background="@drawable/rounded_corners_background_big"
     android:gravity="center"
     android:padding="@dimen/bottom_sheet_corner_radius"
-    android:layout_width="@dimen/dim_250"
+    android:layout_marginHorizontal="@dimen/padding_10"
+    android:layout_width="match_parent"
     android:layout_height="@dimen/dim_160">
 
     <LinearLayout

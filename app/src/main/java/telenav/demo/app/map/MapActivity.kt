@@ -1,42 +1,36 @@
 package telenav.demo.app.map
 
-import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
-import androidx.activity.viewModels
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.prediction.Suggestion
-//import com.telenav.sdk.map.SDK
 import kotlinx.android.synthetic.main.activity_map.*
 import telenav.demo.app.R
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.search.CategoriesResultFragment
 import telenav.demo.app.search.SearchBottomFragment
 import telenav.demo.app.search.SearchHotCategoriesFragment
+import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.setGPSListener
 import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.stopGPSListener
 import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
-import telenav.demo.app.widgets.SearchButton
+import java.lang.Exception
 import java.util.*
+import java.util.concurrent.Executor
 
 class MapActivity : AppCompatActivity() {
 
@@ -45,6 +39,8 @@ class MapActivity : AppCompatActivity() {
         private const val MAP_FRAGMENT_TAG = "MapFragment"
     }
 
+    private var filters: List<Filter>? = null
+    private var lastSearch: String = ""
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
@@ -68,6 +64,30 @@ class MapActivity : AppCompatActivity() {
         showMapFragment(mapFragment!!)
     }
 
+    fun redoButtonLogic() {
+        if (lastSearch.isEmpty()) {
+            redo_button.visibility = View.GONE
+        } else {
+            redo_button.visibility = View.VISIBLE
+        }
+        redo_button.setOnClickListener {
+            val region = mapFragment?.getRegion()
+            if (filters != null) {
+                mapFragment?.setFilters(filters!!)
+            } else {
+                mapFragment?.setFilters(null)
+            }
+            try {
+                lastSearch.toInt()
+                mapFragment?.searchInRegion(null, lastSearch, lastKnownLocation, getUIExecutor(),
+                        region?.nearLeft, region?.farRight)
+            } catch (e: Exception) {
+                mapFragment?.searchInRegion(lastSearch, null, lastKnownLocation, getUIExecutor(),
+                        region?.nearLeft, region?.farRight)
+            }
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
         fab_search.setOnClickListener { openSearch() }
@@ -86,6 +106,7 @@ class MapActivity : AppCompatActivity() {
     var searchFragment: SearchBottomFragment? = null
     private fun openSearch() {
         Log.d(MAP_FRAGMENT_TAG, " Click on search")
+        filters = null
         searchFragment = SearchBottomFragment()
         searchFragment!!.setSearchType(SearchBottomFragment.CATEGORY_SEARCH)
         searchFragment!!.show(supportFragmentManager, searchFragment!!.tag)
@@ -164,13 +185,34 @@ class MapActivity : AppCompatActivity() {
         searchListFragment!!.show(supportFragmentManager, searchListFragment!!.tag)
     }
 
+    var subcategoriesFragment: CategoriesResultFragment? = null
     fun showSubcategoriesFragment() {
-        val subcategoriesFragment = CategoriesResultFragment.newInstance()
-        subcategoriesFragment.show(supportFragmentManager, subcategoriesFragment.tag)
+        subcategoriesFragment = CategoriesResultFragment.newInstance()
+        subcategoriesFragment!!.show(supportFragmentManager, subcategoriesFragment!!.tag)
+    }
+
+    fun setFiltersSub() {
+        if (filters != null) {
+            subcategoriesFragment?.setFilters(filters!!)
+        }
     }
 
     fun setFilters(filters: List<telenav.demo.app.search.filters.Filter>) {
         Log.d(TAG, "filters: ${filters.count()}")
+        this.filters = filters
         searchFragment?.setFilters(filters)
     }
+
+    fun setLastSearch(lastSearch: String) {
+        this.lastSearch = lastSearch
+    }
+}
+
+fun View.hideKeyboard() {
+    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
+}
+
+fun Activity.getUIExecutor(): Executor {
+    return Executor { r -> runOnUiThread(r) }
 }

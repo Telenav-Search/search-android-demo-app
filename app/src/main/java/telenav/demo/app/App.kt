@@ -7,33 +7,52 @@ import android.preference.PreferenceManager
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.telenav.sdk.core.Locale
-import com.telenav.sdk.core.SDKOptions
-import com.telenav.sdk.entity.api.EntityService
 
 class App : Application() {
 
     companion object {
         var application: App? = null
-        private const val TAG = "ApplicationClass"
 
         const val FILTER_NUMBER = "number_of_results"
-        const val FILTER_STARS = "stars"
-        const val FILTER_PRICE_LEVEL = "price_level"
+        const val LAST_ENTITY_RESPONSE_REF_ID = "last_entity_response_ref_id"
         const val FILTER_NUMBER_VALUE = 10
 
         fun writeToSharedPreferences(keyName: String, filterNr: Int) {
             val prefs =
-                PreferenceManager.getDefaultSharedPreferences(application?.applicationContext)
-                    .edit()
-            prefs.putInt(keyName, filterNr)
-            prefs.apply()
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putInt(keyName, filterNr)
+            prefs?.apply()
         }
 
         fun readFromSharedPreferences(keyName: String): Int {
             val prefs =
-                PreferenceManager.getDefaultSharedPreferences(application?.applicationContext)
-            return prefs.getInt(keyName, FILTER_NUMBER_VALUE)
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getInt(keyName, FILTER_NUMBER_VALUE)?.toInt() ?: FILTER_NUMBER_VALUE
+        }
+
+        fun writeStringToSharedPreferences(keyName: String, string: String) {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putString(keyName, string)
+            prefs?.apply()
+        }
+
+        fun readStringFromSharedPreferences(keyName: String): String? {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getString(keyName, "")
         }
     }
 
