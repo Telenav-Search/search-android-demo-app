@@ -105,7 +105,6 @@ class MapActivity : AppCompatActivity() {
 
     var searchFragment: SearchBottomFragment? = null
     private fun openSearch() {
-        Log.d(MAP_FRAGMENT_TAG, " Click on search")
         filters = null
         searchFragment = SearchBottomFragment()
         searchFragment!!.setSearchType(SearchBottomFragment.CATEGORY_SEARCH)
@@ -143,14 +142,10 @@ class MapActivity : AppCompatActivity() {
      * -------- !!!!!!! this methods are called by fragments ---------
      */
     fun displaySearchResults(it: List<Entity>?, currentSearchHotCategory: String?) {
-
-        Log.e(MAP_FRAGMENT_TAG, "results size ${it?.size}")
         mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
     }
 
     fun displaySuggestion(suggestion: Suggestion) {
-        Log.d(MAP_FRAGMENT_TAG, "Suggestion clicked -> ${suggestion.formattedLabel}")
-
         for (eachHotCategory in hotCategoriesList) {
             if (eachHotCategory.name.toLowerCase(Locale.ROOT).indexOf(getOriginalQuery(suggestion.query).toLowerCase(
                     Locale.ROOT)) != -1) {
@@ -171,7 +166,6 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?) {
-        Log.d(MAP_FRAGMENT_TAG, "Single entity clicked -> ${entity.distance}")
         mapFragment?.addSearchResultsOnMap(
             listOf(entity),
             lastKnownLocation,
@@ -198,7 +192,6 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun setFilters(filters: List<telenav.demo.app.search.filters.Filter>) {
-        Log.d(TAG, "filters: ${filters.count()}")
         this.filters = filters
         searchFragment?.setFilters(filters)
     }

@@ -56,4 +56,5 @@
     <string name="tts_and">and</string>
     <string name="set_as_home">Set As Home</string>
     <string name="set_as_work">Set As Work</string>
+    <string name="perm_closed">Permanently closed: Yes</string>
 </resources>

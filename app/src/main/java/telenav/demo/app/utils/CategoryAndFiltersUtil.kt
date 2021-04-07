@@ -227,6 +227,8 @@ object CategoryAndFiltersUtil {
 
         val searchResult = SearchResult.build(entityResult.place.name,  categoryName) {
             id = entityResult.id
+            permanentlyClosed = entityResult.place.isPermanentlyClosed
+            parking = entityResult.facets.parking
             address = entityResult.place.address.formattedAddress
 
                 if (entityResult.place.phoneNumbers.isNotEmpty()) {

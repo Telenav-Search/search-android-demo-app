@@ -65,12 +65,15 @@
                 android:textColor="@android:color/black"
                 android:textSize="16sp" />
 
+
             <Button
                 android:id="@+id/settings_select_index_data_path"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:backgroundTint="@color/telenav_gray_pressed"
                 android:text="browse" />
+
         </LinearLayout>
 
         <LinearLayout
@@ -141,6 +144,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:backgroundTint="@color/telenav_gray_pressed"
         android:layout_marginHorizontal="10dp"
         android:layout_marginBottom="20dp"
         android:text="Save" />

@@ -104,7 +104,6 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
     }
 
     companion object {
-        @JvmStatic
         fun newInstance() =
             CategoriesResultFragment()
     }

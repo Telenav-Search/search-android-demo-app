@@ -1,33 +1,42 @@
 package telenav.demo.app.entitydetails
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
-import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.entity.model.base.Parking
+import com.telenav.sdk.entity.model.base.ParkingPriceItem
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import kotlinx.android.synthetic.main.entity_detail_fragment_layout.*
+import telenav.demo.app.App
 import telenav.demo.app.R
+import telenav.demo.app.dip
 import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.model.SearchResult
-import telenav.demo.app.utils.CategoryAndFiltersUtil
-import telenav.demo.app.utils.setHome
-import telenav.demo.app.utils.setWork
+import telenav.demo.app.utils.*
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
+import java.lang.reflect.Type
 
 class EntityDetailFragment : RoundedBottomSheetLayout() {
 
@@ -54,12 +63,25 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        entity_favorite.setOnClickListener {
+            toggleFavorite(entity)
+        }
         viewModel = ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
 
         viewModel.getSearchResultLiveData().observe(viewLifecycleOwner, Observer {
             searchResult = it
             searchResult.id?.let { it1 -> getDetails(it1) }
             entity_name_field.text = it.name
+
+            if (it.parking != null) {
+                showParking(it.parking!!)
+            }
+
+            if (it.permanentlyClosed != null && it.permanentlyClosed!!) {
+                always_closed.text = getString(R.string.perm_closed)
+            } else {
+                always_closed.visibility = View.INVISIBLE
+            }
 
             if (!it.categoryName.isNullOrEmpty()) {
                 entity_category.text = it.categoryName
@@ -119,7 +141,16 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
 
         call_button.setOnClickListener {
             try {
-                val callIntent = Intent(Intent.ACTION_CALL)
+                entity?.id?.let { it1 ->
+                    dataCollectorClient.entityCall(
+                            App.readStringFromSharedPreferences(
+                                    App.LAST_ENTITY_RESPONSE_REF_ID
+                            ) ?: "",
+                            it1,
+                            EntityActionEvent.DisplayMode.MAP_VIEW
+                    )
+                }
+                val callIntent = Intent(Intent.ACTION_DIAL)
                 callIntent.data = Uri.parse("tel:${searchResult.phoneNo}")
                 startActivity(callIntent)
             } catch (activityException: ActivityNotFoundException) {
@@ -160,6 +191,72 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
         }
     }
 
+    private fun showParking(parking: Parking) {
+        parking_box.visibility = View.VISIBLE
+        val prices = parking.pricing?.prices
+
+        val uniqPrices = ArrayList<ParkingPriceItem>()
+
+        prices?.forEach { price ->
+            if (uniqPrices.find { uniq -> uniq.unitText == price.unitText } == null) {
+                uniqPrices.add(price)
+            }
+        }
+
+        uniqPrices.forEachIndexed { index, price ->
+            if (index > 3)
+                return@forEachIndexed
+            val view = TextView(requireContext())
+            view.text =
+                    "Price: ${price.symbol} ${String.format("%.1f", price.amount)} / ${price.unitText}"
+            view.setTextColor(resources.getColor(R.color.telenav_gray_pressed))
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            view.setPadding(requireActivity().dip(5), requireActivity().dip(3), requireActivity().dip(5), requireActivity().dip(0))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            parking_box.addView(
+                    view,
+                    LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+            )
+        }
+        if (parking.spacesTotal != null) {
+            val view = TextView(requireContext())
+            view.text = "Total spaces: ${parking.spacesTotal}"
+            view.setTextColor(resources.getColor(R.color.telenav_gray_pressed))
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            view.setPadding(requireActivity().dip(5), requireActivity().dip(3), requireActivity().dip(5), requireActivity().dip(0))
+            view.ellipsize = TextUtils.TruncateAt.END
+            view.setLines(1)
+            parking_box.addView(
+                    view,
+                    LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+            )
+            if (parking.spacesAvailable != null) {
+                val view = TextView(requireContext())
+                view.text = "Available: ${parking.spacesAvailable}"
+                view.setTextColor(resources.getColor(R.color.telenav_gray_pressed))
+                view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+                view.setPadding(requireActivity().dip(5), requireActivity().dip(3), requireActivity().dip(5), requireActivity().dip(0))
+                view.ellipsize = TextUtils.TruncateAt.END
+                view.setLines(1)
+                parking_box.addView(
+                        view,
+                        LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                )
+            }
+        }
+    }
+
+
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
         dataCollectorClient.setHome(requireActivity(), entity)
@@ -170,8 +267,39 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
         dataCollectorClient.setWork(requireActivity(), entity)
     }
 
+    private fun toggleFavorite(entity: Entity?) {
+        entity ?: return
+        if (isFavorite) {
+            dataCollectorClient.deleteFavorite(requireActivity(), entity)
+        } else {
+            dataCollectorClient.addFavorite(requireActivity(), entity)
+        }
+        checkFavorite(entity)
+    }
+
+    private fun checkFavorite(entity: Entity) {
+        val prefs = requireActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        val listType: Type = object : TypeToken<List<Entity>>() {}.type
+        val favoriteEntities = Gson().fromJson<List<Entity>>(
+                prefs.getString(
+                        getString(R.string.saved_favorite_list_key),
+                        ""
+                ), listType
+        )
+
+        isFavorite =
+                if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }) {
+                    entity_favorite.setImageResource(R.drawable.ic_favorite)
+                    true
+                } else {
+                    entity_favorite.setImageResource(R.drawable.ic_favorite_border)
+                    false
+                }
+    }
+
+
     private fun getDetails(id: String) {
-        Log.w("test", "getDetails ${id}")
         telenavService.detailRequest
             .setEntityIds(listOf(id))
             .asyncCall(
@@ -181,9 +309,7 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
                         Log.w("test", "result ${Gson().toJson(response.results)}")
                         if (response.results != null && response.results.size > 0) {
                             entity = response.results[0]
-                            /*showEntityOnMap(response.results[0])
-                            showDetails(response.results[0])
-                            setToggler(true)*/
+                            checkFavorite(entity!!)
                         }
                     }
 

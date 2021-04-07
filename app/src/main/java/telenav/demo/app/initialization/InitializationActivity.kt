@@ -156,12 +156,6 @@ class InitializationActivity : AppCompatActivity() {
                 ),
                 1
             )
-        } else if (!this.checkCallPermission()) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CALL_PHONE),
-                1
-            )
         } else if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             vLoading.visibility = View.GONE
             vInitialization.visibility = View.GONE
@@ -250,9 +244,6 @@ fun Context.saveSearchMode(searchMode: SearchMode = SearchMode.HYBRID) {
 
 fun Context.checkLocationPermission(): Boolean =
     checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
-
-fun Context.checkCallPermission(): Boolean =
-    checkCallingOrSelfPermission("android.permission.CALL_PHONE") == PackageManager.PERMISSION_GRANTED
 
 fun Context.checkExternalStoragePermissions(): Boolean =
     checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&
