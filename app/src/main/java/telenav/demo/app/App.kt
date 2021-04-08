@@ -15,6 +15,9 @@ class App : Application() {
 
         const val FILTER_NUMBER = "number_of_results"
         const val LAST_ENTITY_RESPONSE_REF_ID = "last_entity_response_ref_id"
+        const val SEARCH_LIMIT = "search_limit"
+        const val SUGGESTIONS_LIMIT = "suggestions_limit"
+        const val PREDICTIONS_LIMIT = "predictions_limit"
         const val FILTER_NUMBER_VALUE = 10
 
         fun writeToSharedPreferences(keyName: String, filterNr: Int) {
@@ -46,13 +49,13 @@ class App : Application() {
             prefs?.apply()
         }
 
-        fun readStringFromSharedPreferences(keyName: String): String? {
+        fun readStringFromSharedPreferences(keyName: String, def: String): String? {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
                     application?.applicationContext?.getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE
                 )
-            return prefs?.getString(keyName, "")
+            return prefs?.getString(keyName, def)
         }
     }
 

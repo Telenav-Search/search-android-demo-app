@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:orientation="vertical">
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,11 +36,16 @@
         android:layout_width="match_parent"
         android:layout_height="2px"
         android:background="@color/colorAccent" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+       android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="10dp">
 
@@ -150,17 +157,31 @@
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Search limit"
-                android:textColor="@android:color/black"
-                android:layout_marginTop="15dp"
-                android:textSize="16sp" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search limit"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/count_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
 
             <SeekBar
-                android:id="@+id/seekBar"
+                android:id="@+id/search_bar"
                 android:layout_marginTop="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -173,7 +194,108 @@
             android:layout_height="1px"
             android:background="@color/colorAccent" />
 
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/default_suggestions_limit"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Suggestions limit"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/count_sugg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/sugg_bar"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="15" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/colorAccent" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/default_predictions_limit"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Predictions limit"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/count_predictions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:textColor="@android:color/black"
+                    android:layout_marginTop="15dp"
+                    android:textSize="16sp" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/predictions_bar"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/colorAccent" />
+
     </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/settings_save"

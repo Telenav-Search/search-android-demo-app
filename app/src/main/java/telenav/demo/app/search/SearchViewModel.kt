@@ -28,7 +28,9 @@ import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
 
 private const val TAG = "SearchViewModel"
-private const val SEARCH_LIMIT_WITH_FILTERS = 30
+const val SEARCH_LIMIT_WITH_FILTERS = 30
+const val SUGGESTIONS_LIMIT_DEF = 10
+const val PREDICTIONS_LIMIT_DEF = 3
 
 @Suppress("DEPRECATION")
 class SearchViewModel : ViewModel() {
@@ -86,7 +88,8 @@ class SearchViewModel : ViewModel() {
         telenavEntityClient.suggestionPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
-            .setLimit(10)
+            .setLimit(App.readStringFromSharedPreferences(App.SUGGESTIONS_LIMIT,
+                    SUGGESTIONS_LIMIT_DEF.toString())!!.toInt())
             .asyncCall(executor,
                 object : Callback<EntitySuggestionPredictionResponse> {
                     override fun onSuccess(response: EntitySuggestionPredictionResponse) {
@@ -106,7 +109,8 @@ class SearchViewModel : ViewModel() {
         telenavEntityClient.wordPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
-            .setLimit(10)
+            .setLimit(App.readStringFromSharedPreferences(App.PREDICTIONS_LIMIT,
+                    PREDICTIONS_LIMIT_DEF.toString())!!.toInt())
             .asyncCall(executor,
                 object : com.telenav.sdk.core.Callback<EntityWordPredictionResponse> {
                     override fun onSuccess(response: EntityWordPredictionResponse) {
@@ -217,7 +221,8 @@ class SearchViewModel : ViewModel() {
                     setFilters(filtersSearch.build())
                 }
             .setLocation(location.latitude, location.longitude)
-            .setLimit(SEARCH_LIMIT_WITH_FILTERS)
+            .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
+                    SEARCH_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(
                 executor,
                 object : Callback<EntitySearchResponse> {

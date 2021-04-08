@@ -58,4 +58,6 @@
     <string name="set_as_work">Set As Work</string>
     <string name="perm_closed">Permanently closed: Yes</string>
     <string name="default_search_limit">Default search limit</string>
+    <string name="default_suggestions_limit">Default suggestions limit</string>
+    <string name="default_predictions_limit">Default predictions limit</string>
 </resources>

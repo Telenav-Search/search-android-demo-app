@@ -14,6 +14,7 @@ import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FiltersFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.search.SEARCH_LIMIT_WITH_FILTERS
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.CategoryAndFiltersUtil.setStarsViewBasedOnRating
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
@@ -151,6 +152,19 @@ class FiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
 
         initNrOfResults()
         initChips()
+        nr_of_results_et.doOnTextChanged { text, start, before, count ->
+            try {
+                val n = text.toString().toInt()
+                if (n > App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
+                                SEARCH_LIMIT_WITH_FILTERS.toString())!!.toInt()) {
+                    nr_of_results_et.setText(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
+                            SEARCH_LIMIT_WITH_FILTERS.toString()))
+                }
+
+            } catch (e: Exception) {
+
+            }
+        }
     }
 
     private fun initNrOfResults() {

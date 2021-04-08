@@ -144,7 +144,7 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
                 entity?.id?.let { it1 ->
                     dataCollectorClient.entityCall(
                             App.readStringFromSharedPreferences(
-                                    App.LAST_ENTITY_RESPONSE_REF_ID
+                                    App.LAST_ENTITY_RESPONSE_REF_ID, ""
                             ) ?: "",
                             it1,
                             EntityActionEvent.DisplayMode.MAP_VIEW

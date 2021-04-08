@@ -91,7 +91,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     override fun onInfoWindowClick(marker: Marker?) {
         dataCollectorClient.entityClick(
             App.readStringFromSharedPreferences(
-                App.LAST_ENTITY_RESPONSE_REF_ID
+                App.LAST_ENTITY_RESPONSE_REF_ID, ""
             ) ?: "",
             entitiesList[marker?.zIndex!!.toInt() - 1].id,
             EntityActionEvent.DisplayMode.MAP_VIEW
