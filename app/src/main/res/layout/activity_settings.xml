@@ -215,7 +215,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Suggestions limit"
+                    android:text="@string/suggestions_limit"
                     android:textColor="@android:color/black"
                     android:layout_marginTop="15dp"
                     android:textSize="16sp" />
@@ -265,7 +265,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Predictions limit"
+                    android:text="@string/predictions_limit"
                     android:textColor="@android:color/black"
                     android:layout_marginTop="15dp"
                     android:textSize="16sp" />
@@ -293,6 +293,36 @@
             android:layout_width="match_parent"
             android:layout_height="1px"
             android:background="@color/colorAccent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_environment"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/environment"
+                android:textColor="@android:color/black"
+                android:layout_marginTop="15dp"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
 
     </LinearLayout>
     </ScrollView>

@@ -1,8 +1,10 @@
 package telenav.demo.app.settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
@@ -16,10 +18,12 @@ import telenav.demo.app.R
 import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.initialization.saveIndexDataPath
 import telenav.demo.app.initialization.saveSearchMode
+import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
 import telenav.demo.app.search.PREDICTIONS_LIMIT_DEF
 import telenav.demo.app.search.SEARCH_LIMIT_WITH_FILTERS
 import telenav.demo.app.search.SUGGESTIONS_LIMIT_DEF
 import java.io.File
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -29,6 +33,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
+    private var environment = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +89,12 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
             override fun onStopTrackingTouch(seekBar: SeekBar) {}
         })
+        environment = App.readStringFromSharedPreferences(App.ENVIRONMENT,
+                "0")!!.toInt()
+        val adapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this, R.array.env, android.R.layout.simple_spinner_item)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+        spinner.setSelection(environment)
         getSavedIndexPath()
         getSavedSearchMode()
         updateUI()
@@ -157,6 +168,13 @@ class SettingsActivity : AppCompatActivity() {
         saveSearchMode(searchMode)
         saveLimits()
         SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+        if (spinner.selectedItemPosition != environment) {
+            App.writeStringToSharedPreferences(App.ENVIRONMENT,
+                    spinner.selectedItemPosition.toString())
+            val data = Intent()
+            data.putExtra(IS_ENV_CHANGED, true)
+            setResult(RESULT_OK, data);
+        }
         finish()
     }
 }

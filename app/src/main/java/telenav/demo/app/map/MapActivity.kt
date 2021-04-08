@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -18,6 +17,7 @@ import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
 import telenav.demo.app.R
+import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.search.CategoriesResultFragment
 import telenav.demo.app.search.SearchBottomFragment
@@ -28,7 +28,6 @@ import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.stopGPSListener
 import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.Executor
 
@@ -37,6 +36,8 @@ class MapActivity : AppCompatActivity() {
     companion object {
         private val TAG: String = MapActivity::class.java.simpleName
         private const val MAP_FRAGMENT_TAG = "MapFragment"
+        private const val CODE_SETTINGS = 3
+        const val IS_ENV_CHANGED = "IS_ENV_CHANGED"
     }
 
     private var filters: List<Filter>? = null
@@ -100,7 +101,24 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun showSettingsActivity() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+        startActivityForResult(Intent(this, SettingsActivity::class.java), CODE_SETTINGS)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode === CODE_SETTINGS) {
+            if (resultCode === Activity.RESULT_OK) {
+                if (data != null) {
+                    val isChanged = data.getBooleanExtra(IS_ENV_CHANGED, false)
+                    if (isChanged) {
+                        val toInit = Intent(this@MapActivity, InitializationActivity::class.java)
+                        toInit.putExtra(IS_ENV_CHANGED, true)
+                        startActivity(toInit)
+                        finish()
+                    }
+                }
+            }
+        }
     }
 
     var searchFragment: SearchBottomFragment? = null

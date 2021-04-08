@@ -22,6 +22,7 @@ import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import telenav.demo.app.App
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
@@ -38,6 +39,7 @@ class InitializationActivity : AppCompatActivity() {
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
+    var isChanged = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,14 +110,21 @@ class InitializationActivity : AppCompatActivity() {
         try {
             GlobalScope.launch {
                 delay(100L)
-
-                val sdkOptions = getSDKOptions(deviceID, indexDataPath)
+                if (intent != null) {
+                     isChanged = intent.getBooleanExtra(MapActivity.IS_ENV_CHANGED, false)
+                }
+                val environment = App.readStringFromSharedPreferences(App.ENVIRONMENT,
+                        "0")!!.toInt()
+                val sdkOptions = getSDKOptions(deviceID, indexDataPath, environment)
 
                 EntityService.initialize(sdkOptions)
 
                 getUIExecutor().execute {
-                    DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
-                    OtaService.initialize(this@InitializationActivity, sdkOptions)
+                    if (!isChanged) {
+                        DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                        OtaService.initialize(this@InitializationActivity, sdkOptions)
+
+                    }
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
@@ -192,7 +201,7 @@ class InitializationActivity : AppCompatActivity() {
     }
 }
 
-fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOptions {
+fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environment: Int): SDKOptions {
     var dataPath = BuildConfig.telenav_data_dir
     if (pathToIndex.isNotEmpty()) {
         dataPath = pathToIndex
@@ -201,12 +210,22 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
 
     saveIndexDataPath(dataPath)
 
+    var apiKey = "7bd512e0-16bc-4a45-9bc9-09377ee8a913"
+    var apiSecret = "89e872bc-1529-4c9f-857c-c32febbf7f5a"
+    var apiEndpoint = "https://restapistage.telenav.com"
+    if (environment == 1) {
+        /*
+        USE RELEASE REAL DATA
+        apiKey = "ENTER_KEY"
+        apiSecret = "ENTER_KEY"
+        apiEndpoint = "https://restapi.telenav.com"*/
+    }
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
         .setUserId("telenavDemoApp")
-        .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
-        .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
-        .setCloudEndPoint("https://restapistage.telenav.com")
+        .setApiKey(apiKey)
+        .setApiSecret(apiSecret)
+        .setCloudEndPoint(apiEndpoint)
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)

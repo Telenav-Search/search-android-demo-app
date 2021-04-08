@@ -2,6 +2,7 @@ package telenav.demo.app
 
 import android.app.Application
 import android.content.Context
+import android.os.Environment
 import android.os.Looper
 import android.preference.PreferenceManager
 import com.google.android.gms.location.LocationCallback
@@ -18,6 +19,7 @@ class App : Application() {
         const val SEARCH_LIMIT = "search_limit"
         const val SUGGESTIONS_LIMIT = "suggestions_limit"
         const val PREDICTIONS_LIMIT = "predictions_limit"
+        const val ENVIRONMENT = "environment"
         const val FILTER_NUMBER_VALUE = 10
 
         fun writeToSharedPreferences(keyName: String, filterNr: Int) {
