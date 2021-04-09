@@ -69,6 +69,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             (activity!! as MapActivity).showSearchHotCategoriesFragment(
                     it as List<Entity>, ""
             )
+            (activity!! as MapActivity).enableDisableRedoButton(true)
         })
     }
 

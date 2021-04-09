@@ -99,6 +99,10 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
         )
     }
 
+    fun removeFragment() {
+        fragmentManager?.beginTransaction()?.remove(this)?.commit()
+    }
+
     fun setFilters(filters: List<Filter>?) {
         viewModel.filters = filters
     }
