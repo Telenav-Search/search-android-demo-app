@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="bottom_sheet_corner_radius">16dp</dimen>
+    <dimen name="bottom_sheet_top_padding">8dp</dimen>
+    <dimen name="search_edit_text_margin">8dp</dimen>
+    <dimen name="general_padding_medium">16dp</dimen>
+    <dimen name="general_margin_medium">16dp</dimen>
+    <dimen name="general_margin_small">8dp</dimen>
+    <dimen name="general_padding_large">24dp</dimen>
+    <dimen name="general_padding_small">8dp</dimen>
+    <dimen name="general_padding_4">4dp</dimen>
+
+    <dimen name="star_margin">2dp</dimen>
+    <dimen name="action_text_text_size">18sp</dimen>
+
+    <dimen name="rounded_corners_radius">12dp</dimen>
+    <dimen name="rounded_corners_radius_large">32dp</dimen>
+
+    <!-- Search button on map view-->
+    <dimen name="search_button_elevation">16dp</dimen>
+    <dimen name="search_button_padding">3dp</dimen>
+
+    <dimen name="padding_0">0dp</dimen>
+    <dimen name="padding_2">2dp</dimen>
+    <dimen name="padding_5">5dp</dimen>
+    <dimen name="padding_8">8dp</dimen>
+    <dimen name="padding_10">10dp</dimen>
+    <dimen name="padding_12">12dp</dimen>
+    <dimen name="padding_15">15dp</dimen>
+    <dimen name="padding_16">16dp</dimen>
+    <dimen name="padding_18">18dp</dimen>
+    <dimen name="padding_20">20dp</dimen>
+    <dimen name="padding_40">40dp</dimen>
+    <dimen name="padding_60">60dp</dimen>
+
+    <dimen name="dim_250">250dp</dimen>
+    <dimen name="dim_160">160dp</dimen>
+
+    <!--
+Refer to App Widget Documentation for margin information
+http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
+    -->
+    <dimen name="widget_margin">0dp</dimen>
+</resources>

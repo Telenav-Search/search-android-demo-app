@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="telenav.demo.app.search.SearchViewModel" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/general_padding_small">
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/search_edit_text_margin"
+            android:layout_marginEnd="@dimen/search_edit_text_margin"
+            android:autofillHints="@string/hint_number_of_results"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="@android:color/white"
+            android:drawableStart="@drawable/ic_search"
+            android:drawableTint="@android:color/holo_blue_dark"
+            android:gravity="center"
+            android:hint="@string/search_label"
+            android:inputType="text"
+            android:paddingTop="@dimen/general_padding_4"
+            android:paddingBottom="@dimen/general_padding_4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RelativeLayout
+            android:id="@+id/categories_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chip_group"
+                android:padding="@dimen/general_padding_small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/show_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/chip_group"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/general_margin_medium"
+                android:layout_marginBottom="@dimen/general_margin_medium"
+                android:background="@drawable/rounded_corners_background"
+                android:backgroundTint="@color/action_text"
+                android:paddingStart="@dimen/general_padding_medium"
+                android:paddingTop="@dimen/general_padding_small"
+                android:paddingEnd="@dimen/general_padding_medium"
+                android:paddingBottom="@dimen/general_padding_small"
+                android:text="@string/filters_label"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/suggestions_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search"
+            tools:visibility="visible">
+
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/suggestionsLoading"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:visibility="@{viewModel.suggestionsLoading?View.VISIBLE:View.GONE}" />
+
+            <TextView
+                android:id="@+id/suggestionsError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="@string/suggestion_error_loading"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/suggestionsEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/no_suggestion"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/suggestions"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:text="@string/suggestions_label" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/suggestionsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical" />
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

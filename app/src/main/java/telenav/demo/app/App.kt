@@ -1,58 +1,71 @@
 package telenav.demo.app
 
-import android.app.Activity
-import android.app.Application.ActivityLifecycleCallbacks
+import android.app.Application
 import android.content.Context
-import android.os.Bundle
+import android.os.Environment
 import android.os.Looper
+import android.preference.PreferenceManager
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import telenav.demo.app.utils.gpsProbe
-import telenav.demo.app.utils.startEngine
-import telenav.demo.app.utils.stopEngine
 
-class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+class App : Application() {
 
-    private val locationCallback = object : LocationCallback() {
-        override fun onLocationResult(locationResult: LocationResult?) {
-            locationResult ?: return
-            dataCollectorClient.gpsProbe(locationResult.lastLocation)
+    companion object {
+        var application: App? = null
+
+        const val FILTER_NUMBER = "number_of_results"
+        const val LAST_ENTITY_RESPONSE_REF_ID = "last_entity_response_ref_id"
+        const val SEARCH_LIMIT = "search_limit"
+        const val SUGGESTIONS_LIMIT = "suggestions_limit"
+        const val PREDICTIONS_LIMIT = "predictions_limit"
+        const val ENVIRONMENT = "environment"
+        const val FILTER_NUMBER_VALUE = 10
+
+        fun writeToSharedPreferences(keyName: String, filterNr: Int) {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putInt(keyName, filterNr)
+            prefs?.apply()
+        }
+
+        fun readFromSharedPreferences(keyName: String): Int {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getInt(keyName, FILTER_NUMBER_VALUE)?.toInt() ?: FILTER_NUMBER_VALUE
+        }
+
+        fun writeStringToSharedPreferences(keyName: String, string: String) {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putString(keyName, string)
+            prefs?.apply()
+        }
+
+        fun readStringFromSharedPreferences(keyName: String, def: String): String? {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getString(keyName, def)
         }
     }
 
-    private var isAppLaunch = true
-
-    private var isActivityChangingConfigurations = false
-    private var activityCounter = 1
-
-    override fun onActivityStarted(activity: Activity) {
-        activityCounter++
-        if ((isAppLaunch || activityCounter == 1) && !isActivityChangingConfigurations) {
-            isAppLaunch = false
-            dataCollectorClient.startEngine()
-            activity.applicationContext.setGPSListener(locationCallback)
-        }
+    init {
+        application = this
     }
-
-    override fun onActivityStopped(activity: Activity) {
-        activityCounter--
-        isActivityChangingConfigurations = activity.isChangingConfigurations
-        if (!isAppLaunch && activityCounter == 0 && !isActivityChangingConfigurations) {
-            activity.applicationContext.stopGPSListener(locationCallback)
-            dataCollectorClient.stopEngine()
-        }
-    }
-
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-    override fun onActivityDestroyed(activity: Activity) {}
-    override fun onActivityResumed(activity: Activity) {}
-    override fun onActivityPaused(activity: Activity) {}
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 }
+
 
 fun Context.setGPSListener(locationCallback: LocationCallback) {
     val locationRequest = LocationRequest.create()?.apply {

@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/categoriesLoading"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+    <data>
 
-    <TextView
-        android:id="@+id/categoriesError"
-        android:text="Categories loading error"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal" />
+        <import type="android.view.View" />
 
-    <LinearLayout
-        android:id="@+id/categories"
+        <variable
+            name="viewModel"
+            type="telenav.demo.app.search.SearchViewModel" />
+
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        android:orientation="vertical">
+        android:background="@color/colorPrimary">
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/categoriesLoading"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/categoriesError"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="Categories:" />
+            android:layout_gravity="center_horizontal"
+            android:text="Categories loading error"
+            android:visibility="gone" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/categoriesTree"
+        <LinearLayout
+            android:id="@+id/categories"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
-    </LinearLayout>
-</FrameLayout>
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Categories:" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoriesTree"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical" />
+        </LinearLayout>
+    </FrameLayout>
+</layout>

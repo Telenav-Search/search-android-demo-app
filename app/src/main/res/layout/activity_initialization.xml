@@ -94,6 +94,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:backgroundTint="@color/telenav_gray_pressed"
             android:layout_marginBottom="20dp"
             android:text="Select index data folder" />
 
@@ -102,6 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:backgroundTint="@color/telenav_gray_pressed"
             android:layout_marginBottom="20dp"
             android:text="Go Next" />
 

@@ -1,9 +1,45 @@
 <resources>
-
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+    </style>
+
+    <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bottom_layout_shape</item>
+    </style>
+
+    <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="bottomSheetStyle">@style/BottomSheet</item>
+    </style>
+
+    <style name="AppWidgetSection" parent="@android:style/Widget">
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_marginLeft">12dp</item>
+        <item name="android:layout_marginRight">12dp</item>
+        <item name="android:background">#B2808084</item>
+    </style>
+
+    <style name="AppWidgetLabel">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#1A0D47</item>
+    </style>
+
+    <style name="AppWidgetText" parent="Base.TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:background">@drawable/rounded_corners_normal</item>
+    </style>
+
+    <style name="AppWidgetImageButton">
+        <item name="android:layout_margin">10dp</item>
+        <item name="android:background">@drawable/widget_btn_selector</item>
+        <item name="android:visibility">gone</item>
+    </style>
 </resources>

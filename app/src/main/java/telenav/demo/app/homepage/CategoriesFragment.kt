@@ -16,7 +16,7 @@ import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
 import telenav.demo.app.R
 import telenav.demo.app.searchlist.SearchListFragment
-
+import telenav.demo.app.utils.CategoryAndFiltersUtil
 
 class CategoriesFragment : Fragment() {
     private val telenavService: EntityClient by lazy { EntityService.getClient() }
@@ -24,20 +24,6 @@ class CategoriesFragment : Fragment() {
     private lateinit var vCategoryTree: RecyclerView
     private lateinit var vCategoryLoading: ContentLoadingProgressBar
     private lateinit var vCategoryError: TextView
-
-    private val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food, "2040"),
-        HotCategory("Coffee", R.drawable.ic_coffee, "241"),
-        HotCategory("Grocery", R.drawable.ic_grocery, "221"),
-        HotCategory("Shopping", R.drawable.ic_shopping, "4090"),
-        HotCategory("Parking", R.drawable.ic_parking, "600"),
-        HotCategory("Banks / ATMs", R.drawable.ic_atm, "374"),
-        HotCategory("Hotels / Motels", R.drawable.ic_hotel, "595"),
-        HotCategory("Attractions", R.drawable.ic_attraction, "605"),
-        HotCategory("Fuel", R.drawable.ic_gas, "811"),
-        HotCategory("Electric Vehicle Charge Station", R.drawable.ic_ev, "771"),
-        HotCategory("More", R.drawable.ic_more, "")
-    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,7 +47,7 @@ class CategoriesFragment : Fragment() {
     private fun showHotCategories() {
         vCategoryLoading.hide()
         vCategories.visibility = View.VISIBLE
-        vCategoryTree.adapter = CategoriesHotRecyclerAdapter(hotCategoriesList) { category ->
+        vCategoryTree.adapter = CategoriesHotRecyclerAdapter(CategoryAndFiltersUtil.hotCategoriesList) { category ->
             if (category.id.isEmpty()) {
                 requestCategories()
             } else {
@@ -100,4 +86,4 @@ class CategoriesFragment : Fragment() {
 
 }
 
-class HotCategory(val name: String, val icon: Int, val id: String)
+class HotCategory(val name: String, val iconPurple: Int, val iconWhite: Int, val id: String)
