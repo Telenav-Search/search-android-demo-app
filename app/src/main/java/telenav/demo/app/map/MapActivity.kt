@@ -72,6 +72,7 @@ class MapActivity : AppCompatActivity() {
             redo_button.visibility = View.VISIBLE
         }
         redo_button.setOnClickListener {
+            enableDisableRedoButton(false)
             val region = mapFragment?.getRegion()
             if (filters != null) {
                 mapFragment?.setFilters(filters!!)
@@ -87,6 +88,10 @@ class MapActivity : AppCompatActivity() {
                         region?.nearLeft, region?.farRight)
             }
         }
+    }
+
+    fun enableDisableRedoButton(enable: Boolean) {
+        redo_button.isEnabled = enable
     }
 
     @SuppressLint("ClickableViewAccessibility")

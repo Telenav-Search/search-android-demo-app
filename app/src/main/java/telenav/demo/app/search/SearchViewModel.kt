@@ -266,8 +266,9 @@ class SearchViewModel : ViewModel() {
     private fun filterByStar(results: List<Entity>, filter: StarsFilter): ArrayList<Entity> {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
-            if (entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() >= 0.0 &&
-                entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() < 1.0
+            if (entity.facets.rating != null && entity.facets.rating.size > 0
+                    && entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() >= 0.0 &&
+                    entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() < 1.0
             ) {
                 filteredResults.add(entity)
             }
@@ -278,7 +279,7 @@ class SearchViewModel : ViewModel() {
     private fun filterByPrice(results: List<Entity>, filter: PriceLevel): ArrayList<Entity> {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
-            if (entity.facets.priceInfo.priceLevel == filter.priceLevel.priceLevel) {
+            if (entity.facets?.priceInfo?.priceLevel == filter?.priceLevel?.priceLevel) {
                 filteredResults.add(entity)
             }
         }

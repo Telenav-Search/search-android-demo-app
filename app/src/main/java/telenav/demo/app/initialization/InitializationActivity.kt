@@ -150,20 +150,15 @@ class InitializationActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions() {
-        if (!this.checkLocationPermission())
+        if (!this.checkLocationPermission() || !this.checkExternalStoragePermissions()) {
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1
-            )
-        else if (!this.checkExternalStoragePermissions()) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ),
-                1
+                    this,
+                    arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
+                    1
             )
         } else if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             vLoading.visibility = View.GONE
