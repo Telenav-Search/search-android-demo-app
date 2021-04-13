@@ -217,7 +217,7 @@ object CategoryAndFiltersUtil {
 
 
     fun generateSearchResult(entityResult: Entity?, currentSearchHotCategory: String?) : SearchResult {
-        if (entityResult == null) {
+        if (entityResult == null || entityResult.place==null) {
             return SearchResult.build("No result", "No category") {}
         }
         var categoryName = " "
@@ -228,7 +228,7 @@ object CategoryAndFiltersUtil {
         val searchResult = SearchResult.build(entityResult.place.name,  categoryName) {
             id = entityResult.id
             permanentlyClosed = entityResult.place.isPermanentlyClosed
-            parking = entityResult.facets.parking
+            parking = entityResult.facets?.parking
             address = entityResult.place.address.formattedAddress
 
                 if (entityResult.place.phoneNumbers.isNotEmpty()) {

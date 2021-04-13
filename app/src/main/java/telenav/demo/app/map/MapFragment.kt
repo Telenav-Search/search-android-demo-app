@@ -13,7 +13,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.VisibleRegion
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
@@ -63,26 +66,25 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
         viewModel.searchResults.observe(requireActivity(), Observer {
             (activity as MapActivity).displaySearchResults(
-                    it as List<Entity>?,
-                    ""
+                it as List<Entity>?,
+                ""
             )
             (activity!! as MapActivity).showSearchHotCategoriesFragment(
-                    it as List<Entity>, ""
+                it as List<Entity>, ""
             )
             (activity!! as MapActivity).enableDisableRedoButton(true)
         })
     }
 
     fun searchInRegion(
-            query: String?,
-            categoryId: String?,
-            location: Location,
-            executor: Executor,
-            nearLeft: LatLng? = null,
-            farRight: LatLng? = null) {
-        viewModel.search(
-                query, categoryId, location, executor, nearLeft, farRight
-        )
+        query: String?,
+        categoryId: String?,
+        location: Location,
+        executor: Executor,
+        nearLeft: LatLng? = null,
+        farRight: LatLng? = null
+    ) {
+        viewModel.search(query, categoryId, location, executor, nearLeft, farRight)
     }
 
     fun setFilters(filters: List<Filter>?) {
@@ -126,7 +128,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         coordinatesList.clear()
         searchResults?.forEach { result ->
 
-            if(result == null) {
+            if (result == null || result.place == null) {
                 return
             }
             entitiesList.add(result)
@@ -174,9 +176,16 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         if (alreadyInitialized) {
             return
         }
-        googleMap?.addMarker(MarkerOptions()
-            .position(latLng)
-            .icon(CategoryAndFiltersUtil.bitmapDescriptorFromVector(activity!!, R.drawable.ic_star_full)))
+        googleMap?.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .icon(
+                    CategoryAndFiltersUtil.bitmapDescriptorFromVector(
+                        activity!!,
+                        R.drawable.ic_star_full
+                    )
+                )
+        )
 
         googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f))
 
