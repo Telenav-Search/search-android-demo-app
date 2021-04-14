@@ -25,7 +25,7 @@ object CategoryAndFiltersUtil {
     const val PREF_PREFIX_KEY = "appwidget_"
 
     val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food_color, R.drawable.ic_food, "2040"),
+        HotCategory("Food", R.drawable.ic_food_color, R.drawable.ic_food, "226"),
         HotCategory("Banks / ATMs", R.drawable.ic_atm_color, R.drawable.ic_atm, "374"),
         HotCategory("Grocery", R.drawable.ic_grocery_color, R.drawable.ic_grocery, "221"),
         HotCategory("Shopping", R.drawable.ic_shopping_color, R.drawable.ic_shopping, "4090"),
