@@ -205,9 +205,11 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
 
     saveIndexDataPath(dataPath)
 
-    var apiKey = "7bd512e0-16bc-4a45-9bc9-09377ee8a913"
-    var apiSecret = "89e872bc-1529-4c9f-857c-c32febbf7f5a"
-    var apiEndpoint = "https://restapistage.telenav.com"
+    var apiKey = BuildConfig.telenav_api_key
+    var apiSecret = BuildConfig.telenav_api_secret
+    var apiEndpoint = BuildConfig.telenav_cloud_endpoint
+    var userId = BuildConfig.telenav_user_id
+
     if (environment == 1) {
         /*
         USE RELEASE REAL DATA
@@ -215,9 +217,10 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
         apiSecret = "ENTER_KEY"
         apiEndpoint = "https://restapi.telenav.com"*/
     }
+
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
-        .setUserId("telenavDemoApp")
+        .setUserId(userId)
         .setApiKey(apiKey)
         .setApiSecret(apiSecret)
         .setCloudEndPoint(apiEndpoint)
