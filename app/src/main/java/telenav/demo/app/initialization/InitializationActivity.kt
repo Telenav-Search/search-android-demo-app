@@ -202,12 +202,17 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
 
     saveIndexDataPath(dataPath)
 
+    var apiKey = BuildConfig.telenav_api_key
+    var apiSecret = BuildConfig.telenav_api_secret
+    var apiEndpoint = BuildConfig.telenav_cloud_endpoint
+    var userId = BuildConfig.telenav_user_id
+
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
-        .setUserId("telenavDemoApp")
-        .setApiKey("7bd512e0-16bc-4a45-9bc9-09377ee8a913")
-        .setApiSecret("89e872bc-1529-4c9f-857c-c32febbf7f5a")
-        .setCloudEndPoint("https://restapistage.telenav.com")
+        .setUserId(userId)
+        .setApiKey(apiKey)
+        .setApiSecret(apiSecret)
+        .setCloudEndPoint(apiEndpoint)
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)

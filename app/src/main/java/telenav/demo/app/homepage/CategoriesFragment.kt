@@ -26,7 +26,7 @@ class CategoriesFragment : Fragment() {
     private lateinit var vCategoryError: TextView
 
     private val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food, "2040"),
+        HotCategory("Food", R.drawable.ic_food, "226"),
         HotCategory("Coffee", R.drawable.ic_coffee, "241"),
         HotCategory("Grocery", R.drawable.ic_grocery, "221"),
         HotCategory("Shopping", R.drawable.ic_shopping, "4090"),
