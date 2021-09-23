@@ -20,10 +20,39 @@
         android:layout_gravity="center_horizontal" />
 
     <LinearLayout
+        android:id="@+id/destiantions"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_above="@+id/categories"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Prediction:" />
+        <TextView
+            android:id="@+id/prediction_no_result"
+            android:text="No Result"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/predictionList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/categories"
+        android:layout_marginTop="140dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:orientation="vertical">
 
         <TextView

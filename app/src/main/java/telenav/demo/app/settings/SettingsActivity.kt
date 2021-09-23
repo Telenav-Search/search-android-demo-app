@@ -3,6 +3,7 @@ package telenav.demo.app.settings
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +14,7 @@ import telenav.demo.app.initialization.saveIndexDataPath
 import telenav.demo.app.initialization.saveSearchMode
 import telenav.demo.app.initialization.SearchMode
 import java.io.File
+import android.util.Log
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -20,6 +22,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var vIndexDataPath: TextView
     private lateinit var vModeHybrid: RadioButton
     private lateinit var vModeOnBoard: RadioButton
+    private lateinit var vUserId: EditText
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
@@ -31,6 +34,7 @@ class SettingsActivity : AppCompatActivity() {
         vIndexDataPath = findViewById(R.id.settings_index_data_path)
         vModeHybrid = findViewById(R.id.settings_mode_hybrid)
         vModeOnBoard = findViewById(R.id.settings_mode_onboard)
+        vUserId = findViewById(R.id.settings_user_id)
 
         vModeHybrid.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) searchMode = SearchMode.HYBRID
@@ -42,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.settings_back).setOnClickListener { finish() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.settings_save).setOnClickListener { save() }
+        vUserId.setText(SDKRuntime.getUserId())
 
         getSavedIndexPath()
         getSavedSearchMode()
@@ -57,6 +62,7 @@ class SettingsActivity : AppCompatActivity() {
             updateUI()
         }
         directoryPickerDialog.show()
+
     }
 
     private fun updateUI() {
@@ -102,6 +108,7 @@ class SettingsActivity : AppCompatActivity() {
         saveIndexDataPath(indexDataPath)
         saveSearchMode(searchMode)
         SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+        SDKRuntime.updateUserId(vUserId.getText().toString())
         finish()
     }
 }

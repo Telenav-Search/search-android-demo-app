@@ -18,6 +18,8 @@ import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.entity.api.EntityServiceSettings
+import com.telenav.sdk.entity.model.prediction.DestinationPredictionMode
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
@@ -113,7 +115,8 @@ class InitializationActivity : AppCompatActivity() {
 
                 val sdkOptions = getSDKOptions(deviceID, indexDataPath)
 
-                EntityService.initialize(sdkOptions)
+
+                EntityService.initialize(sdkOptions,EntityServiceSettings.builder().destinationPredictionMode(DestinationPredictionMode.CLOUD).build())
 
                 getUIExecutor().execute {
                     DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
@@ -210,6 +213,8 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
     var applicationName = BuildConfig.telenav_data_collector_applicationName
     var applicationVersion = BuildConfig.telenav_data_cpllector_applicationVersion
     var applicationInfo = ApplicationInfo.builder(applicationName,applicationVersion).build()
+
+    SDKRuntime.updateUserId(userId)
 
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)

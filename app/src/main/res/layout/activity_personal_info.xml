@@ -137,7 +137,7 @@
                     android:id="@+id/personal_home_entity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:baselineAligned="false" android:orientation="horizontal"
                     android:padding="10dp"
                     android:visibility="gone">
 
@@ -292,7 +292,7 @@
                     android:id="@+id/personal_work_entity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:baselineAligned="false" android:orientation="horizontal"
                     android:padding="10dp"
                     android:visibility="gone">
 

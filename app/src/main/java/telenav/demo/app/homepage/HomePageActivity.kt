@@ -23,11 +23,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
+import com.google.gson.Gson
 import com.telenav.sdk.core.Callback
+import com.telenav.sdk.entity.api.DestinationPredictionClient
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.entity.model.prediction.EntityDestinationPredictionResponse
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
+import org.json.JSONObject
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.personalinfo.PersonalInfoActivity
@@ -97,6 +101,7 @@ class HomePageActivity : AppCompatActivity() {
                     vSearchInputClear.visibility = View.VISIBLE
                     showSuggestionFragment(text.toString())
                 }
+
                 predictSearchWord()
             }
 
@@ -230,7 +235,16 @@ class HomePageActivity : AppCompatActivity() {
     }
 
     private fun showSettingsActivity() {
-        startActivity(Intent(this, SettingsActivity::class.java))
+        //startActivity(Intent(this, SettingsActivity::class.java))
+        startActivityForResult(Intent(this, SettingsActivity::class.java), 0);
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+       /* vInitialization.visibility = View.VISIBLE
+        vAccess.visibility = View.GONE*/
+        startActivity(getIntent())
+
     }
 
     override fun onResume() {
