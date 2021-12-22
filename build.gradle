@@ -25,7 +25,7 @@ allprojects {
                 username "$telenav_jfrog_user"
                 password "$telenav_jfrog_password"
             }
-            url 'https://telenav.jfrog.io/artifactory/telenav-maven-releases/'
+            url 'https://artifactory.telenav.com/telenav-maven-public'
             authentication {
                 basic(BasicAuthentication)
             }

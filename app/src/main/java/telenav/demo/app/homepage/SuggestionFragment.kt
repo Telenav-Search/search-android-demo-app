@@ -13,9 +13,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
-import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
 import com.telenav.sdk.entity.model.prediction.SuggestionType
 import telenav.demo.app.R
@@ -23,7 +23,7 @@ import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.searchlist.SearchListFragment
 
 class SuggestionFragment : Fragment() {
-    private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
     private lateinit var vSuggestions: View
     private lateinit var vSuggestionsList: RecyclerView
     private lateinit var vSuggestionsLoading: ContentLoadingProgressBar

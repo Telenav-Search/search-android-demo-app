@@ -10,16 +10,16 @@ import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
-import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
 import telenav.demo.app.R
 import telenav.demo.app.searchlist.SearchListFragment
 
 
 class CategoriesFragment : Fragment() {
-    private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
     private lateinit var vCategories: View
     private lateinit var vCategoryTree: RecyclerView
     private lateinit var vCategoryLoading: ContentLoadingProgressBar

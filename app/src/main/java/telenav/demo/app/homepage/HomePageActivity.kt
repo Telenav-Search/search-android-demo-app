@@ -24,8 +24,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.telenav.sdk.core.Callback
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.EntityClient
-import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.R
@@ -39,7 +39,7 @@ import java.util.concurrent.Executor
 
 
 class HomePageActivity : AppCompatActivity() {
-    private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
     var lastKnownLocation: Location? = null
     var lastLaunchedPrediction: String = ""
     private var locationCallback: LocationCallback = object : LocationCallback() {

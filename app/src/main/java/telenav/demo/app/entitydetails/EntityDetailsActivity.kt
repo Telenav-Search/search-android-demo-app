@@ -33,9 +33,9 @@ import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
-import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
@@ -47,7 +47,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class EntityDetailsActivity : AppCompatActivity() {
-    private val telenavService: EntityClient by lazy { EntityService.getClient() }
+    private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar

@@ -16,7 +16,7 @@ import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.entity.api.EntityService
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
@@ -112,7 +112,7 @@ class InitializationActivity : AppCompatActivity() {
 
                 val sdkOptions = getSDKOptions(deviceID, indexDataPath)
 
-                EntityService.initialize(sdkOptions)
+                AndroidEntityService.initialize(this@InitializationActivity, sdkOptions)
 
                 getUIExecutor().execute {
                     DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
