@@ -18,6 +18,7 @@ import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
+import com.telenav.sdk.prediction.api.PredictionService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -116,7 +117,9 @@ class InitializationActivity : AppCompatActivity() {
 
                 getUIExecutor().execute {
                     DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                    PredictionService.initialize(sdkOptions)
                     OtaService.initialize(this@InitializationActivity, sdkOptions)
+
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)

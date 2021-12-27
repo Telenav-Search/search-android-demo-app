@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.RadioButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.telenav.sdk.core.Callback
 import com.telenav.sdk.core.SDKRuntime
+import com.telenav.sdk.prediction.api.PredictionService
+import com.telenav.sdk.prediction.api.model.destination.ResetDestinationPredictionResponse
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import telenav.demo.app.R
 import telenav.demo.app.initialization.saveIndexDataPath
@@ -42,6 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.settings_back).setOnClickListener { finish() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.settings_save).setOnClickListener { save() }
+        findViewById<View>(R.id.settings_reset).setOnClickListener { reset() }
 
         getSavedIndexPath()
         getSavedSearchMode()
@@ -103,5 +108,27 @@ class SettingsActivity : AppCompatActivity() {
         saveSearchMode(searchMode)
         SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
         finish()
+    }
+
+    private fun reset() {
+        PredictionService.getClient().resetDestinationPredictionRequest()
+            .asyncCall(object : Callback<ResetDestinationPredictionResponse> {
+                override fun onSuccess(response: ResetDestinationPredictionResponse) {
+                    showResetResponseMessage(response.message)
+                }
+
+                override fun onFailure(e: Throwable) {
+                    e.printStackTrace()
+                    e.message?.let {
+                        showResetResponseMessage(it)
+                    }
+                }
+            })
+    }
+
+    private fun showResetResponseMessage(message: String) {
+        runOnUiThread {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
 }

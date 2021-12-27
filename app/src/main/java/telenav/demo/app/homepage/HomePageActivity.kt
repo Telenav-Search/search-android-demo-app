@@ -16,7 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
@@ -28,6 +29,9 @@ import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
+import com.telenav.sdk.prediction.api.model.destination.DestinationPredictionResponse
+import com.telenav.sdk.prediction.api.PredictionService
+import com.telenav.sdk.prediction.api.model.destination.Destination
 import telenav.demo.app.R
 import telenav.demo.app.dip
 import telenav.demo.app.personalinfo.PersonalInfoActivity
@@ -49,7 +53,7 @@ class HomePageActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var vSearchInput: EditText
+    private lateinit var vSearchInput: AutoCompleteTextView
     private lateinit var vSearchInputClear: View
 
     private var popupWindow: PopupWindow? = null
@@ -98,6 +102,7 @@ class HomePageActivity : AppCompatActivity() {
                     showSuggestionFragment(text.toString())
                 }
                 predictSearchWord()
+                predictDestination()
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -112,6 +117,8 @@ class HomePageActivity : AppCompatActivity() {
             } else
                 false
         }
+        vSearchInput.setOnFocusChangeListener { _, _ -> predictDestination() }
+        vSearchInput.setOnClickListener { predictDestination() }
     }
 
     fun removeTopFragment(): Boolean {
@@ -220,6 +227,46 @@ class HomePageActivity : AppCompatActivity() {
         popupWindow!!.showAsDropDown(vSearchInput)
     }
 
+    private fun predictDestination() {
+        if (vSearchInput.text.isNotEmpty() || !vSearchInput.isFocused) {
+            clearPredictionDestination()
+            return
+        }
+
+        val location = lastKnownLocation ?: Location("")
+        PredictionService.getClient().destinationPredictionRequest()
+            .predictionTime(0)
+            .predictionLocation(location.latitude, location.longitude)
+            .asyncCall(getUIExecutor(), object : Callback<DestinationPredictionResponse> {
+                override fun onSuccess(response: DestinationPredictionResponse) {
+                    val results: List<Destination> = response.results
+                    val predictions = ArrayList<String>()
+                    for (result in results) {
+                        predictions.add(result.label)
+                    }
+                    showPredictionDestination(predictions)
+                }
+
+                override fun onFailure(e: Throwable) {
+                    e.printStackTrace()
+                }
+            })
+    }
+
+    private fun showPredictionDestination(predictions: ArrayList<String>) {
+        val adapter = ArrayAdapter(this, R.layout.prediction_list_item, predictions)
+        vSearchInput.setAdapter(adapter)
+        vSearchInput.showDropDown()
+    }
+
+    private fun clearPredictionDestination() {
+        vSearchInput.adapter?.let {
+            val adapter = it as ArrayAdapter<*>
+            adapter.clear()
+            adapter.notifyDataSetChanged()
+        }
+    }
+
     private fun hidePredictions() {
         popupWindow?.dismiss()
         popupWindow = null
@@ -236,6 +283,7 @@ class HomePageActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         setGPSListener(locationCallback)
+        predictDestination()
     }
 
     override fun onPause() {

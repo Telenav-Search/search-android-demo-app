@@ -51,10 +51,12 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.telenav.sdk:telenav-sdk-base:1.4.0'
     api 'com.telenav.sdk:telenav-entity-hybrid:1.4.0'
-    api 'com.telenav.sdk:telenav-android-datacollector:1.2.6-r15c'
+    api 'com.telenav.sdk:telenav-android-dataconnector-core:2.1.0'
     api('com.telenav.sdk:telenav-android-ota:1.2.6-r15c'){
         exclude group: 'com.telenav.sdk', module: "telenav-entity-onboard"
     }
+    api 'com.telenav.sdk:telenav-prediction-cloud:1.0.0-BETA.2'
+    api 'com.telenav.sdk:telenav-prediction-android:1.0.0-BETA.1-SNAPSHOT'
 
     api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9'
     api 'com.github.salehyarahmadi:FileAndFolderPicker:1.0.4'
