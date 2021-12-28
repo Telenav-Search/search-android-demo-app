@@ -122,7 +122,6 @@ class InitializationActivity : AppCompatActivity() {
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
 
                     startActivity(Intent(this@InitializationActivity, HomePageActivity::class.java))
-                    finish()
                 }
             }
         } catch (e: Throwable) {
