@@ -171,7 +171,9 @@ class InitializationActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        checkPermissions()
+        if (permissions.isNotEmpty()) {
+            checkPermissions()
+        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
