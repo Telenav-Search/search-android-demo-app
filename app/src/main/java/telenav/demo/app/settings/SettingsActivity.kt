@@ -1,28 +1,36 @@
 package telenav.demo.app.settings
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.telenav.sdk.core.SDKRuntime
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
-import telenav.demo.app.initialization.saveIndexDataPath
-import telenav.demo.app.initialization.saveSearchMode
-import telenav.demo.app.initialization.SearchMode
+import telenav.demo.app.initialization.*
+import telenav.demo.app.utils.SharedPreferencesRepository
 import java.io.File
 
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var vIndexDataPath: TextView
+    private lateinit var vApiKey: EditText
+    private lateinit var vApiSecret: EditText
+    private lateinit var vCloudEndpoint: EditText
     private lateinit var vModeHybrid: RadioButton
     private lateinit var vModeOnBoard: RadioButton
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
+    private var apiKey = ""
+    private var apiSecret = ""
+    private var cloudEndpoint = ""
+
+    private var sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +39,9 @@ class SettingsActivity : AppCompatActivity() {
         vIndexDataPath = findViewById(R.id.settings_index_data_path)
         vModeHybrid = findViewById(R.id.settings_mode_hybrid)
         vModeOnBoard = findViewById(R.id.settings_mode_onboard)
+        vApiKey = findViewById(R.id.settings_api_key)
+        vApiSecret = findViewById(R.id.settings_api_secret)
+        vCloudEndpoint = findViewById(R.id.settings_cloud_endpoint)
 
         vModeHybrid.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) searchMode = SearchMode.HYBRID
@@ -43,8 +54,28 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.settings_save).setOnClickListener { save() }
 
-        getSavedIndexPath()
-        getSavedSearchMode()
+        val mode = sharedPreferencesRepository.searchMode.value
+        searchMode = SearchMode.fromInt(mode)
+
+        indexDataPath = sharedPreferencesRepository.indexDataPath.value
+        if (indexDataPath.isEmpty()) {
+            indexDataPath = BuildConfig.telenav_data_dir
+        }
+
+        apiKey = sharedPreferencesRepository.apiKey.value
+        if (apiKey.isEmpty()) {
+            apiKey = BuildConfig.telenav_api_key
+        }
+
+        apiSecret = sharedPreferencesRepository.apiSecret.value
+        if (apiSecret.isEmpty()) {
+            apiSecret =  BuildConfig.telenav_api_secret
+        }
+
+        cloudEndpoint = sharedPreferencesRepository.cloudEndpoint.value
+        if (cloudEndpoint.isEmpty()) {
+            cloudEndpoint =  BuildConfig.telenav_cloud_endpoint
+        }
 
         updateUI()
     }
@@ -61,6 +92,9 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun updateUI() {
         vIndexDataPath.text = indexDataPath
+        vApiKey.setText(apiKey)
+        vApiSecret.setText(apiSecret)
+        vCloudEndpoint.setText(cloudEndpoint)
 
         when (searchMode) {
             SearchMode.HYBRID -> {
@@ -74,34 +108,20 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun getSavedIndexPath() {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-        val dataPath = prefs.getString(getString(R.string.saved_index_data_path_key), "")
-        if (dataPath != null && dataPath.isNotEmpty()) {
-            indexDataPath = dataPath
-        }
-    }
-
-    private fun getSavedSearchMode() {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-        val mode = prefs.getInt(getString(R.string.saved_search_mode_key), 1)
-        searchMode = SearchMode.fromInt(mode)
-    }
-
     private fun save() {
-        saveIndexDataPath(indexDataPath)
-        saveSearchMode(searchMode)
-        SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+        val apiKey = vApiKey.text.toString()
+        val apiSecret = vApiSecret.text.toString()
+        val cloudEndpoint = vCloudEndpoint.text.toString()
+
+        if (sharedPreferencesRepository.searchMode.value != searchMode.value) {
+            SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+            sharedPreferencesRepository.searchMode.value = searchMode.value
+        }
+
+        sharedPreferencesRepository.indexDataPath.value = indexDataPath
+        sharedPreferencesRepository.apiKey.value = apiKey
+        sharedPreferencesRepository.apiSecret.value = apiSecret
+        sharedPreferencesRepository.cloudEndpoint.value = cloudEndpoint
         finish()
     }
 }

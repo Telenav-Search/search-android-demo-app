@@ -16,14 +16,6 @@
     <string name="initialization_note">In order to Hybrid SDK works, download an index file from Telenav and extract it to Telenav folder on internal storage. Or if you already have one you could select it as index data folder</string>
     <string name="home_title">This is your home</string>
     <string name="work_title">This is your work</string>
-    <string name="preference_file_key">telenav.demo.app.storage</string>
-    <string name="saved_index_data_path_key">index_data_path</string>
-    <string name="saved_search_mode_key">search_mode</string>
-    <string name="saved_home_address_key">home_address</string>
-    <string name="saved_work_address_key">work_address</string>
-    <string name="saved_favorite_list_key">favorite_list</string>
-    <string name="saved_update_status">update_status</string>
-    <string name="saved_device_id">device_id</string>
     <string name="home_area_last_update">Last update: %s, Size: %.2fM</string>
     <string name="home_area_last_update_na">Last update: N/A</string>
     <string name="channel_name">Home Area Update Notification Channel</string>

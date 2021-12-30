@@ -136,46 +136,43 @@ class PersonalInfoActivity : AppCompatActivity() {
     }
 
     private fun deleteHomeData() {
-        dataCollectorClient.removeHome(this)
+        dataCollectorClient.removeHome()
         getPersonalData()
     }
 
     private fun deleteWorkData() {
-        dataCollectorClient.removeWork(this)
+        dataCollectorClient.removeWork()
         getPersonalData()
     }
 
     private fun deleteAllFavoriteEntities() {
-        dataCollectorClient.removeAllFavorites(this)
+        dataCollectorClient.removeAllFavorites()
         getPersonalData()
     }
 
     private fun deleteFavoriteEntity(entity: Entity) {
-        dataCollectorClient.deleteFavorite(this, entity)
+        dataCollectorClient.deleteFavorite(entity)
         getPersonalData()
     }
 
     private fun getPersonalData() {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
         val storedHome = Gson().fromJson(
-            prefs.getString(getString(R.string.saved_home_address_key), ""),
+            sharedPreferencesRepository.homeAddress.value,
             Entity::class.java
         )
         fillHomeInfo(storedHome)
 
         val storedWork = Gson().fromJson(
-            prefs.getString(getString(R.string.saved_work_address_key), ""),
+            sharedPreferencesRepository.workAddress.value,
             Entity::class.java
         )
         fillWorkInfo(storedWork)
 
         val listType: Type = object : TypeToken<List<Entity>>() {}.type
         val favoriteEntities = Gson().fromJson<List<Entity>>(
-            prefs.getString(
-                getString(R.string.saved_favorite_list_key),
-                ""
-            ), listType
+            sharedPreferencesRepository.favoriteList.value,
+            listType
         )
         fillFavoriteList(favoriteEntities)
     }

@@ -30,6 +30,7 @@ import org.greenrobot.eventbus.ThreadMode
 import telenav.demo.app.R
 import telenav.demo.app.setGPSListener
 import telenav.demo.app.stopGPSListener
+import telenav.demo.app.utils.SharedPreferencesRepository
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -89,34 +90,14 @@ class HomeAreaActivity : AppCompatActivity() {
         updateUI()
     }
 
-    private fun getUpdateStatus(): Boolean {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-        return prefs.getBoolean(getString(R.string.saved_update_status), false)
-    }
-
-    private fun setUpdateStatus(status: Boolean) {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-        with(prefs.edit()) {
-            putBoolean(getString(R.string.saved_update_status), status)
-            apply()
-        }
-    }
-
     private fun getHomeArea() {
         homeArea = homeAreaClient.statusRequest().execute()
         updateUI()
     }
 
     private fun updateHomeArea() {
-        setUpdateStatus(true)
+        val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
+        sharedPreferencesRepository.updateStatus.value = true
         homeAreaClient.updateRequest()
             .setCurrentLocation(
                 lastKnownLocation?.latitude ?: .0,
@@ -136,7 +117,7 @@ class HomeAreaActivity : AppCompatActivity() {
                 }
 
                 private fun finalize(areaStatus: AreaStatus?, error: Throwable?) {
-                    setUpdateStatus(false)
+                    sharedPreferencesRepository.updateStatus.value = false
                     EventBus.getDefault().post(HomeAreaUpdateEvent(areaStatus, error))
                 }
             })
@@ -188,8 +169,9 @@ class HomeAreaActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
+        val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
         val areaStatus = homeArea
-        val isUpdating = getUpdateStatus()
+        val isUpdating = sharedPreferencesRepository.updateStatus.value
 
         if (isUpdating) {
             vUpdateInProgress.visibility = View.VISIBLE

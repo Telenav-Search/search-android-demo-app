@@ -1,7 +1,6 @@
 package telenav.demo.app.entitydetails
 
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -150,20 +149,20 @@ class EntityDetailsActivity : AppCompatActivity() {
 
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setHome(this, entity)
+        dataCollectorClient.setHome(entity)
     }
 
     private fun setAsWorkAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setWork(this, entity)
+        dataCollectorClient.setWork(entity)
     }
 
     private fun toggleFavorite(entity: Entity?) {
         entity ?: return
         if (isFavorite) {
-            dataCollectorClient.deleteFavorite(this, entity)
+            dataCollectorClient.deleteFavorite(entity)
         } else {
-            dataCollectorClient.addFavorite(this, entity)
+            dataCollectorClient.addFavorite(entity)
         }
         checkFavorite(entity)
     }
@@ -332,15 +331,11 @@ class EntityDetailsActivity : AppCompatActivity() {
     }
 
     private fun checkFavorite(entity: Entity) {
-        val prefs =
-            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
-
+        val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
         val listType: Type = object : TypeToken<List<Entity>>() {}.type
         val favoriteEntities = Gson().fromJson<List<Entity>>(
-            prefs.getString(
-                getString(R.string.saved_favorite_list_key),
-                ""
-            ), listType
+            sharedPreferencesRepository.favoriteList.value,
+            listType
         )
 
         isFavorite =

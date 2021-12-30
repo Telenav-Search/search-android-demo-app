@@ -25,8 +25,10 @@ import kotlinx.coroutines.launch
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
+import telenav.demo.app.application.TelenavApplication
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.utils.SharedPreferencesRepository
 import java.io.File
 import java.util.*
 
@@ -39,6 +41,7 @@ class InitializationActivity : AppCompatActivity() {
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
+    private var sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,14 +64,8 @@ class InitializationActivity : AppCompatActivity() {
     }
 
     private fun getSavedIndexPath() {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-        val dataPath = prefs.getString(getString(R.string.saved_index_data_path_key), "")
-        if (dataPath != null && dataPath.isNotEmpty()) {
+        val dataPath = sharedPreferencesRepository.indexDataPath.value
+        if (dataPath.isNotEmpty()) {
             indexDataPath = dataPath
             initSDKs()
         } else {
@@ -77,41 +74,17 @@ class InitializationActivity : AppCompatActivity() {
     }
 
     private fun getSavedSearchMode() {
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-        val mode = prefs.getInt(getString(R.string.saved_search_mode_key), 1)
+        val mode = sharedPreferencesRepository.searchMode.value
         searchMode = SearchMode.fromInt(mode)
     }
 
     private fun initSDKs() {
         showProgress()
-
-        val prefs =
-            getSharedPreferences(
-                getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE
-            )
-
-        var deviceID = prefs.getString(getString(R.string.saved_device_id), "")
-        if (deviceID == null || deviceID.isEmpty()) {
-            deviceID = UUID.randomUUID().toString()
-        }
-        with(prefs.edit()) {
-            remove(getString(R.string.saved_update_status))
-            putString(getString(R.string.saved_device_id), deviceID)
-            apply()
-        }
-
         try {
             GlobalScope.launch {
                 delay(100L)
 
-                val sdkOptions = getSDKOptions(deviceID, indexDataPath)
-
+                val sdkOptions = TelenavApplication.instance.getSDKOptions(indexDataPath)
                 AndroidEntityService.initialize(this@InitializationActivity, sdkOptions)
 
                 getUIExecutor().execute {
@@ -191,61 +164,6 @@ class InitializationActivity : AppCompatActivity() {
     private fun hideProgress() {
         vLoading.visibility = View.GONE
         vInitialization.visibility = View.VISIBLE
-    }
-}
-
-fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOptions {
-    var dataPath = BuildConfig.telenav_data_dir
-    if (pathToIndex.isNotEmpty()) {
-        dataPath = pathToIndex
-    }
-    val cachePath = applicationContext.cacheDir.absolutePath
-
-    saveIndexDataPath(dataPath)
-
-    var apiKey = BuildConfig.telenav_api_key
-    var apiSecret = BuildConfig.telenav_api_secret
-    var apiEndpoint = BuildConfig.telenav_cloud_endpoint
-    var userId = BuildConfig.telenav_user_id
-
-    return SDKOptions.builder()
-        .setDeviceGuid(deviceId)
-        .setUserId(userId)
-        .setApiKey(apiKey)
-        .setApiSecret(apiSecret)
-        .setCloudEndPoint(apiEndpoint)
-        .setSdkDataDir(dataPath)
-        .setSdkCacheDataDir(cachePath)
-        .setLocale(Locale.EN_US)
-        .build()
-}
-
-fun Context.saveIndexDataPath(pathToIndex: String = "") {
-    if (pathToIndex.isEmpty()) {
-        return
-    }
-
-    val prefs =
-        getSharedPreferences(
-            getString(R.string.preference_file_key),
-            Context.MODE_PRIVATE
-        )
-    with(prefs.edit()) {
-        putString(getString(R.string.saved_index_data_path_key), pathToIndex)
-        apply()
-    }
-}
-
-fun Context.saveSearchMode(searchMode: SearchMode = SearchMode.HYBRID) {
-
-    val prefs =
-        getSharedPreferences(
-            getString(R.string.preference_file_key),
-            Context.MODE_PRIVATE
-        )
-    with(prefs.edit()) {
-        putInt(getString(R.string.saved_search_mode_key), searchMode.value)
-        apply()
     }
 }
 
