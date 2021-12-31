@@ -85,7 +85,7 @@ class InitializationActivity : AppCompatActivity() {
                 delay(100L)
 
                 val sdkOptions = TelenavApplication.instance.getSDKOptions(indexDataPath)
-                AndroidEntityService.initialize(this@InitializationActivity, sdkOptions)
+                AndroidEntityService.initialize(applicationContext, sdkOptions)
 
                 getUIExecutor().execute {
                     DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
@@ -95,10 +95,11 @@ class InitializationActivity : AppCompatActivity() {
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
 
                     startActivity(Intent(this@InitializationActivity, HomePageActivity::class.java))
+                    finish()
                 }
             }
         } catch (e: Throwable) {
-            Toast.makeText(this, "Something went wrong", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.error_message), Toast.LENGTH_LONG).show()
             e.printStackTrace()
             hideProgress()
         }

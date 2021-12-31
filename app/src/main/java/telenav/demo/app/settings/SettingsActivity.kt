@@ -5,11 +5,20 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.telenav.sdk.core.SDKRuntime
+import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.entity.android.client.api.AndroidEntityService
+import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
+import telenav.demo.app.application.TelenavApplication
+import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.initialization.*
 import telenav.demo.app.utils.SharedPreferencesRepository
 import java.io.File
@@ -112,16 +121,51 @@ class SettingsActivity : AppCompatActivity() {
         val apiKey = vApiKey.text.toString()
         val apiSecret = vApiSecret.text.toString()
         val cloudEndpoint = vCloudEndpoint.text.toString()
+        var shouldReInitializeSDKs = false
 
-        if (sharedPreferencesRepository.searchMode.value != searchMode.value) {
-            SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
-            sharedPreferencesRepository.searchMode.value = searchMode.value
+        if (sharedPreferencesRepository.indexDataPath.value != indexDataPath ||
+            sharedPreferencesRepository.apiKey.value != apiKey ||
+            sharedPreferencesRepository.apiSecret.value != apiSecret ||
+            sharedPreferencesRepository.cloudEndpoint.value != cloudEndpoint) {
+            shouldReInitializeSDKs = true
         }
 
         sharedPreferencesRepository.indexDataPath.value = indexDataPath
         sharedPreferencesRepository.apiKey.value = apiKey
         sharedPreferencesRepository.apiSecret.value = apiSecret
         sharedPreferencesRepository.cloudEndpoint.value = cloudEndpoint
-        finish()
+
+        if (shouldReInitializeSDKs) {
+            reInitializeSDKs()
+        } else {
+            if (sharedPreferencesRepository.searchMode.value != searchMode.value) {
+                SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+                sharedPreferencesRepository.searchMode.value = searchMode.value
+            }
+            finish()
+        }
+    }
+
+    private fun reInitializeSDKs() {
+        try {
+            GlobalScope.launch {
+                delay(100L)
+
+                val sdkOptions = TelenavApplication.instance.getSDKOptions(indexDataPath)
+                AndroidEntityService.reInitialize(applicationContext, sdkOptions)
+
+                getUIExecutor().execute {
+                    DataCollectorService.initialize(this@SettingsActivity, sdkOptions)
+                    OtaService.shutdown()
+                    OtaService.initialize(this@SettingsActivity, sdkOptions)
+
+                    SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
+                    finish()
+                }
+            }
+        } catch (e: Throwable) {
+            Toast.makeText(this, this.getText(R.string.error_message), Toast.LENGTH_LONG).show()
+            e.printStackTrace()
+        }
     }
 }
