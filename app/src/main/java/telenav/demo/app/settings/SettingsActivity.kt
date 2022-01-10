@@ -13,7 +13,6 @@ import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
@@ -149,7 +148,6 @@ class SettingsActivity : AppCompatActivity() {
     private fun reInitializeSDKs() {
         try {
             GlobalScope.launch {
-                delay(100L)
 
                 val sdkOptions = TelenavApplication.instance.getSDKOptions(indexDataPath)
                 AndroidEntityService.reInitialize(applicationContext, sdkOptions)
