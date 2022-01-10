@@ -1,24 +1,22 @@
 package telenav.demo.app.utils
 
-import android.content.Context
 import android.location.Location
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.core.Callback
-import com.telenav.sdk.datacollector.api.DataCollectorClient
-import com.telenav.sdk.datacollector.model.SendEventResponse
-import com.telenav.sdk.datacollector.model.event.*
+import com.telenav.sdk.dataconnector.api.DataConnectorClient
+import com.telenav.sdk.dataconnector.model.SendEventResponse
+import com.telenav.sdk.dataconnector.model.event.*
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.GeoPoint
-import telenav.demo.app.R
 import java.lang.reflect.Type
 
 fun Entity.getCoord(): GeoPoint? {
     return address?.geoCoordinates ?: place?.address?.geoCoordinates
 }
 
-fun DataCollectorClient.startEngine() {
+fun DataConnectorClient.startEngine() {
     sendEventRequest().setEvent(StartEngineEvent.builder().build())
         .asyncCall(object : Callback<SendEventResponse> {
             override fun onSuccess(response: SendEventResponse) {
@@ -31,7 +29,7 @@ fun DataCollectorClient.startEngine() {
         })
 }
 
-fun DataCollectorClient.stopEngine() {
+fun DataConnectorClient.stopEngine() {
     sendEventRequest().setEvent(StopEngineEvent.builder().build())
         .asyncCall(object : Callback<SendEventResponse> {
             override fun onSuccess(response: SendEventResponse) {
@@ -44,7 +42,7 @@ fun DataCollectorClient.stopEngine() {
         })
 }
 
-fun DataCollectorClient.addFavorite(entity: Entity) {
+fun DataConnectorClient.addFavorite(entity: Entity) {
     val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
     val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
     var favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
@@ -79,7 +77,7 @@ fun DataCollectorClient.addFavorite(entity: Entity) {
     })
 }
 
-fun DataCollectorClient.deleteFavorite(entity: Entity) {
+fun DataConnectorClient.deleteFavorite(entity: Entity) {
     val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
     val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
     val favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
@@ -108,7 +106,7 @@ fun DataCollectorClient.deleteFavorite(entity: Entity) {
     })
 }
 
-fun DataCollectorClient.removeAllFavorites() {
+fun DataConnectorClient.removeAllFavorites() {
     val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
     val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
     val favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
@@ -132,7 +130,7 @@ fun DataCollectorClient.removeAllFavorites() {
         })
 }
 
-fun DataCollectorClient.setHome(entity: Entity) {
+fun DataConnectorClient.setHome(entity: Entity) {
     val eventBuilder = getHomeEventBuilder(entity)
 
     val setEvent = eventBuilder.setActionType(SetHomeEvent.ActionType.SET).build()
@@ -146,7 +144,7 @@ fun DataCollectorClient.setHome(entity: Entity) {
     )
 }
 
-fun DataCollectorClient.removeHome() {
+fun DataConnectorClient.removeHome() {
     val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
     val entity = Gson().fromJson(
         sharedPreferencesRepository.homeAddress.value,
@@ -170,7 +168,7 @@ fun DataCollectorClient.removeHome() {
     })
 }
 
-fun DataCollectorClient.setWork(entity: Entity) {
+fun DataConnectorClient.setWork(entity: Entity) {
     val eventBuilder = getWorkEventBuilder(entity)
 
     val setEvent = eventBuilder.setActionType(SetWorkEvent.ActionType.SET).build()
@@ -184,7 +182,7 @@ fun DataCollectorClient.setWork(entity: Entity) {
     )
 }
 
-fun DataCollectorClient.removeWork() {
+fun DataConnectorClient.removeWork() {
     val sharedPreferencesRepository = SharedPreferencesRepository.getInstance()
     val entity = Gson().fromJson(
         sharedPreferencesRepository.workAddress.value,
@@ -232,7 +230,7 @@ private fun getWorkEventBuilder(entity: Entity): SetWorkEvent.Builder {
     return eventBuilder
 }
 
-private fun DataCollectorClient.setAddress(
+private fun DataConnectorClient.setAddress(
     entity: Entity,
     setEvent: Event,
     removeEvent: Event,
@@ -272,7 +270,7 @@ private fun DataCollectorClient.setAddress(
     })
 }
 
-fun DataCollectorClient.entityClick(
+fun DataConnectorClient.entityClick(
     referenceId: String,
     entityId: String,
     displayMode: EntityActionEvent.DisplayMode
@@ -291,7 +289,7 @@ fun DataCollectorClient.entityClick(
     })
 }
 
-fun DataCollectorClient.entityCall(
+fun DataConnectorClient.entityCall(
     referenceId: String, entityId: String, displayMode: EntityActionEvent.DisplayMode
 ) {
     sendEventRequest().setEvent(
@@ -308,7 +306,7 @@ fun DataCollectorClient.entityCall(
     })
 }
 
-fun DataCollectorClient.entityCachedClick(
+fun DataConnectorClient.entityCachedClick(
     entityId: String,
     source: EntityCacheActionEvent.SourceType
 ) {
@@ -326,7 +324,7 @@ fun DataCollectorClient.entityCachedClick(
     })
 }
 
-fun DataCollectorClient.entityCachedCall(
+fun DataConnectorClient.entityCachedCall(
     entityId: String,
     source: EntityCacheActionEvent.SourceType
 ) {
@@ -344,7 +342,7 @@ fun DataCollectorClient.entityCachedCall(
     })
 }
 
-fun DataCollectorClient.gpsProbe(location: Location?) {
+fun DataConnectorClient.gpsProbe(location: Location?) {
     location ?: return
     sendEventRequest().setEvent(
         GpsProbeEvent.builder()

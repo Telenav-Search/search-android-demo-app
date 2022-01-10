@@ -51,7 +51,7 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:4.8.1'
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.telenav.sdk:telenav-android-entity-client:0.0.1-feature-implement-for-async-without-message-SNAPSHOT'
-    api 'com.telenav.sdk:telenav-android-datacollector:1.2.6-r15c'
+    api 'com.telenav.sdk:telenav-android-dataconnector-core:2.1.0'
     api('com.telenav.sdk:telenav-android-ota:1.2.6-r15c'){
         exclude group: 'com.telenav.sdk', module: "telenav-entity-onboard"
     }

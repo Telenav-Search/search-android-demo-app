@@ -1,6 +1,5 @@
 package telenav.demo.app.personalinfo
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -12,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
+import com.telenav.sdk.dataconnector.api.DataConnectorService
+import com.telenav.sdk.dataconnector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
@@ -23,7 +22,7 @@ import java.lang.reflect.Type
 
 
 class PersonalInfoActivity : AppCompatActivity() {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     private lateinit var vHomeAndWork: View
     private lateinit var vFavorite: View
@@ -136,22 +135,22 @@ class PersonalInfoActivity : AppCompatActivity() {
     }
 
     private fun deleteHomeData() {
-        dataCollectorClient.removeHome()
+        dataConnectorClient.removeHome()
         getPersonalData()
     }
 
     private fun deleteWorkData() {
-        dataCollectorClient.removeWork()
+        dataConnectorClient.removeWork()
         getPersonalData()
     }
 
     private fun deleteAllFavoriteEntities() {
-        dataCollectorClient.removeAllFavorites()
+        dataConnectorClient.removeAllFavorites()
         getPersonalData()
     }
 
     private fun deleteFavoriteEntity(entity: Entity) {
-        dataCollectorClient.deleteFavorite(entity)
+        dataConnectorClient.deleteFavorite(entity)
         getPersonalData()
     }
 
@@ -193,7 +192,7 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vHomeName.text = name
         vHomeEntity.setOnClickListener {
-            dataCollectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.HOME)
+            dataConnectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.HOME)
             startActivity(
                 Intent(
                     this,
@@ -251,7 +250,7 @@ class PersonalInfoActivity : AppCompatActivity() {
 
         vWorkName.text = name
         vWorkEntity.setOnClickListener {
-            dataCollectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.WORK)
+            dataConnectorClient.entityCachedClick(entity.id, EntityCacheActionEvent.SourceType.WORK)
             startActivity(
                 Intent(
                     this,

@@ -1,9 +1,11 @@
 package telenav.demo.app.application
 
 import android.app.Application
+import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import telenav.demo.app.BuildConfig
+import telenav.demo.app.R
 import telenav.demo.app.utils.SharedPreferencesRepository
 import java.util.*
 
@@ -61,6 +63,7 @@ class TelenavApplication : Application() {
             .setSdkDataDir(dataPath)
             .setSdkCacheDataDir(cachePath)
             .setLocale(Locale.EN_US)
+            .setApplicationInfo(ApplicationInfo.builder(getString(R.string.app_name), BuildConfig.VERSION_NAME).build())
             .build()
     }
 

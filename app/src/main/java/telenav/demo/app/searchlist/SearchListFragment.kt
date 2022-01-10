@@ -23,8 +23,8 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.gson.Gson
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityActionEvent
+import com.telenav.sdk.dataconnector.api.DataConnectorService
+import com.telenav.sdk.dataconnector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
@@ -43,7 +43,7 @@ import telenav.demo.app.utils.entityClick
 
 class SearchListFragment : Fragment() {
     private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     private lateinit var vSearchTitle: TextView
     private lateinit var vSearchEmpty: TextView
@@ -259,7 +259,7 @@ class SearchListFragment : Fragment() {
             map?.setOnInfoWindowClickListener { marker ->
                 val id = marker.tag as String
                 activity ?: return@setOnInfoWindowClickListener
-                dataCollectorClient.entityClick(
+                dataConnectorClient.entityClick(
                     referenceId,
                     entity.id,
                     EntityActionEvent.DisplayMode.MAP_VIEW

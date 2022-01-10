@@ -8,7 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.telenav.sdk.core.SDKRuntime
-import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.dataconnector.api.DataConnectorService
 import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
@@ -155,7 +155,8 @@ class SettingsActivity : AppCompatActivity() {
                 AndroidEntityService.reInitialize(applicationContext, sdkOptions)
 
                 getUIExecutor().execute {
-                    DataCollectorService.initialize(this@SettingsActivity, sdkOptions)
+                    DataConnectorService.shutdown()
+                    DataConnectorService.initialize(this@SettingsActivity, sdkOptions)
                     OtaService.shutdown()
                     OtaService.initialize(this@SettingsActivity, sdkOptions)
 

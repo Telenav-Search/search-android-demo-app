@@ -12,10 +12,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.telenav.sdk.core.Locale
-import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
-import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.dataconnector.api.DataConnectorService
 import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.ota.api.OtaService
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
@@ -23,7 +21,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import telenav.demo.app.AppLifecycleCallbacks
-import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.application.TelenavApplication
 import telenav.demo.app.homepage.HomePageActivity
@@ -88,7 +85,7 @@ class InitializationActivity : AppCompatActivity() {
                 AndroidEntityService.initialize(applicationContext, sdkOptions)
 
                 getUIExecutor().execute {
-                    DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                    DataConnectorService.initialize(this@InitializationActivity, sdkOptions)
                     OtaService.initialize(this@InitializationActivity, sdkOptions)
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 

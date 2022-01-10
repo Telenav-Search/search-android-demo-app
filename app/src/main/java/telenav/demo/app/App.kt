@@ -9,18 +9,18 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.dataconnector.api.DataConnectorService
 import telenav.demo.app.utils.gpsProbe
 import telenav.demo.app.utils.startEngine
 import telenav.demo.app.utils.stopEngine
 
 class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
-            dataCollectorClient.gpsProbe(locationResult.lastLocation)
+            dataConnectorClient.gpsProbe(locationResult.lastLocation)
         }
     }
 
@@ -33,7 +33,7 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         activityCounter++
         if ((isAppLaunch || activityCounter == 1) && !isActivityChangingConfigurations) {
             isAppLaunch = false
-            dataCollectorClient.startEngine()
+            dataConnectorClient.startEngine()
             activity.applicationContext.setGPSListener(locationCallback)
         }
     }
@@ -43,7 +43,7 @@ class AppLifecycleCallbacks : ActivityLifecycleCallbacks {
         isActivityChangingConfigurations = activity.isChangingConfigurations
         if (!isAppLaunch && activityCounter == 0 && !isActivityChangingConfigurations) {
             activity.applicationContext.stopGPSListener(locationCallback)
-            dataCollectorClient.stopEngine()
+            dataConnectorClient.stopEngine()
         }
     }
 
