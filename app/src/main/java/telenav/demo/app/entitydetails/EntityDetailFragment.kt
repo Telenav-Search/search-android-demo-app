@@ -103,7 +103,7 @@ class EntityDetailFragment : RoundedBottomSheetLayout() {
             if (it.iconId != 0) {
                 poi_icon.setImageResource(it.iconId)
             } else {
-                poi_icon.setImageResource(R.drawable.ic_more)
+                poi_icon.setImageResource(R.drawable.ic_more_color)
             }
 
             if (!it.email.isNullOrEmpty()) {

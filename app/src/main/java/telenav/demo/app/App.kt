@@ -21,14 +21,16 @@ class App : Application() {
         const val PREDICTIONS_LIMIT = "predictions_limit"
         const val ENVIRONMENT = "environment"
         const val FILTER_NUMBER_VALUE = 10
+        const val RATE_STARS = "rate_stars"
+        const val PRICE_LEVEL = "price_level"
 
-        fun writeToSharedPreferences(keyName: String, filterNr: Int) {
+        fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
                     application?.applicationContext?.getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE
                 )?.edit()
-            prefs?.putInt(keyName, filterNr)
+            prefs?.putInt(keyName, defaultValue)
             prefs?.apply()
         }
 
@@ -58,6 +60,15 @@ class App : Application() {
                     Context.MODE_PRIVATE
                 )
             return prefs?.getString(keyName, def)
+        }
+
+        fun readIntFromSharedPreferences(keyName: String, def: Int): Int {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getInt(keyName, def) ?: 0
         }
     }
 

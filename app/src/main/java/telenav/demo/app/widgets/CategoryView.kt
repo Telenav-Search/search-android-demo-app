@@ -4,8 +4,11 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import android.view.LayoutInflater
+import com.telenav.sdk.entity.model.base.Category
+import telenav.demo.app.R
 import telenav.demo.app.databinding.CategoryViewBinding
 import telenav.demo.app.homepage.HotCategory
+import telenav.demo.app.utils.CategoryAndFiltersUtil
 
 class CategoryView : ConstraintLayout {
 
@@ -33,4 +36,14 @@ class CategoryView : ConstraintLayout {
         binding?.categoryIcon?.setImageResource(category.iconPurple)
     }
 
+    fun init(category: Category, categoryTag: String?) {
+        binding?.categoryName?.text = category.name
+        categoryTag?.let {
+            val icon = CategoryAndFiltersUtil.getCategoryIcon(it, category.name)
+            if (icon != 0) {
+                binding?.categoryIcon?.setImageResource(icon)
+            }
+        }
+        binding?.frameLayout?.setBackgroundResource(R.drawable.cycle_background_white)
+    }
 }

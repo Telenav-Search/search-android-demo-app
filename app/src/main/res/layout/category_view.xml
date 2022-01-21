@@ -15,7 +15,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:background="@drawable/cycle_background">
+            android:background="@drawable/cycle_background_grey">
 
             <ImageView
                 android:id="@+id/category_icon"

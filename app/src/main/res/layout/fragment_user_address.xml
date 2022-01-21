@@ -11,7 +11,7 @@
             android:id="@+id/home_address_info"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/rounded_corners_background_new"
+            android:background="@drawable/rounded_corners_background"
             android:backgroundTint="@color/grey_c2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -74,7 +74,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/home_address_info"
             android:layout_marginTop="9dp"
-            android:background="@drawable/rounded_corners_background_new"
+            android:background="@drawable/rounded_corners_background"
             android:backgroundTint="@color/grey_c2">
 
             <ImageView

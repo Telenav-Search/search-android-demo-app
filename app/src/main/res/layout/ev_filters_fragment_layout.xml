@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ev_filters_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/translucent_white"
+        android:paddingBottom="@dimen/general_padding_large">
+
+        <View
+            android:id="@+id/separate_line"
+            android:layout_width="26dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/blue_c1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/ev_filters_area_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:layout_marginTop="19dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/separate_line"
+            app:tint="@color/blue_c1"/>
+
+        <TextView
+            android:id="@+id/ev_filters_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/filters_header"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingLeft="12dp"
+            android:textColor="@color/black_header"
+            app:layout_constraintStart_toEndOf="@id/ev_filters_area_back"
+            app:layout_constraintBottom_toBottomOf="@id/ev_filters_area_back" />
+
+        <TextView
+            android:id="@+id/ev_connector_types"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/ev_connector_types"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ev_filters_area_back" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_connector_types"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:flow_wrapMode="aligned"
+            app:flow_horizontalGap="10dp"
+            app:flow_verticalGap="20dp"
+            app:layout_constraintEnd_toEndOf="@id/ev_connector_types_reset"
+            app:layout_constraintStart_toStartOf="@id/ev_connector_types"
+            app:layout_constraintTop_toBottomOf="@id/ev_connector_types" />
+
+        <TextView
+            android:id="@+id/ev_connector_types_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/reset"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ev_connector_types"
+            app:layout_constraintBottom_toBottomOf="@id/ev_connector_types"/>
+
+        <View
+            android:id="@+id/separate_line1"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue_c2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flow_connector_types" />
+
+        <TextView
+            android:id="@+id/ev_power_feed_levels"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/ev_power_feed_levels"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separate_line1" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_power_feed_levels"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:flow_wrapMode="aligned"
+            app:flow_horizontalGap="10dp"
+            app:flow_verticalGap="20dp"
+            app:layout_constraintEnd_toEndOf="@id/ev_power_feed_levels_reset"
+            app:layout_constraintStart_toStartOf="@id/ev_power_feed_levels"
+            app:layout_constraintTop_toBottomOf="@id/ev_power_feed_levels" />
+
+        <TextView
+            android:id="@+id/ev_power_feed_levels_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/reset"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ev_power_feed_levels" />
+
+        <View
+            android:id="@+id/separate_line2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue_c2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flow_power_feed_levels"/>
+
+        <TextView
+            android:id="@+id/ev_charger_brands_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/ev_charger_brands"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separate_line2" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_charger_brands"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:flow_wrapMode="aligned"
+            app:flow_horizontalGap="10dp"
+            app:flow_verticalGap="20dp"
+            app:layout_constraintEnd_toEndOf="@id/ev_charger_brands_reset"
+            app:layout_constraintStart_toStartOf="@id/ev_charger_brands_header"
+            app:layout_constraintTop_toBottomOf="@id/ev_charger_brands_header" />
+
+        <TextView
+            android:id="@+id/ev_charger_brands_reset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/reset"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ev_charger_brands_header" />
+
+        <View
+            android:id="@+id/separate_line4"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue_c2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flow_charger_brands"/>
+
+        <View
+            android:id="@+id/separate_line5"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue_c2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ev_charger_brands_header" />
+
+        <TextView
+            android:id="@+id/free_charge_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/blue_c1"
+            android:text="@string/free_charge"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/separate_line4" />
+
+        <CheckBox
+            android:id="@+id/reservation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:buttonTint="@color/telenav_indigo_mid_tone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/free_charge_header"
+            app:layout_constraintBottom_toBottomOf="@id/free_charge_header" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

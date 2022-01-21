@@ -50,16 +50,15 @@ class SettingsActivity : AppCompatActivity() {
             if (isChecked) searchMode = SearchMode.ONBOARD
         }
 
-        findViewById<View>(R.id.settings_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.settings_back).setOnClickListener { save() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
-        findViewById<View>(R.id.settings_save).setOnClickListener { save() }
         search_bar.progress = App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_LIMIT_WITH_FILTERS.toString())!!.toInt()
         count_search.text = App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_LIMIT_WITH_FILTERS.toString())
         search_bar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                count_search.setText(progress.toString())
+                count_search.text = progress.toString()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -71,7 +70,7 @@ class SettingsActivity : AppCompatActivity() {
                 SUGGESTIONS_LIMIT_DEF.toString())
         sugg_bar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                count_sugg.setText(progress.toString())
+                count_sugg.text = progress.toString()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -83,7 +82,7 @@ class SettingsActivity : AppCompatActivity() {
                 PREDICTIONS_LIMIT_DEF.toString())
         predictions_bar.setOnSeekBarChangeListener(object : OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                count_predictions.setText(progress.toString())
+                count_predictions.text = progress.toString()
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -173,7 +172,7 @@ class SettingsActivity : AppCompatActivity() {
                     spinner.selectedItemPosition.toString())
             val data = Intent()
             data.putExtra(IS_ENV_CHANGED, true)
-            setResult(RESULT_OK, data);
+            setResult(RESULT_OK, data)
         }
         finish()
     }

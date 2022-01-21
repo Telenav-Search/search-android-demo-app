@@ -99,5 +99,4 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
         fun newInstance() =
             PersonalInfoFragment()
     }
-
 }

@@ -220,7 +220,7 @@ class SearchViewModel : ViewModel() {
             }.apply {
                     setFilters(filtersSearch.build())
                 }
-            .setLocation(location.latitude, location.longitude)
+            .setLocation(37.78509, -122.41988)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                     SEARCH_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(

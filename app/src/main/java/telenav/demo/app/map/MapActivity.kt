@@ -13,28 +13,31 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.telenav.sdk.entity.model.base.Entity
-import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.view_bottom.*
 import telenav.demo.app.R
-import telenav.demo.app.homepage.CategoriesFragment
 import telenav.demo.app.homepage.HotCategory
-import telenav.demo.app.homepage.getUIExecutor
+import kotlinx.android.synthetic.main.entity_detail_fragment_layout.*
+import kotlinx.android.synthetic.main.info_window.view.*
+import kotlinx.android.synthetic.main.view_entity_details_bottom.*
+import telenav.demo.app.*
 import telenav.demo.app.initialization.InitializationActivity
+import telenav.demo.app.model.SearchResult
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
+import telenav.demo.app.search.filters.EvFiltersFragment
 import telenav.demo.app.search.filters.Filter
-import telenav.demo.app.setGPSListener
+import telenav.demo.app.search.filters.GeneralFiltersFragment
+import telenav.demo.app.search.filters.ParkingFiltersFragment
 import telenav.demo.app.settings.SettingsActivity
-import telenav.demo.app.stopGPSListener
-import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.widgets.CategoryView
 import java.util.*
@@ -47,6 +50,7 @@ class MapActivity : AppCompatActivity() {
         private const val MAP_FRAGMENT_TAG = "MapFragment"
         private const val CODE_SETTINGS = 3
         const val IS_ENV_CHANGED = "IS_ENV_CHANGED"
+        private val FRAGMENT_TAG = "EntityDetailsFragment"
     }
 
     private var filters: List<Filter>? = null
@@ -66,6 +70,8 @@ class MapActivity : AppCompatActivity() {
     lateinit var behavior: BottomSheetBehavior<*>
     var lastKnownLocation: Location = Location("")
     private var mapFragment: MapFragment? = null
+    private var hotCategoryName = ""
+    private var hotCategoryTag = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,35 +83,6 @@ class MapActivity : AppCompatActivity() {
         displayUserInfo()
     }
 
-    fun redoButtonLogic() {
-        if (lastSearch.isEmpty()) {
-            redo_button.visibility = View.GONE
-        } else {
-            redo_button.visibility = View.VISIBLE
-        }
-        redo_button.setOnClickListener {
-            enableDisableRedoButton(false)
-            val region = mapFragment?.getRegion()
-            if (filters != null) {
-                mapFragment?.setFilters(filters!!)
-            } else {
-                mapFragment?.setFilters(null)
-            }
-            try {
-                lastSearch.toInt()
-                mapFragment?.searchInRegion(null, lastSearch, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            } catch (e: Exception) {
-                mapFragment?.searchInRegion(lastSearch, null, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            }
-        }
-    }
-
-    fun enableDisableRedoButton(enable: Boolean) {
-        redo_button.isEnabled = enable
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
         fab_search.setOnClickListener { openSearch() }
@@ -115,6 +92,16 @@ class MapActivity : AppCompatActivity() {
             collapseBottomSheet()
             showPersonalInfoFragment()
         }
+
+        entity_details_back.setOnClickListener {
+            onBackSearchInfoFragment()
+        }
+    }
+
+    fun onBackSearchInfoFragment() {
+        entity_details.visibility = View.GONE
+        top_navigation_panel.visibility = View.GONE
+        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
     }
 
     private fun showPersonalInfoActivity() {
@@ -184,16 +171,31 @@ class MapActivity : AppCompatActivity() {
         mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
     }
 
-    fun displaySuggestion(suggestion: Suggestion) {
-        for (eachHotCategory in hotCategoriesList) {
-            if (eachHotCategory.name.toLowerCase(Locale.ROOT).indexOf(getOriginalQuery(suggestion.query).toLowerCase(
-                    Locale.ROOT)) != -1) {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, eachHotCategory.id)
-                break
-            } else {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, "")
-            }
+    fun showBottomSheet() {
+        if (this::behavior.isInitialized) {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
+    }
+
+    private fun collapseBottomSheet() {
+        if (this::behavior.isInitialized) {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    private fun getCategoryView(hotCategory: HotCategory): CategoryView {
+        val categoryView = CategoryView(this)
+        categoryView.init(hotCategory)
+        categoryView.id = View.generateViewId()
+
+        categoryView.setOnClickListener {
+            hotCategoryName = hotCategory.name
+            hotCategoryTag = hotCategory.tag
+            collapseBottomSheet()
+            showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag)
+        }
+
+        return categoryView
     }
 
     private fun displayHotCategories() {
@@ -213,26 +215,6 @@ class MapActivity : AppCompatActivity() {
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
-    fun collapseBottomSheet() {
-        if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-    }
-
-    fun showBottomSheet() {
-        if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-    }
-
-    private fun getCategoryView(hotCategory: HotCategory): CategoryView {
-        val categoryView = CategoryView(this)
-        categoryView.init(hotCategory)
-        categoryView.id = View.generateViewId()
-
-        return categoryView
-    }
-
     private fun displayUserInfo() {
         supportFragmentManager.beginTransaction().replace(R.id.user_address,
             UserAddressFragment.newInstance()).commit()
@@ -247,11 +229,12 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(
-            listOf(entity),
+        mapFragment?.addEntityResultOnMap(
+            entity,
             lastKnownLocation,
             currentSearchHotCategory
         )
+        searchInfoBottomFragment?.dismiss()
     }
 
     var searchListFragment: SearchHotCategoriesFragment? = null
@@ -272,19 +255,79 @@ class MapActivity : AppCompatActivity() {
         personalInfoFragment!!.show(supportFragmentManager, personalInfoFragment!!.tag)
     }
 
+    var searchInfoBottomFragment: SearchInfoBottomFragment? = null
+    private fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
+        searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
+    }
+
+    var parkingFiltersFragment: ParkingFiltersFragment? = null
+    fun showParkingFiltersFragment() {
+        parkingFiltersFragment = ParkingFiltersFragment.newInstance()
+        parkingFiltersFragment!!.show(supportFragmentManager, parkingFiltersFragment!!.tag)
+    }
+
+    var evFiltersFragment: EvFiltersFragment? = null
+    fun showEvFiltersFragment() {
+        evFiltersFragment = EvFiltersFragment.newInstance()
+        evFiltersFragment!!.show(supportFragmentManager, evFiltersFragment!!.tag)
+    }
+
+    var generalFiltersFragment: GeneralFiltersFragment? = null
+    fun showGeneralFiltersFragment() {
+        generalFiltersFragment = GeneralFiltersFragment.newInstance()
+        generalFiltersFragment!!.show(supportFragmentManager, generalFiltersFragment!!.tag)
+    }
+
     fun setFiltersSub() {
         if (filters != null) {
             subcategoriesFragment?.setFilters(filters!!)
         }
     }
 
-    fun setFilters(filters: List<telenav.demo.app.search.filters.Filter>) {
+    fun setFilters(filters: List<Filter>) {
         this.filters = filters
         searchFragment?.setFilters(filters)
     }
 
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
+    }
+
+    fun showEntityDetails(searchResult: SearchResult) {
+        entity_details.visibility = View.VISIBLE
+        top_navigation_panel.visibility = View.VISIBLE
+
+        navigation_header.text = hotCategoryName
+
+        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.entity_root)
+        val behavior = BottomSheetBehavior.from(bottomSheetLayout)
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+        supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
+            EntityDetailsFragment.newInstance(searchResult), FRAGMENT_TAG).commit()
+
+        behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {}
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+                val fragment: Fragment? = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+                if (fragment != null && fragment is EntityDetailsFragment) {
+                    fragment.updateItemVisibility(slideOffset)
+                }
+            }
+        })
+
+        bottomSheetLayout.setOnClickListener {
+            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
+    fun hideKeyboard(view: View) {
+        view.hideKeyboard()
     }
 }
 

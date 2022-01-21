@@ -47,7 +47,19 @@
     <string name="path">Path</string>
     <string name="search_mode">SDK Search Mode</string>
     <string name="settings">Settings</string>
-
+    <string name="open_time">Open time</string>
+    <string name="phone_number">Phone number</string>
+    <string name="favorite">Favorite</string>
+    <string name="call">Call</string>
+    <string name="open">Open</string>
+    <string name="closed">Closed</string>
+    <string name="available_parking_lot">Available parking lot</string>
+    <string name="price">Price</string>
+    <string name="available_service">Available service</string>
+    <string name="connectors_number">Connectors number</string>
+    <string name="connectors_type">Connectors type</string>
+    <string name="power_feed">Power feed</string>
+    <string name="charger_brand">Charger brand</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>
@@ -55,14 +67,27 @@
     <string name="apply_filter">Apply</string>
     <string name="search_label">Search..</string>
     <string name="filters_label">Filters >></string>
+    <string name="filters_header">Filters</string>
     <string name="appwidget_text">SEARCH SDK</string>
     <string name="configure">Configure Telenav Search SDK widget</string>
     <string name="add_widget">Add widget</string>
     <string name="email_placeholder">visitor@email.com</string>
+    <string name="reset">Reset</string>
+    <string name="reservation">Reservation</string>
+    <string name="parking_time_start_from">Parking time start from</string>
+    <string name="parking_duration">Parking duration</string>
+    <string name="ev_connector_types">Ev connector types</string>
+    <string name="ev_power_feed_levels">Ev power feed levels</string>
+    <string name="ev_charger_brands">Ev charger brands</string>
+    <string name="free_charge">Free charge</string>
+    <string name="rating">Rating</string>
 
     <string name="suggestions_label">Suggestions: </string>
     <string name="no_suggestion">No suggestions found</string>
     <string name="suggestion_error_loading">Suggestions loading error</string>
+
+    <string name="no_result">No results found</string>
+    <string name="result_error_loading">Loading error</string>
 
     <string name="dollar">$</string>
     <string name="star_1">1</string>

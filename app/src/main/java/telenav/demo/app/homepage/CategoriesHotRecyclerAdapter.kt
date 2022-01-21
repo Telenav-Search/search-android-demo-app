@@ -26,7 +26,7 @@ class CategoriesHotRecyclerAdapter(categories: List<HotCategory>, val onCategory
         holder.vIcon.visibility = View.VISIBLE
         holder.vName.setTypeface(
             null,
-            if (category.id.isEmpty()) Typeface.NORMAL else Typeface.BOLD
+            if (category.tag.isEmpty()) Typeface.NORMAL else Typeface.BOLD
         )
         holder.vIcon.setImageResource(category.iconPurple)
         holder.vItem.setOnClickListener {

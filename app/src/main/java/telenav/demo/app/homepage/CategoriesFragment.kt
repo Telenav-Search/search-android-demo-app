@@ -48,7 +48,7 @@ class CategoriesFragment : Fragment() {
         vCategoryLoading.hide()
         vCategories.visibility = View.VISIBLE
         vCategoryTree.adapter = CategoriesHotRecyclerAdapter(CategoryAndFiltersUtil.hotCategoriesList) { category ->
-            if (category.id.isEmpty()) {
+            if (category.tag.isEmpty()) {
                 requestCategories()
             } else {
                 (activity!! as HomePageActivity).showSearchFragment(
@@ -61,7 +61,7 @@ class CategoriesFragment : Fragment() {
     private fun requestCategories() {
         vCategories.visibility = View.GONE
         vCategoryLoading.show()
-        telenavService.getCategoriesRequest().asyncCall(
+        telenavService.categoriesRequest.asyncCall(
             activity?.getUIExecutor(),
             object : Callback<EntityGetCategoriesResponse> {
                 override fun onSuccess(response: EntityGetCategoriesResponse) {
@@ -86,4 +86,4 @@ class CategoriesFragment : Fragment() {
 
 }
 
-class HotCategory(val name: String, val iconPurple: Int, val iconWhite: Int, val id: String)
+class HotCategory(val name: String, val tag: String, val iconPurple: Int)

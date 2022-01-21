@@ -10,7 +10,7 @@
     android:layout_marginBottom="8dp"
     android:layout_marginStart="20dp"
     android:layout_marginEnd="20dp"
-    android:background="@drawable/rounded_corners_background_new"
+    android:background="@drawable/rounded_corners_background"
     android:backgroundTint="@color/grey_c2">
 
     <TextView

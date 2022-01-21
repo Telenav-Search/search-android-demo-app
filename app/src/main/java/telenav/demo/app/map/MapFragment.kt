@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -64,16 +63,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         entityDetailFragment = EntityDetailFragment()
         entityDetailViewModel =
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
-        viewModel.searchResults.observe(requireActivity(), Observer {
-            (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?,
-                ""
-            )
-            (activity!! as MapActivity).showSearchHotCategoriesFragment(
-                it as List<Entity>, ""
-            )
-            (activity!! as MapActivity).enableDisableRedoButton(true)
-        })
     }
 
     fun searchInRegion(
@@ -100,7 +89,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             EntityActionEvent.DisplayMode.MAP_VIEW
         )
         entityDetailViewModel.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
+        //entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
         marker.hideInfoWindow()
     }
 
@@ -109,56 +98,20 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
-        marker?.hideInfoWindow()
-        if (searchResultList.isEmpty()) {
-            return true
-        }
-        customInfoWindowAdapter.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        marker.showInfoWindow()
+        (activity!! as MapActivity).showEntityDetails(searchResultList[marker?.zIndex!!.toInt() - 1])
         return false
     }
 
     fun addSearchResultsOnMap(
         searchResults: List<Entity>?,
         currentLocation: Location?,
-        currentSearchHotCategory: String?
+        currentSearchHotTag: String?
     ) {
 
         googleMap?.clear()
         coordinatesList.clear()
         searchResults?.forEach { result ->
-
-            if (result == null || result.place == null) {
-                return
-            }
-            entitiesList.add(result)
-            val searchResult =
-                CategoryAndFiltersUtil.generateSearchResult(result, currentSearchHotCategory)
-            searchResultList.add(searchResult)
-            coordinatesList.add(
-                LatLng(
-                    result.place.address.navCoordinates.latitude,
-                    result.place.address.navCoordinates.longitude
-                )
-            )
-
-            googleMap?.addMarker(
-                MarkerOptions()
-                    .position(
-                        LatLng(
-                            result.place.address.navCoordinates.latitude,
-                            result.place.address.navCoordinates.longitude
-                        )
-                    )
-                    .title(result.place.name)
-                    .zIndex(searchResultList.size.toFloat())
-                    .icon(
-                        CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                            activity!!,
-                            searchResult.iconId
-                        )
-                    )
-            )
+            addSearchResultsOnMap(result, currentSearchHotTag)
         }
 
         CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
@@ -166,6 +119,64 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             coordinatesList,
             currentLocation
         )
+    }
+
+    fun addEntityResultOnMap(
+        entity: Entity,
+        currentLocation: Location?,
+        currentSearchHotTag: String?
+    ) {
+
+        googleMap?.clear()
+        coordinatesList.clear()
+        addSearchResultsOnMap(entity, currentSearchHotTag, true)
+        CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
+            googleMap,
+            coordinatesList,
+            currentLocation
+        )
+    }
+
+    private fun addSearchResultsOnMap(
+        entity: Entity,
+        currentSearchHotTag: String?,
+        shouldOpenEntityDetails: Boolean = false) {
+
+        if (entity.place == null) {
+            return
+        }
+        entitiesList.add(entity)
+        val searchResult =
+            CategoryAndFiltersUtil.generateSearchResult(entity, currentSearchHotTag)
+        searchResultList.add(searchResult)
+        coordinatesList.add(
+            LatLng(
+                entity.place.address.navCoordinates.latitude,
+                entity.place.address.navCoordinates.longitude
+            )
+        )
+
+        googleMap?.addMarker(
+            MarkerOptions()
+                .position(
+                    LatLng(
+                        entity.place.address.navCoordinates.latitude,
+                        entity.place.address.navCoordinates.longitude
+                    )
+                )
+                .title(entity.place.name)
+                .zIndex(searchResultList.size.toFloat())
+                .icon(
+                    CategoryAndFiltersUtil.bitmapDescriptorFromVector(
+                        activity!!,
+                        searchResult.iconId
+                    )
+                )
+        )
+
+        if (shouldOpenEntityDetails) {
+            (activity!! as MapActivity).showEntityDetails(searchResult)
+        }
     }
 
     fun blockMap(block: Boolean) {
@@ -192,7 +203,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         alreadyInitialized = true
     }
 
-
     private fun initMap() {
         map = SupportMapFragment()
         childFragmentManager.beginTransaction().add(R.id.map_fragment, map).commit()
@@ -212,15 +222,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
 
             googleMap?.setOnMarkerClickListener(this)
             googleMap?.setOnInfoWindowClickListener(this)
-
-            setInfoWindow()
         }
-    }
-
-    private fun setInfoWindow() {
-        customInfoWindowAdapter =
-            CustomInfoWindowAdapter(layoutInflater.inflate(R.layout.info_window, null))
-        googleMap!!.setInfoWindowAdapter(customInfoWindowAdapter)
     }
 
     private fun positionMap(lat: Double, lon: Double) {
