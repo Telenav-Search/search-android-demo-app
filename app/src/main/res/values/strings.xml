@@ -33,6 +33,14 @@
     <string name="channel_name">Home Area Update Notification Channel</string>
     <string name="channel_description">Home Area Update Notification Channel</string>
     <string name="redo_search_in_this_area">Redo Search in This Area</string>
+    <string name="user_title">User</string>
+    <string name="search_hint">Search for address, bus station, food......</string>
+    <string name="my_place">My Place</string>
+    <string name="setup">Setup</string>
+    <string name="edit">Edit</string>
+    <string name="home">Home</string>
+    <string name="office">Office</string>
+    <string name="favorites">Favorites</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>
