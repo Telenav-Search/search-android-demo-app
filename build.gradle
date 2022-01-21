@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = "1.4.32"
+    ext.kotlin_version = "1.5.10"
     repositories {
         google()
         jcenter()
@@ -25,7 +25,7 @@ allprojects {
                 username "$telenav_jfrog_user"
                 password "$telenav_jfrog_password"
             }
-            url 'https://telenav.jfrog.io/artifactory/telenav-maven-releases/'
+            url 'https://artifactory.telenav.com/telenav-maven-public'
             authentication {
                 basic(BasicAuthentication)
             }

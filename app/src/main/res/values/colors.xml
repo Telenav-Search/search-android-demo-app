@@ -25,6 +25,13 @@
     <color name="c8">#EAF2F8</color>
     <color name="c9">#D5F5E3</color>
 
+    <color name="blue_c1">#4141E6</color>
+    <color name="blue_c2">#104141E6</color>
+    <color name="grey_c1">#747B84</color>
+    <color name="grey_c2">#F4F6F9</color>
+    <color name="black_header">#1E1E1E</color>
+    <color name="black_c1">#343434</color>
+
     <color name="telenav_gray">#808084</color>
     <color name="telenav_gray_opacity_50">#E6808084</color>
     <color name="telenav_yellow">#ffde00</color>
@@ -45,7 +52,6 @@
     <color name="light_blue_200">#FF81D4FA</color>
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
-
 
     <color name="speech_ready_main">#ffde00</color>
     <color name="speech_ready_neutral">#000000</color>

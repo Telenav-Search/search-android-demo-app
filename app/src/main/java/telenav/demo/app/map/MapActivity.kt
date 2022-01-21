@@ -16,9 +16,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.view_bottom.*
 import telenav.demo.app.R
 import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.personalinfo.PersonalInfoActivity
+import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.search.CategoriesResultFragment
 import telenav.demo.app.search.SearchBottomFragment
 import telenav.demo.app.search.SearchHotCategoriesFragment
@@ -99,6 +101,7 @@ class MapActivity : AppCompatActivity() {
         fab_search.setOnClickListener { openSearch() }
         app_mode_select.setOnClickListener { showSettingsActivity() }
         app_personal_info.setOnClickListener { showPersonalInfoActivity() }
+        user_icon.setOnClickListener { showPersonalInfoFragment() }
     }
 
     private fun showPersonalInfoActivity() {
@@ -206,6 +209,12 @@ class MapActivity : AppCompatActivity() {
     fun showSubcategoriesFragment() {
         subcategoriesFragment = CategoriesResultFragment.newInstance()
         subcategoriesFragment!!.show(supportFragmentManager, subcategoriesFragment!!.tag)
+    }
+
+    var personalInfoFragment: PersonalInfoFragment? = null
+    private fun showPersonalInfoFragment() {
+        personalInfoFragment = PersonalInfoFragment.newInstance()
+        personalInfoFragment!!.show(supportFragmentManager, personalInfoFragment!!.tag)
     }
 
     fun setFiltersSub() {
