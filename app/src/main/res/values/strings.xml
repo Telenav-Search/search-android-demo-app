@@ -41,6 +41,12 @@
     <string name="home">Home</string>
     <string name="office">Office</string>
     <string name="favorites">Favorites</string>
+    <string name="index_data_path">Index Data Path</string>
+    <string name="index_data_path_desc">Changing index data path will take effect on next app startup</string>
+    <string name="browse">Browse</string>
+    <string name="path">Path</string>
+    <string name="search_mode">SDK Search Mode</string>
+
 
     <!-- filters-->
     <string name="open_now">Open now</string>

@@ -45,12 +45,4 @@
         android:src="@drawable/ic_person"
         app:tint="@color/blue_c1" />
 
-    <include
-        android:id="@+id/bottom_sheet"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginTop="40dp"
-        app:layout_constraintTop_toBottomOf="@+id/user_icon"
-        layout="@layout/info_window" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

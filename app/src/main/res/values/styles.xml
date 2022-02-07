@@ -10,13 +10,27 @@
         <item name="android:navigationBarColor">@android:color/white</item>
     </style>
 
+    <style name="BottomSheetDialogThemeNew" parent="BaseBottomSheetDialogNew">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/white</item>
+    </style>
+
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/bottom_layout_shape</item>
+    </style>
+
+    <style name="BottomSheetNew" parent="@style/Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bottom_layout_shape_new</item>
     </style>
 
     <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="bottomSheetStyle">@style/BottomSheet</item>
+    </style>
+
+    <style name="BaseBottomSheetDialogNew" parent="@style/Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="bottomSheetStyle">@style/BottomSheetNew</item>
     </style>
 
     <style name="AppWidgetSection" parent="@android:style/Widget">
