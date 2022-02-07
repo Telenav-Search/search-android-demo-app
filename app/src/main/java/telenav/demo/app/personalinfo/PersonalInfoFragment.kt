@@ -3,9 +3,9 @@ package telenav.demo.app.personalinfo
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
@@ -17,12 +17,14 @@ import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
 import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.utils.deleteFavorite
 import telenav.demo.app.utils.entityCachedClick
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.lang.reflect.Type
+import androidx.recyclerview.widget.ItemTouchHelper
+import telenav.demo.app.utils.SwipeToDeleteCallback
+import telenav.demo.app.widgets.RoundedBottomSheetLayoutNew
 
 private const val TAG = "PersonalInfoFragment"
 
-class PersonalInfoFragment : RoundedBottomSheetLayout() {
+class PersonalInfoFragment : RoundedBottomSheetLayoutNew() {
 
     private var binding : FragmentPersonalInfoBottomBinding? = null
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
@@ -47,26 +49,6 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
         fillWorkInfo()
     }
 
-    private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
-        if (favoriteEntities.isNullOrEmpty()) {
-            binding?.personalFavoriteList?.visibility = View.GONE
-            return
-        }
-        binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(
-            favoriteEntities,
-            object : OnDeleteFavoriteListener {
-                override fun onDelete(entity: Entity) {
-                    deleteFavoriteEntity(entity)
-                }
-            }
-        )
-    }
-
-    private fun deleteFavoriteEntity(entity: Entity) {
-        dataCollectorClient.deleteFavorite(requireContext(), entity)
-        getFavoriteData()
-    }
-
     private fun getFavoriteData() {
         val prefs =
             requireContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
@@ -79,6 +61,31 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
             ), listType
         )
         fillFavoriteList(favoriteEntities)
+    }
+
+    private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
+        if (favoriteEntities.isNullOrEmpty()) {
+            binding?.personalFavoriteList?.visibility = View.GONE
+            return
+        }
+
+        binding?.personalFavoriteList?.layoutManager = LinearLayoutManager(requireContext())
+        binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(favoriteEntities)
+
+        val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val entity = favoriteEntities[viewHolder.adapterPosition]
+                deleteFavoriteEntity(entity)
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(swipeHandler)
+        itemTouchHelper.attachToRecyclerView(binding?.personalFavoriteList)
+    }
+
+    private fun deleteFavoriteEntity(entity: Entity) {
+        dataCollectorClient.deleteFavorite(requireContext(), entity)
+        getFavoriteData()
     }
 
     private fun fillHomeInfo() {
