@@ -46,6 +46,7 @@
     <string name="browse">Browse</string>
     <string name="path">Path</string>
     <string name="search_mode">SDK Search Mode</string>
+    <string name="settings">Settings</string>
 
 
     <!-- filters-->

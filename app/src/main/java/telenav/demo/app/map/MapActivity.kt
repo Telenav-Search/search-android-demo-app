@@ -10,6 +10,9 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.helper.widget.Flow
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
@@ -30,6 +33,7 @@ import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.stopGPSListener
 import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
+import telenav.demo.app.widgets.CategoryView
 import java.util.*
 import java.util.concurrent.Executor
 
@@ -65,6 +69,7 @@ class MapActivity : AppCompatActivity() {
         setupListeners()
         mapFragment = MapFragment()
         showMapFragment(mapFragment!!)
+        displayHotCategories()
     }
 
     fun redoButtonLogic() {
@@ -181,6 +186,25 @@ class MapActivity : AppCompatActivity() {
                 mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, "")
             }
         }
+    }
+
+    private fun displayHotCategories() {
+        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
+        val flowLayout = findViewById<Flow>(R.id.flow_main_root)
+        val set = ConstraintSet()
+        set.clone(bottomSheetLayout)
+
+        val hotCategoryIdArray = ArrayList<Int>()
+
+        for (eachHotCategory in hotCategoriesList) {
+            val categoryView = CategoryView(this)
+            categoryView.init(eachHotCategory)
+            categoryView.id = View.generateViewId()
+
+            bottomSheetLayout.addView(categoryView)
+            hotCategoryIdArray.add(categoryView.id)
+        }
+        flowLayout.referencedIds = hotCategoryIdArray.toIntArray()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
