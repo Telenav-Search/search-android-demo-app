@@ -38,6 +38,6 @@
         app:layout_constraintStart_toEndOf="@+id/entity_name"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="29 Westheimer Rd. Santa Ana dddddddddddddddddddddddddddd"/>
+        tools:text="29 Westheimer Rd. Santa Ana"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

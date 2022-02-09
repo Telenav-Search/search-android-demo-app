@@ -16,17 +16,20 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.view_bottom.*
 import telenav.demo.app.R
+import telenav.demo.app.homepage.CategoriesFragment
+import telenav.demo.app.homepage.HotCategory
+import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
-import telenav.demo.app.search.CategoriesResultFragment
-import telenav.demo.app.search.SearchBottomFragment
-import telenav.demo.app.search.SearchHotCategoriesFragment
+import telenav.demo.app.personalinfo.UserAddressFragment
+import telenav.demo.app.search.*
 import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.setGPSListener
 import telenav.demo.app.settings.SettingsActivity
@@ -60,6 +63,7 @@ class MapActivity : AppCompatActivity() {
             )
         }
     }
+    lateinit var behavior: BottomSheetBehavior<*>
     var lastKnownLocation: Location = Location("")
     private var mapFragment: MapFragment? = null
 
@@ -70,6 +74,7 @@ class MapActivity : AppCompatActivity() {
         mapFragment = MapFragment()
         showMapFragment(mapFragment!!)
         displayHotCategories()
+        displayUserInfo()
     }
 
     fun redoButtonLogic() {
@@ -106,7 +111,10 @@ class MapActivity : AppCompatActivity() {
         fab_search.setOnClickListener { openSearch() }
         app_mode_select.setOnClickListener { showSettingsActivity() }
         app_personal_info.setOnClickListener { showPersonalInfoActivity() }
-        user_icon.setOnClickListener { showPersonalInfoFragment() }
+        user_icon.setOnClickListener {
+            collapseBottomSheet()
+            showPersonalInfoFragment()
+        }
     }
 
     private fun showPersonalInfoActivity() {
@@ -195,16 +203,39 @@ class MapActivity : AppCompatActivity() {
         set.clone(bottomSheetLayout)
 
         val hotCategoryIdArray = ArrayList<Int>()
-
-        for (eachHotCategory in hotCategoriesList) {
-            val categoryView = CategoryView(this)
-            categoryView.init(eachHotCategory)
-            categoryView.id = View.generateViewId()
-
+        for (hotCategory in hotCategoriesList) {
+            val categoryView = getCategoryView(hotCategory)
             bottomSheetLayout.addView(categoryView)
             hotCategoryIdArray.add(categoryView.id)
         }
+
         flowLayout.referencedIds = hotCategoryIdArray.toIntArray()
+        behavior = BottomSheetBehavior.from(bottomSheetLayout)
+    }
+
+    fun collapseBottomSheet() {
+        if (this::behavior.isInitialized) {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    fun showBottomSheet() {
+        if (this::behavior.isInitialized) {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
+    private fun getCategoryView(hotCategory: HotCategory): CategoryView {
+        val categoryView = CategoryView(this)
+        categoryView.init(hotCategory)
+        categoryView.id = View.generateViewId()
+
+        return categoryView
+    }
+
+    private fun displayUserInfo() {
+        supportFragmentManager.beginTransaction().replace(R.id.user_address,
+            UserAddressFragment.newInstance()).commit()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

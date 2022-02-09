@@ -15,6 +15,7 @@ import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
 import telenav.demo.app.utils.deleteFavorite
 import java.lang.reflect.Type
 import androidx.recyclerview.widget.ItemTouchHelper
+import telenav.demo.app.map.MapActivity
 import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.widgets.RoundedBottomSheetLayoutNew
 
@@ -37,8 +38,14 @@ class PersonalInfoFragment : RoundedBottomSheetLayoutNew() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding?.personalInfoAreaBack?.setOnClickListener { dismiss() }
+        binding?.personalInfoAreaBack?.setOnClickListener {
+            dismiss()
+            (activity!! as MapActivity).showBottomSheet()
+        }
         binding?.personalInfoOta?.setOnClickListener { showHomeAreaActivity() }
+
+        childFragmentManager.beginTransaction().replace(R.id.user_address,
+            UserAddressFragment.newInstance()).commit()
 
         getFavoriteData()
     }
@@ -60,9 +67,11 @@ class PersonalInfoFragment : RoundedBottomSheetLayoutNew() {
     private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
         if (favoriteEntities.isNullOrEmpty()) {
             binding?.personalFavoriteList?.visibility = View.GONE
+            binding?.favorites?.visibility = View.GONE
             return
         }
 
+        binding?.favorites?.visibility = View.VISIBLE
         binding?.personalFavoriteList?.layoutManager = LinearLayoutManager(requireContext())
         binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(favoriteEntities)
 
