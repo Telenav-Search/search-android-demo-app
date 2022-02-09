@@ -1,13 +1,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
-    android:tint="@color/telenav_indigo_mid_tone">
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20"
+    android:tint="@color/blue_c1">
   <path
-      android:fillColor="@color/telenav_indigo_mid_tone"
-      android:pathData="M20,3H9v2.4l1.81,1.45C10.93,6.94 11,7.09 11,7.24v4.26c0,0.28 -0.22,0.5 -0.5,0.5h-4C6.22,12 6,11.78 6,11.5V7.24c0,-0.15 0.07,-0.3 0.19,-0.39L8,5.4V3H4v10c0,2.21 1.79,4 4,4h6c2.21,0 4,-1.79 4,-4v-3h2c1.11,0 2,-0.9 2,-2V5C22,3.89 21.11,3 20,3zM20,8h-2V5h2V8z"/>
-  <path
-      android:fillColor="@android:color/white"
-      android:pathData="M4,19h16v2h-16z"/>
+      android:fillColor="@color/blue_c1"
+      android:pathData="M16.0368,0.2443H2.6135C1.4323,0.2443 0.4658,1.2108 0.4658,2.3921V8.5238C0.4658,12.6367 3.6337,16.2342 7.7466,16.3523C11.9991,16.4812 15.4999,13.0663 15.4999,8.8352V7.7614H16.0368C18.1094,7.7614 19.7954,6.0754 19.7954,4.0029C19.7954,1.9303 18.1094,0.2443 16.0368,0.2443ZM13.3522,2.3921V5.6137H2.6135V2.3921H13.3522ZM16.0368,5.6137H15.4999V2.3921H16.0368C16.9281,2.3921 17.6476,3.1116 17.6476,4.0029C17.6476,4.8942 16.9281,5.6137 16.0368,5.6137ZM0.4658,17.4262H17.6476V19.5739H0.4658V17.4262Z" />
 </vector>
