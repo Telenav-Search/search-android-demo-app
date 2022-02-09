@@ -1,10 +1,11 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
-    android:tint="@color/telenav_indigo_mid_tone">
+    android:width="23dp"
+    android:height="16dp"
+    android:viewportWidth="23"
+    android:viewportHeight="16"
+    android:tint="@color/blue_c1">
+
   <path
-      android:fillColor="@color/telenav_indigo_mid_tone"
-      android:pathData="M7,13c1.66,0 3,-1.34 3,-3S8.66,7 7,7s-3,1.34 -3,3 1.34,3 3,3zM19,7h-8v7L3,14L3,5L1,5v15h2v-3h18v3h2v-9c0,-2.21 -1.79,-4 -4,-4z"/>
+      android:fillColor="@color/blue_c1"
+      android:pathData="M6.2727,8.3636C8.0029,8.3636 9.4091,6.9575 9.4091,5.2273C9.4091,3.497 8.0029,2.0909 6.2727,2.0909C4.5425,2.0909 3.1364,3.497 3.1364,5.2273C3.1364,6.9575 4.5425,8.3636 6.2727,8.3636ZM18.8182,2.0909H10.4545V9.4091H2.0909V-0H0V15.6818H2.0909V12.5454H20.9091V15.6818H23V6.2727C23,3.9623 21.1286,2.0909 18.8182,2.0909Z" />
 </vector>
