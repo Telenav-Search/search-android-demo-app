@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -15,6 +16,7 @@ import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
 import telenav.demo.app.utils.deleteFavorite
 import java.lang.reflect.Type
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.google.android.gms.maps.SupportMapFragment
 import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.widgets.RoundedBottomSheetLayoutNew
 
@@ -39,6 +41,9 @@ class PersonalInfoFragment : RoundedBottomSheetLayoutNew() {
 
         binding?.personalInfoAreaBack?.setOnClickListener { dismiss() }
         binding?.personalInfoOta?.setOnClickListener { showHomeAreaActivity() }
+
+        childFragmentManager.beginTransaction().replace(R.id.user_address,
+            UserAddressFragment.newInstance()).commit()
 
         getFavoriteData()
     }

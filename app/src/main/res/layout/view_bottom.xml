@@ -14,10 +14,9 @@
     <EditText
         android:id="@+id/search"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="10dp"
         android:layout_marginEnd="60dp"
-        android:autofillHints="@string/hint_number_of_results"
         android:background="@drawable/rounded_corners_background"
         android:backgroundTint="#F4F6F9"
         android:drawableStart="@drawable/ic_search"
@@ -58,5 +57,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search" />
+
+    <FrameLayout
+        android:id="@+id/user_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flow_main_root" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

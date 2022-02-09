@@ -21,9 +21,11 @@ import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.view_bottom.*
 import telenav.demo.app.R
+import telenav.demo.app.homepage.CategoriesFragment
 import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
+import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.CategoriesResultFragment
 import telenav.demo.app.search.SearchBottomFragment
 import telenav.demo.app.search.SearchHotCategoriesFragment
@@ -70,6 +72,7 @@ class MapActivity : AppCompatActivity() {
         mapFragment = MapFragment()
         showMapFragment(mapFragment!!)
         displayHotCategories()
+        displayUserInfo()
     }
 
     fun redoButtonLogic() {
@@ -205,6 +208,11 @@ class MapActivity : AppCompatActivity() {
             hotCategoryIdArray.add(categoryView.id)
         }
         flowLayout.referencedIds = hotCategoryIdArray.toIntArray()
+    }
+
+    private fun displayUserInfo() {
+        supportFragmentManager.beginTransaction().replace(R.id.user_address,
+            UserAddressFragment.newInstance()).commit()
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
