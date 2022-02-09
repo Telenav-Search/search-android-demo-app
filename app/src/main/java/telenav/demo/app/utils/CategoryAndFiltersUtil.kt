@@ -34,7 +34,7 @@ object CategoryAndFiltersUtil {
         HotCategory("Hotels / Motels", R.drawable.ic_hotel_color, R.drawable.ic_hotel, "595"),
         HotCategory("Attractions", R.drawable.ic_attraction_color, R.drawable.ic_attraction, "605"),
         HotCategory("Fuel", R.drawable.ic_gas_color, R.drawable.ic_gas, "811"),
-        HotCategory("Electric Vehicle Charge Station", R.drawable.ic_ev_color, R.drawable.ic_ev, "771"),
+        HotCategory("Electric Vehicle", R.drawable.ic_ev_color, R.drawable.ic_ev, "771"),
         HotCategory("More", R.drawable.ic_more_color, R.drawable.ic_more, "")
     )
 

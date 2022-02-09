@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/white"
-    android:id="@+id/bottomSheet"
+    android:id="@+id/bottom_sheet"
     android:paddingTop="20dp"
     android:paddingBottom="20dp"
     app:behavior_hideable="false"
@@ -44,5 +44,19 @@
         android:paddingHorizontal="20dp"
         android:src="@drawable/ic_person1"
         app:tint="@color/blue_c1" />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/flow_main_root"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:flow_wrapMode="aligned"
+        app:flow_horizontalGap="10dp"
+        app:flow_verticalGap="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
