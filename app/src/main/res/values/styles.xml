@@ -1,4 +1,4 @@
-<resources>
+<resources >
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -12,7 +12,7 @@
 
     <style name="BottomSheetDialogThemeNew" parent="BaseBottomSheetDialogNew">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
@@ -56,4 +56,5 @@
         <item name="android:background">@drawable/widget_btn_selector</item>
         <item name="android:visibility">gone</item>
     </style>
+
 </resources>
