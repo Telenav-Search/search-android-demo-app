@@ -65,13 +65,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         entityDetailViewModel =
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
         viewModel.searchResults.observe(requireActivity(), Observer {
-            (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?,
-                ""
-            )
-            (activity!! as MapActivity).showSearchHotCategoriesFragment(
-                it as List<Entity>, ""
-            )
             (activity!! as MapActivity).enableDisableRedoButton(true)
         })
     }

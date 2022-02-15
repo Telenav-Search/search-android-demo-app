@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/general_padding_small">
+
+        <View
+            android:id="@+id/separate_line"
+            android:layout_width="26dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/blue_c1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="60dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/rounded_corners_background"
+            android:backgroundTint="#F4F6F9"
+            android:drawableStart="@drawable/ic_search"
+            android:drawableTint="@android:color/black"
+            android:paddingLeft="25dp"
+            android:paddingVertical="16dp"
+            android:gravity="center"
+            android:hint="@string/search_hint"
+            android:textColorHint="@color/grey_c1"
+            android:inputType="text"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/separate_line" />
+
+        <ImageView
+            android:id="@+id/searchFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/search"
+            app:layout_constraintBottom_toBottomOf="@+id/search"
+            android:paddingHorizontal="20dp"
+            android:src="@drawable/ic_filter"
+            app:tint="@color/blue_c1" />
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/searchLoading"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:indeterminateTint="@color/colorAccent" />
+
+        <TextView
+            android:id="@+id/searchError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="21dp"
+            android:layout_marginEnd="21dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/result_error_loading"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search"/>
+
+        <TextView
+            android:id="@+id/resultsEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="21dp"
+            android:layout_marginEnd="21dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/no_result"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search"
+            tools:visibility="visible" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchList"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginStart="21dp"
+            android:layout_marginEnd="18dp"
+            android:layout_marginTop="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search"
+            android:scrollbars="vertical" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -230,6 +230,11 @@ class MapActivity : AppCompatActivity() {
         categoryView.init(hotCategory)
         categoryView.id = View.generateViewId()
 
+        categoryView.setOnClickListener {
+            collapseBottomSheet()
+            showSearchInfoBottomFragment(hotCategory.id, hotCategory.name)
+        }
+
         return categoryView
     }
 
@@ -270,6 +275,12 @@ class MapActivity : AppCompatActivity() {
     private fun showPersonalInfoFragment() {
         personalInfoFragment = PersonalInfoFragment.newInstance()
         personalInfoFragment!!.show(supportFragmentManager, personalInfoFragment!!.tag)
+    }
+
+    var searchInfoBottomFragment: SearchInfoBottomFragment? = null
+    private fun showSearchInfoBottomFragment(categoryId: String?, categoryName: String?) {
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryId, categoryName)
+        searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
     fun setFiltersSub() {

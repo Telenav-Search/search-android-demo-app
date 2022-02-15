@@ -64,6 +64,9 @@
     <string name="no_suggestion">No suggestions found</string>
     <string name="suggestion_error_loading">Suggestions loading error</string>
 
+    <string name="no_result">No results found</string>
+    <string name="result_error_loading">Loading error</string>
+
     <string name="dollar">$</string>
     <string name="star_1">1</string>
     <string name="star_2">2</string>
