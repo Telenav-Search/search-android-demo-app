@@ -17,11 +17,11 @@ import java.lang.reflect.Type
 import androidx.recyclerview.widget.ItemTouchHelper
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.utils.SwipeToDeleteCallback
-import telenav.demo.app.widgets.RoundedBottomSheetLayoutNew
+import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 private const val TAG = "PersonalInfoFragment"
 
-class PersonalInfoFragment : RoundedBottomSheetLayoutNew() {
+class PersonalInfoFragment : RoundedBottomSheetLayout() {
 
     private var binding : FragmentPersonalInfoBottomBinding? = null
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
