@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/separate_line1"
+            android:layout_width="26dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/blue_c1"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/personal_info_area_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp"
+            android:layout_marginTop="19dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/separate_line1"
+            app:tint="@color/blue_c1"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/user_title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingLeft="12dp"
+            android:textColor="@color/black_header"
+            app:layout_constraintStart_toEndOf="@id/personal_info_area_back"
+            app:layout_constraintBottom_toBottomOf="@id/personal_info_area_back" />
+
+        <ImageView
+            android:id="@+id/personal_info_ota"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingHorizontal="5dp"
+            android:src="@drawable/ic_cloud_update"
+            app:layout_constraintEnd_toStartOf="@id/settings"
+            app:layout_constraintBottom_toBottomOf="@id/personal_info_area_back"
+            app:tint="@color/blue_c1" />
+
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:paddingLeft="10dp"
+            android:paddingRight="20dp"
+            android:src="@drawable/ic_settings"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/personal_info_ota"
+            app:layout_constraintBottom_toBottomOf="@id/personal_info_ota"
+            app:tint="@color/blue_c1"/>
+
+        <TextView
+            android:id="@+id/my_place"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="27dp"
+            android:layout_marginStart="25dp"
+            android:text="@string/my_place"
+            android:textSize="14sp"
+            android:textColor="@color/blue_c1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/personal_info_area_back" />
+
+        <FrameLayout
+            android:id="@+id/user_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/my_place" />
+
+        <View
+            android:id="@+id/separate_line"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/blue_c2"
+            app:layout_constraintStart_toStartOf="@+id/user_address"
+            app:layout_constraintEnd_toEndOf="@+id/user_address"
+            app:layout_constraintTop_toBottomOf="@+id/user_address" />
+
+        <TextView
+            android:id="@+id/favorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/favorites"
+            android:textSize="14sp"
+            android:textColor="@color/blue_c1"
+            app:layout_constraintStart_toStartOf="@id/my_place"
+            app:layout_constraintTop_toBottomOf="@+id/separate_line" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/personal_favorite_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
+            app:layout_constraintTop_toBottomOf="@+id/favorites" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

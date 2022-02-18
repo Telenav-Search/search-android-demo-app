@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:id="@+id/bottom_sheet"
+    android:paddingTop="8dp"
+    android:paddingBottom="20dp"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="82dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <View
+        android:id="@+id/separate_line"
+        android:layout_width="26dp"
+        android:layout_height="3dp"
+        android:background="@color/blue_c1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginTop="9dp"
+        android:background="@drawable/rounded_corners_background"
+        android:backgroundTint="@color/grey_c2"
+        android:drawableStart="@drawable/ic_search"
+        android:drawableTint="@android:color/black"
+        android:paddingLeft="25dp"
+        android:paddingVertical="16dp"
+        android:gravity="center"
+        android:hint="@string/search_hint"
+        android:textColorHint="@color/grey_c1"
+        android:inputType="text"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/separate_line" />
+
+    <ImageView
+        android:id="@+id/user_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/search"
+        app:layout_constraintBottom_toBottomOf="@+id/search"
+        android:paddingHorizontal="20dp"
+        android:src="@drawable/ic_person"
+        app:tint="@color/blue_c1" />
+
+    <androidx.constraintlayout.helper.widget.Flow
+        android:id="@+id/flow_main_root"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:flow_wrapMode="aligned"
+        app:flow_horizontalGap="10dp"
+        app:flow_verticalGap="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search" />
+
+    <FrameLayout
+        android:id="@+id/user_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/flow_main_root" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
