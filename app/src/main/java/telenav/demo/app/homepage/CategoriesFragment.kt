@@ -86,4 +86,4 @@ class CategoriesFragment : Fragment() {
 
 }
 
-class HotCategory(val name: String, val iconPurple: Int, val iconWhite: Int, val id: String)
+class HotCategory(val name: String, val tag: String, val iconPurple: Int, val iconWhite: Int, val id: String)

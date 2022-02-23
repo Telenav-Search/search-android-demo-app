@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/bottom_sheet"
         android:paddingBottom="@dimen/general_padding_small">
 
         <View
@@ -26,16 +26,17 @@
             android:layout_marginEnd="60dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/rounded_corners_background"
-            android:backgroundTint="#F4F6F9"
+            android:backgroundTint="@color/grey_c2"
             android:drawableStart="@drawable/ic_search"
             android:drawableTint="@android:color/black"
+            android:drawablePadding="5dp"
             android:paddingLeft="25dp"
             android:paddingVertical="16dp"
-            android:gravity="center"
             android:hint="@string/search_hint"
             android:textColorHint="@color/grey_c1"
             android:inputType="text"
             android:textSize="12sp"
+            android:textColor="@color/blue_c1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/separate_line" />
@@ -51,6 +52,20 @@
             android:paddingHorizontal="20dp"
             android:src="@drawable/ic_filter"
             app:tint="@color/blue_c1" />
+
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/flow_category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:flow_wrapMode="aligned"
+            app:flow_horizontalGap="10dp"
+            app:flow_verticalGap="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search" />
 
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/searchLoading"
@@ -71,35 +86,20 @@
             android:layout_marginEnd="21dp"
             android:layout_marginTop="10dp"
             android:layout_gravity="center_horizontal"
-            android:text="@string/result_error_loading"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/search"/>
-
-        <TextView
-            android:id="@+id/resultsEmpty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="21dp"
-            android:layout_marginEnd="21dp"
-            android:layout_marginTop="10dp"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/no_result"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/search"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toBottomOf="@+id/flow_category"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchList"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="200dp"
             android:layout_marginStart="21dp"
             android:layout_marginEnd="18dp"
             android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/search"
+            app:layout_constraintTop_toBottomOf="@id/flow_category"
             android:scrollbars="vertical" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

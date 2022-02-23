@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import android.view.LayoutInflater
+import com.telenav.sdk.entity.model.base.Category
 import telenav.demo.app.databinding.CategoryViewBinding
 import telenav.demo.app.homepage.HotCategory
 
@@ -31,6 +32,10 @@ class CategoryView : ConstraintLayout {
     fun init(category: HotCategory) {
         binding?.categoryName?.text = category.name
         binding?.categoryIcon?.setImageResource(category.iconPurple)
+    }
+
+    fun init(category: Category) {
+        binding?.categoryName?.text = category.name
     }
 
 }

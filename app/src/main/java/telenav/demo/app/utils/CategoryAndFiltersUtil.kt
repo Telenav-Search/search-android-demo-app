@@ -25,18 +25,18 @@ object CategoryAndFiltersUtil {
     const val PREF_PREFIX_KEY = "appwidget_"
 
     val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food_color, R.drawable.ic_food, "226"),
-        HotCategory("Parking", R.drawable.ic_parking_color, R.drawable.ic_parking, "600"),
-        HotCategory("Coffee", R.drawable.ic_coffee_color, R.drawable.ic_coffee, "241"),
-        HotCategory("Fuel", R.drawable.ic_gas_color, R.drawable.ic_gas, "811"),
-        HotCategory("Shopping", R.drawable.ic_grocery_color, R.drawable.ic_shopping, "4090"),
-        HotCategory("Hotels", R.drawable.ic_hotel_color, R.drawable.ic_hotel, "595"),
-        HotCategory("Banks", R.drawable.ic_atm_color, R.drawable.ic_atm, "374"),
-        HotCategory("Attractions", R.drawable.ic_attraction_color, R.drawable.ic_attraction, "605"),
-        HotCategory("EV Charger", R.drawable.ic_ev_color, R.drawable.ic_ev, "771"),
-        HotCategory("Bus", R.drawable.ic_bus, R.drawable.ic_grocery, "222"),
-        HotCategory("Hospital", R.drawable.ic_hospital, R.drawable.ic_grocery, "223"),
-        HotCategory("More", R.drawable.ic_more_color, R.drawable.ic_more, "")
+        HotCategory("Food", "RESTAURANT", R.drawable.ic_food_color, R.drawable.ic_food, "226"),
+        HotCategory("Parking", "PARKING", R.drawable.ic_parking_color, R.drawable.ic_parking, "600"),
+        HotCategory("Coffee", "COFFEE_HOUSE", R.drawable.ic_coffee_color, R.drawable.ic_coffee, "241"),
+        HotCategory("Fuel", "FUEL_STATION", R.drawable.ic_gas_color, R.drawable.ic_gas, "811"),
+        HotCategory("Shopping", "SHOPPING", R.drawable.ic_grocery_color, R.drawable.ic_shopping, "4090"),
+        HotCategory("Hotels", "HOTEL_MOTEL", R.drawable.ic_hotel_color, R.drawable.ic_hotel, "595"),
+        HotCategory("Banks", "BANK AND ATM", R.drawable.ic_atm, R.drawable.ic_atm,"374"),
+        HotCategory("Attractions", "TOURIST_ATTRACTION", R.drawable.ic_attraction_color, R.drawable.ic_attraction, "605"),
+        HotCategory("EV Charger", "ELECTRIC_CHARGE_STATION", R.drawable.ic_ev_color, R.drawable.ic_ev, "771"),
+        HotCategory("Bus", "", R.drawable.ic_bus, R.drawable.ic_grocery, "222"),
+        HotCategory("Hospital", "HEALTH_MEDICINE", R.drawable.ic_hospital, R.drawable.ic_grocery, "223"),
+        HotCategory("More", "",  R.drawable.ic_more_color, R.drawable.ic_more, "")
     )
 
     val categoriesColors = arrayListOf(

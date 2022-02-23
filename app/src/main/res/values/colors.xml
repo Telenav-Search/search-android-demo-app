@@ -32,6 +32,8 @@
     <color name="grey_c3">#807F7F</color>
     <color name="black_header">#1E1E1E</color>
     <color name="black_c1">#343434</color>
+    <color name="green_c1">#43AD02</color>
+    <color name="red_c1">#F26D61</color>
 
     <color name="telenav_gray">#808084</color>
     <color name="telenav_gray_opacity_50">#E6808084</color>

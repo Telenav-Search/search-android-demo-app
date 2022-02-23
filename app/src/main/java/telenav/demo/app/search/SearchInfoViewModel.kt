@@ -29,19 +29,21 @@ class SearchInfoViewModel : ViewModel() {
     var filters: List<Any>? = null
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
     var searchResults = MutableLiveData<List<Any>>().apply { listOf<Any>() }
-    var searchError = MutableLiveData<Boolean>().apply { postValue(false) }
+    var searchError = MutableLiveData<String>().apply { postValue("") }
     var loading = MutableLiveData<Boolean>().apply { postValue(false) }
+    val categories = MutableLiveData<List<Category>>().apply { listOf<Any>() }
 
     fun search(
         query: String?,
         categoryId: String?,
+        categoryTag: String?,
         location: Location,
         executor: Executor,
         nearLeft: LatLng? = null,
         farRight: LatLng? = null) {
 
         loading.postValue(true)
-        searchError.postValue(false)
+        searchError.postValue("")
 
         val filtersSearch = SearchFilters.builder()
         if (categoryId != null) {
@@ -60,6 +62,7 @@ class SearchInfoViewModel : ViewModel() {
                     .build()
             filtersSearch.setGeoFilter(geoFilter)
         }
+
         telenavEntityClient.searchRequest()
             .apply {
                 if (query != null)
@@ -67,7 +70,7 @@ class SearchInfoViewModel : ViewModel() {
             }.apply {
                     setFilters(filtersSearch.build())
                 }
-            .setLocation(37.78509, -122.41988)
+            .setLocation(37.39877104671623, -121.97739243507385)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_INFO_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(
@@ -80,11 +83,12 @@ class SearchInfoViewModel : ViewModel() {
                             response.referenceId
                         )
                         handleSearchResponse(filters != null, response.results)
+                        requestSubcategories(categoryId, categoryTag, location, executor)
                     }
 
                     override fun onFailure(p1: Throwable?) {
                         loading.postValue(false)
-                        searchError.postValue(true)
+                        searchError.postValue(p1?.message)
 
                         Log.e(TAG, "onFailure", p1)
                     }
@@ -94,25 +98,26 @@ class SearchInfoViewModel : ViewModel() {
 
     fun requestSubcategories(
         categoryId: String?,
+        categoryTag: String?,
         location: Location,
         executor: Executor
     ) {
         telenavEntityClient.discoverCategoryRequest()
-            .setLocation(37.78509, -122.41988)
+            .setLocation(37.39877104671623, -121.97739243507385)
             .setLimit(App.readFromSharedPreferences(App.FILTER_NUMBER))
-            .setCategory(categoryId)
+            .setCategory(categoryTag)
             .asyncCall(
                 executor,
                 object : Callback<EntityDiscoverCategoryResponse?> {
                 override fun onSuccess(response: EntityDiscoverCategoryResponse?) {
                     loading.postValue(false)
-                    searchResults.postValue(response?.results)
                     // log response in JSON format
                     Log.d("TAG", EntityJsonConverter.toPrettyJson(response))
-                    val categories: List<Category> = response?.results as List<Category>
-                    for (category in categories) {
+                    val categories1: List<Category> = response?.results as List<Category>
+                    for (category in categories1) {
                         Log.d("TAG", " Categories ${category.name}")
                     }
+                    categories.value = categories1
                 }
 
                 override fun onFailure(t: Throwable?) {
@@ -126,7 +131,7 @@ class SearchInfoViewModel : ViewModel() {
     }
 
     private fun handleSearchResponse(filtersAvailable: Boolean, results: List<Entity>) {
-        loading.postValue(false)
+       // loading.postValue(false)
         if (filtersAvailable) {
             searchResults.value = applyFilters(results)
         } else {

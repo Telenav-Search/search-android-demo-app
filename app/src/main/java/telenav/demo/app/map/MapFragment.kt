@@ -20,6 +20,7 @@ import com.google.android.gms.maps.model.VisibleRegion
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
@@ -102,12 +103,15 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
+        /*
         marker?.hideInfoWindow()
         if (searchResultList.isEmpty()) {
             return true
         }
         customInfoWindowAdapter.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
         marker.showInfoWindow()
+        */
+        (activity!! as MapActivity).showEntityDetails(searchResultList[marker?.zIndex!!.toInt() - 1])
         return false
     }
 
@@ -206,7 +210,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             googleMap?.setOnMarkerClickListener(this)
             googleMap?.setOnInfoWindowClickListener(this)
 
-            setInfoWindow()
+            //setInfoWindow()
         }
     }
 

@@ -20,25 +20,26 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.prediction.Suggestion
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.entity_detail_fragment_layout.*
+import kotlinx.android.synthetic.main.info_window.view.*
 import kotlinx.android.synthetic.main.view_bottom.*
-import telenav.demo.app.R
-import telenav.demo.app.homepage.CategoriesFragment
+import kotlinx.android.synthetic.main.view_entity_details_bottom.*
+import telenav.demo.app.*
 import telenav.demo.app.homepage.HotCategory
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.initialization.InitializationActivity
+import telenav.demo.app.model.SearchResult
 import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
 import telenav.demo.app.search.filters.Filter
-import telenav.demo.app.setGPSListener
 import telenav.demo.app.settings.SettingsActivity
-import telenav.demo.app.stopGPSListener
 import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.widgets.CategoryView
 import java.util.*
 import java.util.concurrent.Executor
+
 
 class MapActivity : AppCompatActivity() {
 
@@ -66,6 +67,9 @@ class MapActivity : AppCompatActivity() {
     lateinit var behavior: BottomSheetBehavior<*>
     var lastKnownLocation: Location = Location("")
     private var mapFragment: MapFragment? = null
+    private var hotCategoryName = ""
+    private var hotCategoryTag = ""
+    private var hotCategoryId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,7 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun redoButtonLogic() {
+        /*
         if (lastSearch.isEmpty()) {
             redo_button.visibility = View.GONE
         } else {
@@ -100,6 +105,8 @@ class MapActivity : AppCompatActivity() {
                         region?.nearLeft, region?.farRight)
             }
         }
+
+         */
     }
 
     fun enableDisableRedoButton(enable: Boolean) {
@@ -114,6 +121,12 @@ class MapActivity : AppCompatActivity() {
         user_icon.setOnClickListener {
             collapseBottomSheet()
             showPersonalInfoFragment()
+        }
+        entity_details_back.setOnClickListener {
+            entity_details.visibility = View.GONE
+            top_navigation_panel.visibility = View.GONE
+
+            showSearchInfoBottomFragment(hotCategoryId, hotCategoryName, hotCategoryTag)
         }
     }
 
@@ -231,8 +244,11 @@ class MapActivity : AppCompatActivity() {
         categoryView.id = View.generateViewId()
 
         categoryView.setOnClickListener {
+            hotCategoryName = hotCategory.name
+            hotCategoryId = hotCategory.id
+            hotCategoryTag = hotCategory.tag
             collapseBottomSheet()
-            showSearchInfoBottomFragment(hotCategory.id, hotCategory.name)
+            showSearchInfoBottomFragment(hotCategory.id, hotCategory.name, hotCategory.tag)
         }
 
         return categoryView
@@ -257,6 +273,7 @@ class MapActivity : AppCompatActivity() {
             lastKnownLocation,
             currentSearchHotCategory
         )
+        //showSearchInfoBottomFragment(hotCategoryId, hotCategoryName, hotCategoryTag)
     }
 
     var searchListFragment: SearchHotCategoriesFragment? = null
@@ -278,8 +295,8 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
-    private fun showSearchInfoBottomFragment(categoryId: String?, categoryName: String?) {
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryId, categoryName)
+    private fun showSearchInfoBottomFragment(categoryId: String?, categoryName: String?, hotCategoryTag: String?) {
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryId, categoryName, hotCategoryTag)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
@@ -296,6 +313,46 @@ class MapActivity : AppCompatActivity() {
 
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
+    }
+
+    fun showEntityDetails(searchResult: SearchResult) {
+        entity_details.visibility = View.VISIBLE
+        top_navigation_panel.visibility = View.VISIBLE
+
+        navigation_header.text = hotCategoryName
+
+        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.entity_root)
+        val behavior = BottomSheetBehavior.from(bottomSheetLayout)
+        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+        supportFragmentManager.beginTransaction().add(R.id.frame_entity_details,
+            EntityDetailsFragment.newInstance(searchResult)).commit()
+
+        /*
+        behavior.addBottomSheetCallback(object : BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {}
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+                if (slideOffset == 0f) {
+                    entity_stars.visibility = View.GONE
+                } else {
+                    entity_stars.visibility = View.VISIBLE
+                }
+            }
+        })
+
+         */
+
+        bottomSheetLayout.setOnClickListener {
+            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
+    fun hideKeyboard(view: View) {
+        view.hideKeyboard()
     }
 }
 

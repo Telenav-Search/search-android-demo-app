@@ -40,6 +40,7 @@
     <string name="edit">Edit</string>
     <string name="home">Home</string>
     <string name="office">Office</string>
+    <string name="favorite">Favorite</string>
     <string name="favorites">Favorites</string>
     <string name="index_data_path">Index Data Path</string>
     <string name="index_data_path_desc">Changing index data path will take effect on next app startup</string>
@@ -47,7 +48,18 @@
     <string name="path">Path</string>
     <string name="search_mode">SDK Search Mode</string>
     <string name="settings">Settings</string>
-
+    <string name="open_time">Open time</string>
+    <string name="phone_number">Phone number</string>
+    <string name="call">Call</string>
+    <string name="open">Open</string>
+    <string name="closed">Closed</string>
+    <string name="available_parking_lot">Available parking lot</string>
+    <string name="price">Price</string>
+    <string name="available_service">Available service</string>
+    <string name="connectors_number">Connectors number</string>
+    <string name="connectors_type">Connectors type</string>
+    <string name="power_feed">Power feed</string>
+    <string name="charger_brand">Charger brand</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>
