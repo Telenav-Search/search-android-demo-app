@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
@@ -48,6 +49,7 @@ class MapActivity : AppCompatActivity() {
         private const val MAP_FRAGMENT_TAG = "MapFragment"
         private const val CODE_SETTINGS = 3
         const val IS_ENV_CHANGED = "IS_ENV_CHANGED"
+        private val FRAGMENT_TAG = "EntityDetailsFragment"
     }
 
     private var filters: List<Filter>? = null
@@ -325,24 +327,20 @@ class MapActivity : AppCompatActivity() {
         val behavior = BottomSheetBehavior.from(bottomSheetLayout)
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-        supportFragmentManager.beginTransaction().add(R.id.frame_entity_details,
-            EntityDetailsFragment.newInstance(searchResult)).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
+            EntityDetailsFragment.newInstance(searchResult), FRAGMENT_TAG).commit()
 
-        /*
-        behavior.addBottomSheetCallback(object : BottomSheetCallback() {
+        behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {}
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
 
-                if (slideOffset == 0f) {
-                    entity_stars.visibility = View.GONE
-                } else {
-                    entity_stars.visibility = View.VISIBLE
+                val fragment: Fragment? = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+                if (fragment != null && fragment is EntityDetailsFragment) {
+                    fragment.updateItemVisibility(slideOffset)
                 }
             }
         })
-
-         */
 
         bottomSheetLayout.setOnClickListener {
             if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {

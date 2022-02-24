@@ -29,8 +29,8 @@
             android:id="@+id/entity_always_closed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_marginEnd="14dp"
+            android:layout_marginBottom="20dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Open"/>
@@ -81,7 +81,6 @@
             android:layout_marginStart="6dp"
             android:textColor="@color/blue_c1"
             android:textSize="12sp"
-            android:text="@string/open_now"
             app:layout_constraintTop_toBottomOf="@+id/available_parking_lot_header"
             app:layout_constraintStart_toEndOf="@+id/entity_price_header"
             tools:text="2$/hour"/>

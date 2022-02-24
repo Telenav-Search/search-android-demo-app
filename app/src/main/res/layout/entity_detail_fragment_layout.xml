@@ -125,7 +125,7 @@
                 android:id="@+id/poi_icon"
                 android:layout_width="@dimen/padding_60"
                 android:layout_height="@dimen/padding_60"
-                android:src="@drawable/ic_coffee"
+                android:src="@drawable/ic_coffee_color"
                 android:layout_margin="@dimen/padding_20"
                 android:backgroundTint="@color/telenav_gray"
                 android:background="@drawable/rounded_corners_background"

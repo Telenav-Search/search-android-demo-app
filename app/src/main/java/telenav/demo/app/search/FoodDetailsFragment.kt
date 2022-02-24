@@ -56,6 +56,14 @@ class FoodDetailsFragment : Fragment() {
         CategoryAndFiltersUtil.setStarsViewBasedOnRating(entity_root, searchResult?.ratingLevel!!, requireContext())
     }
 
+    fun updateStartsVisibility(slideOffset: Float) {
+        if (slideOffset == 0f) {
+            binding?.entityStars?.visibility = View.GONE
+        } else {
+            binding?.entityStars?.visibility = View.VISIBLE
+        }
+    }
+
     companion object {
         @JvmStatic
         fun newInstance(searchResult: SearchResult?) =

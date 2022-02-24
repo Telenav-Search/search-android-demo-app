@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentEvChargerDetailsBinding
 import telenav.demo.app.model.SearchResult
 
@@ -31,8 +33,12 @@ class EvChargerDetailsFragment : Fragment() {
             binding?.entityAddress?.text = searchResult?.address
         }
 
-        if (!searchResult?.hours.isNullOrEmpty()) {
-            binding?.entityAlwaysClosed?.text = searchResult?.hours
+        if (searchResult?.permanentlyClosed != null) {
+            binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
+            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
+        } else {
+            binding?.entityAlwaysClosed?.text = getString(R.string.open)
+            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_c1))
         }
     }
 

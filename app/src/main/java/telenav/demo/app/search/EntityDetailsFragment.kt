@@ -24,6 +24,7 @@ import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
 import telenav.demo.app.databinding.FragmentEntityDetailsBinding
 import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.map.MapActivity
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.utils.addFavorite
 import telenav.demo.app.utils.deleteFavorite
@@ -106,7 +107,7 @@ class EntityDetailsFragment : Fragment() {
         }
 
          childFragmentManager.beginTransaction().replace(
-            R.id.frame_entity_additional_details, fragment).commit()
+            R.id.frame_entity_additional_details, fragment, FRAGMENT_TAG).commit()
     }
 
     private fun getDetails(id: String) {
@@ -151,8 +152,16 @@ class EntityDetailsFragment : Fragment() {
             }
     }
 
+    fun updateItemVisibility(slideOffset: Float) {
+        val fragment: Fragment? = childFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+        if (fragment != null && fragment is FoodDetailsFragment) {
+            fragment.updateStartsVisibility(slideOffset)
+        }
+    }
 
     companion object {
+        private val FRAGMENT_TAG = "AdditionalDetailsFragment"
+
         @JvmStatic
         fun newInstance(searchResult: SearchResult) =
             EntityDetailsFragment().apply {

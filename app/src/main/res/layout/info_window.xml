@@ -154,7 +154,7 @@
             android:backgroundTint="@color/telenav_yellow"
             android:padding="@dimen/bottom_sheet_top_padding"
             app:tint="@color/telenav_gray"
-            android:src="@drawable/ic_coffee" />
+            android:src="@drawable/ic_coffee_color" />
         </LinearLayout>
     </LinearLayout>
 
