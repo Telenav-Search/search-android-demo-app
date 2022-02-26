@@ -166,7 +166,6 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val loc = (activity!! as MapActivity).lastKnownLocation
                 (activity!! as MapActivity).setLastSearch(search.text.toString())
-                (activity!! as MapActivity).redoButtonLogic()
                 activity?.getUIExecutor()?.let {
                     currentSearchHotCategory = search.text.toString()
                     viewModel.search(search.text.toString(), null,loc,
@@ -196,7 +195,6 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
                 Log.d("test", "click suggestion ${Gson().toJson(suggestion)}")
                 val loc = (activity!! as MapActivity).lastKnownLocation
                 (activity!! as MapActivity).setLastSearch(suggestion.formattedLabel)
-                (activity!! as MapActivity).redoButtonLogic()
                 activity?.getUIExecutor()?.let {
                     currentSearchHotCategory = suggestion.formattedLabel
                     viewModel.search(suggestion.formattedLabel, null, loc,
@@ -271,19 +269,18 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
         chip.isCloseIconVisible = false
         chip_group.addView(chip as View)
         chip.setOnClickListener {
-            if (hotCategory.id.isEmpty()) {
+            if (hotCategory.tag.isEmpty()) {
                 (activity as MapActivity).showSubcategoriesFragment()
                 fragmentManager?.beginTransaction()?.remove(this)?.commit()
             } else {
-                currentSearchHotCategory = hotCategory.id
+                currentSearchHotCategory = hotCategory.tag
                 val location = (activity!! as MapActivity).lastKnownLocation
                 activity?.getUIExecutor()?.let { executor ->
                     when (searchType) {
                         CATEGORY_SEARCH -> {
-                            (activity!! as MapActivity).setLastSearch(hotCategory.id)
-                            (activity!! as MapActivity).redoButtonLogic()
+                            (activity!! as MapActivity).setLastSearch(hotCategory.tag)
                             viewModel.search(
-                                null, hotCategory.id, location, executor
+                                null, hotCategory.tag, location, executor
                             )
                         }
                     }

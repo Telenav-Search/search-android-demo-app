@@ -35,7 +35,6 @@ class SearchInfoViewModel : ViewModel() {
 
     fun search(
         query: String?,
-        categoryId: String?,
         categoryTag: String?,
         location: Location,
         executor: Executor,
@@ -46,9 +45,9 @@ class SearchInfoViewModel : ViewModel() {
         searchError.postValue("")
 
         val filtersSearch = SearchFilters.builder()
-        if (categoryId != null) {
+        if (categoryTag != null) {
             filtersSearch.setCategoryFilter(
-                    CategoryFilter.builder().addCategory(categoryId).build()
+                    CategoryFilter.builder().addCategory(categoryTag).build()
             )
         }
         if (nearLeft != null && farRight != null) {
@@ -83,7 +82,7 @@ class SearchInfoViewModel : ViewModel() {
                             response.referenceId
                         )
                         handleSearchResponse(filters != null, response.results)
-                        requestSubcategories(categoryId, categoryTag, location, executor)
+                        requestSubcategories(categoryTag, location, executor)
                     }
 
                     override fun onFailure(p1: Throwable?) {
@@ -97,7 +96,6 @@ class SearchInfoViewModel : ViewModel() {
     }
 
     fun requestSubcategories(
-        categoryId: String?,
         categoryTag: String?,
         location: Location,
         executor: Executor

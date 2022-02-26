@@ -51,7 +51,7 @@ class SearchHotCategoriesFragment : RoundedBottomSheetLayout() {
 
         var categoryName = ""
         for (eachCategory in CategoryAndFiltersUtil.hotCategoriesList) {
-            if ((eachCategory.id) == categoryId) {
+            if ((eachCategory.tag) == categoryId) {
                 categoryName = eachCategory.name
                 break
             }

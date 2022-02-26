@@ -339,7 +339,7 @@ class SearchListFragment : Fragment() {
         fun newInstance(category: HotCategory) =
             SearchListFragment().apply {
                 arguments = Bundle().apply {
-                    putString(PARAM_CATEGORY, category.id)
+                    putString(PARAM_CATEGORY, category.tag)
                     putInt(PARAM_ICON, category.iconPurple)
                     putString(PARAM_TITLE, category.name)
                 }

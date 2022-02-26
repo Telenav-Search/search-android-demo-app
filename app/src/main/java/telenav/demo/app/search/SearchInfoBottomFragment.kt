@@ -1,6 +1,5 @@
 package telenav.demo.app.search
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,7 +18,6 @@ import telenav.demo.app.databinding.SearchInfoBottomFragmentLayoutBinding
 import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.searchlist.SearchListInfoRecyclerAdapter
-import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.widgets.CategoryView
 import telenav.demo.app.widgets.RoundedBottomSheetLayoutNew
 import java.util.ArrayList
@@ -29,7 +27,6 @@ private const val TAG = "SearchInfoBottomFragment"
 class SearchInfoBottomFragment : RoundedBottomSheetLayoutNew() {
 
     private val viewModel: SearchInfoViewModel by viewModels()
-    private var currentSearchHotCategoryId: String? = null
     private var currentSearchHotCategoryName: String? = null
     private var currentSearchHotCategoryTag: String? = null
     private var binding: SearchInfoBottomFragmentLayoutBinding? = null
@@ -51,11 +48,9 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayoutNew() {
     private fun init() {
         val location = (activity!! as MapActivity).lastKnownLocation
         activity?.getUIExecutor()?.let { executor ->
-            currentSearchHotCategoryId?.let {
+            currentSearchHotCategoryTag?.let {
                 (activity!! as MapActivity).setLastSearch(it)
-                (activity!! as MapActivity).redoButtonLogic()
-                viewModel.search(null, it, currentSearchHotCategoryTag, location, executor)
-                //viewModel.requestSubcategories(it, location, executor)
+                viewModel.search(null, it, location, executor)
             }
         }
 
@@ -64,12 +59,10 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayoutNew() {
             if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
                 val loc = (activity!! as MapActivity).lastKnownLocation
                 (activity!! as MapActivity).setLastSearch(search.text.toString())
-               // (activity!! as MapActivity).redoButtonLogic()
                 (activity!! as MapActivity).hideKeyboard(search)
                 searchList.removeAllViewsInLayout()
                 activity?.getUIExecutor()?.let {
-                    currentSearchHotCategoryId = search.text.toString()
-                    viewModel.search(search.text.toString(), null, currentSearchHotCategoryTag, loc, it)
+                    viewModel.search(search.text.toString(), null, loc, it)
                 }
             }
             false
@@ -89,12 +82,12 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayoutNew() {
             }
 
             (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?, currentSearchHotCategoryId)
+                it as List<Entity>?, currentSearchHotCategoryTag)
 
             searchList.adapter = SearchListInfoRecyclerAdapter(it,
                 object : SearchListInfoRecyclerAdapter.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
-                        (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryId)
+                        (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
                     }
                 }
             )
@@ -148,9 +141,8 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayoutNew() {
 
     companion object {
         @JvmStatic
-        fun newInstance(categoryId: String?, categoryName: String?, categoryTag: String?) =
+        fun newInstance(categoryName: String?, categoryTag: String?) =
             SearchInfoBottomFragment().apply {
-                this.currentSearchHotCategoryId = categoryId
                 this.currentSearchHotCategoryName = categoryName
                 this.currentSearchHotCategoryTag = categoryTag
             }

@@ -80,7 +80,6 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
                         CategoriesRecyclerAdapter(response.results) { category ->
                             vCatId = category.name
                             (activity!! as MapActivity).setLastSearch(category.id)
-                            (activity!! as MapActivity).redoButtonLogic()
                             val loc = (activity!! as MapActivity).lastKnownLocation
                             activity?.getUIExecutor()?.let {
                                 viewModel.search(null, category.id, loc,

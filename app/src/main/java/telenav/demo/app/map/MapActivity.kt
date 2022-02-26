@@ -71,7 +71,6 @@ class MapActivity : AppCompatActivity() {
     private var mapFragment: MapFragment? = null
     private var hotCategoryName = ""
     private var hotCategoryTag = ""
-    private var hotCategoryId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,34 +80,6 @@ class MapActivity : AppCompatActivity() {
         showMapFragment(mapFragment!!)
         displayHotCategories()
         displayUserInfo()
-    }
-
-    fun redoButtonLogic() {
-        /*
-        if (lastSearch.isEmpty()) {
-            redo_button.visibility = View.GONE
-        } else {
-            redo_button.visibility = View.VISIBLE
-        }
-        redo_button.setOnClickListener {
-            enableDisableRedoButton(false)
-            val region = mapFragment?.getRegion()
-            if (filters != null) {
-                mapFragment?.setFilters(filters!!)
-            } else {
-                mapFragment?.setFilters(null)
-            }
-            try {
-                lastSearch.toInt()
-                mapFragment?.searchInRegion(null, lastSearch, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            } catch (e: Exception) {
-                mapFragment?.searchInRegion(lastSearch, null, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            }
-        }
-
-         */
     }
 
     fun enableDisableRedoButton(enable: Boolean) {
@@ -128,7 +99,7 @@ class MapActivity : AppCompatActivity() {
             entity_details.visibility = View.GONE
             top_navigation_panel.visibility = View.GONE
 
-            showSearchInfoBottomFragment(hotCategoryId, hotCategoryName, hotCategoryTag)
+            showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
         }
     }
 
@@ -199,18 +170,6 @@ class MapActivity : AppCompatActivity() {
         mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
     }
 
-    fun displaySuggestion(suggestion: Suggestion) {
-        for (eachHotCategory in hotCategoriesList) {
-            if (eachHotCategory.name.toLowerCase(Locale.ROOT).indexOf(getOriginalQuery(suggestion.query).toLowerCase(
-                    Locale.ROOT)) != -1) {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, eachHotCategory.id)
-                break
-            } else {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, "")
-            }
-        }
-    }
-
     private fun displayHotCategories() {
         val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
         val flowLayout = findViewById<Flow>(R.id.flow_main_root)
@@ -247,10 +206,9 @@ class MapActivity : AppCompatActivity() {
 
         categoryView.setOnClickListener {
             hotCategoryName = hotCategory.name
-            hotCategoryId = hotCategory.id
             hotCategoryTag = hotCategory.tag
             collapseBottomSheet()
-            showSearchInfoBottomFragment(hotCategory.id, hotCategory.name, hotCategory.tag)
+            showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag)
         }
 
         return categoryView
@@ -297,8 +255,8 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
-    private fun showSearchInfoBottomFragment(categoryId: String?, categoryName: String?, hotCategoryTag: String?) {
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryId, categoryName, hotCategoryTag)
+    private fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
