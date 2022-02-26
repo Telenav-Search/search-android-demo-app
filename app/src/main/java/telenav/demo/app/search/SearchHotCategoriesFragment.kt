@@ -72,7 +72,7 @@ class SearchHotCategoriesFragment : RoundedBottomSheetLayout() {
         if (response.isNotEmpty()) {
             vSearchList.adapter = SearchListRecyclerAdapter(
                 response,
-                R.drawable.ic_coffee,
+                R.drawable.ic_coffee_color,
                 object : SearchListRecyclerAdapter.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
                         dismiss()

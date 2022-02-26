@@ -228,15 +228,15 @@ class MapActivity : AppCompatActivity() {
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
-    fun collapseBottomSheet() {
-        if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-    }
-
     fun showBottomSheet() {
         if (this::behavior.isInitialized) {
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+    }
+
+    private fun collapseBottomSheet() {
+        if (this::behavior.isInitialized) {
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
 
@@ -270,12 +270,12 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(
-            listOf(entity),
+        mapFragment?.addEntityResultOnMap(
+            entity,
             lastKnownLocation,
             currentSearchHotCategory
         )
-        //showSearchInfoBottomFragment(hotCategoryId, hotCategoryName, hotCategoryTag)
+        searchInfoBottomFragment?.dismiss()
     }
 
     var searchListFragment: SearchHotCategoriesFragment? = null

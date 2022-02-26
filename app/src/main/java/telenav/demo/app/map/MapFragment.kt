@@ -94,7 +94,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             EntityActionEvent.DisplayMode.MAP_VIEW
         )
         entityDetailViewModel.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
+        //entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
         marker.hideInfoWindow()
     }
 
@@ -118,44 +118,13 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     fun addSearchResultsOnMap(
         searchResults: List<Entity>?,
         currentLocation: Location?,
-        currentSearchHotCategory: String?
+        currentSearchHotTag: String?
     ) {
 
         googleMap?.clear()
         coordinatesList.clear()
         searchResults?.forEach { result ->
-
-            if (result == null || result.place == null) {
-                return
-            }
-            entitiesList.add(result)
-            val searchResult =
-                CategoryAndFiltersUtil.generateSearchResult(result, currentSearchHotCategory)
-            searchResultList.add(searchResult)
-            coordinatesList.add(
-                LatLng(
-                    result.place.address.navCoordinates.latitude,
-                    result.place.address.navCoordinates.longitude
-                )
-            )
-
-            googleMap?.addMarker(
-                MarkerOptions()
-                    .position(
-                        LatLng(
-                            result.place.address.navCoordinates.latitude,
-                            result.place.address.navCoordinates.longitude
-                        )
-                    )
-                    .title(result.place.name)
-                    .zIndex(searchResultList.size.toFloat())
-                    .icon(
-                        CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                            activity!!,
-                            searchResult.iconId
-                        )
-                    )
-            )
+            addSearchResultsOnMap(result, currentSearchHotTag)
         }
 
         CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
@@ -163,6 +132,64 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             coordinatesList,
             currentLocation
         )
+    }
+
+    fun addEntityResultOnMap(
+        entity: Entity,
+        currentLocation: Location?,
+        currentSearchHotTag: String?
+    ) {
+
+        googleMap?.clear()
+        coordinatesList.clear()
+        addSearchResultsOnMap(entity, currentSearchHotTag, true)
+        CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
+            googleMap,
+            coordinatesList,
+            currentLocation
+        )
+    }
+
+    private fun addSearchResultsOnMap(
+        entity: Entity,
+        currentSearchHotTag: String?,
+        shouldOpenEntityDetails: Boolean = false) {
+
+        if (entity.place == null) {
+            return
+        }
+        entitiesList.add(entity)
+        val searchResult =
+            CategoryAndFiltersUtil.generateSearchResult(entity, currentSearchHotTag)
+        searchResultList.add(searchResult)
+        coordinatesList.add(
+            LatLng(
+                entity.place.address.navCoordinates.latitude,
+                entity.place.address.navCoordinates.longitude
+            )
+        )
+
+        googleMap?.addMarker(
+            MarkerOptions()
+                .position(
+                    LatLng(
+                        entity.place.address.navCoordinates.latitude,
+                        entity.place.address.navCoordinates.longitude
+                    )
+                )
+                .title(entity.place.name)
+                .zIndex(searchResultList.size.toFloat())
+                .icon(
+                    CategoryAndFiltersUtil.bitmapDescriptorFromVector(
+                        activity!!,
+                        searchResult.iconId
+                    )
+                )
+        )
+
+        if (shouldOpenEntityDetails) {
+            (activity!! as MapActivity).showEntityDetails(searchResult)
+        }
     }
 
     fun blockMap(block: Boolean) {

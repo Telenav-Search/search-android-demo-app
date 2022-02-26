@@ -110,6 +110,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/view_bottom"
         android:visibility="visible">
 
         <include layout="@layout/view_bottom" />
