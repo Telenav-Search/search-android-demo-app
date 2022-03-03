@@ -23,6 +23,9 @@ class App : Application() {
         const val FILTER_NUMBER_VALUE = 10
         const val RATE_STARS = "rate_stars"
         const val PRICE_LEVEL = "price_level"
+        const val OPEN_TIME = "open_time"
+        const val RESERVED = "reserved"
+        const val CONNECTION_TYPES = "connection_types"
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
@@ -53,6 +56,16 @@ class App : Application() {
             prefs?.apply()
         }
 
+        fun writeBooleanToSharedPreferences(keyName: String, state: Boolean) {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putBoolean(keyName, state)
+            prefs?.apply()
+        }
+
         fun readStringFromSharedPreferences(keyName: String, def: String): String? {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
@@ -69,6 +82,15 @@ class App : Application() {
                     Context.MODE_PRIVATE
                 )
             return prefs?.getInt(keyName, def) ?: 0
+        }
+
+        fun readBooleanFromSharedPreferences(keyName: String, def: Boolean): Boolean {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getBoolean(keyName, def) ?: def
         }
     }
 

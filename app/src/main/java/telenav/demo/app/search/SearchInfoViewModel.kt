@@ -16,8 +16,15 @@ import com.telenav.sdk.entity.utils.EntityJsonConverter
 import telenav.demo.app.App
 import telenav.demo.app.search.filters.OpenNowFilter
 import telenav.demo.app.search.filters.PriceLevel
+import telenav.demo.app.search.filters.ReservationFilter
 import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
+import com.telenav.sdk.entity.model.base.ParkingParameters
+
+import com.telenav.sdk.entity.model.base.FacetParameters
+
+
+
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -49,6 +56,7 @@ class SearchInfoViewModel : ViewModel() {
             filtersSearch.setCategoryFilter(
                     CategoryFilter.builder().addCategory(categoryTag).build()
             )
+           // filtersSearch.setBrandFilter(BrandFilter.builder().addBrand())
         }
         if (nearLeft != null && farRight != null) {
             val bBox: BBox = BBox
@@ -62,7 +70,32 @@ class SearchInfoViewModel : ViewModel() {
             filtersSearch.setGeoFilter(geoFilter)
         }
 
-        telenavEntityClient.searchRequest()
+        if (filters != null) {
+            val builder: BusinessFilter.Builder = BusinessFilter.builder()
+            var shouldApplyFilter = false
+
+            filters?.forEach { it ->
+                if (it is OpenNowFilter) {
+                    shouldApplyFilter = true
+                    builder.setNewlyOpen()
+                }
+                if (it is ReservationFilter) {
+                    shouldApplyFilter = true
+                    builder.setReservation()
+                }
+            }
+
+            if (shouldApplyFilter) {
+                filtersSearch.setBusinessFilter(builder.build())
+            }
+
+        }
+
+        //val facetParameters = FacetParameters.builder().setParkingParameters(
+        //    ParkingParameters.builder().setDuration(30).setEntryTime("time string").build()
+        //).build()
+
+        telenavEntityClient.searchRequest().setFacetParameters(null)
             .apply {
                 if (query != null)
                     setQuery(query)
@@ -169,7 +202,7 @@ class SearchInfoViewModel : ViewModel() {
     private fun filterByPrice(results: List<Entity>, filter: PriceLevel): ArrayList<Entity> {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
-            if (entity.facets?.priceInfo?.priceLevel == filter?.priceLevel?.priceLevel) {
+            if (entity.facets?.priceInfo?.priceLevel == filter.priceLevel.priceLevel) {
                 filteredResults.add(entity)
             }
         }
@@ -182,15 +215,9 @@ class SearchInfoViewModel : ViewModel() {
             return filteredResults
         }
         if (filters?.size == 0) {
-            return results.subList(
-                0,
-                App.readFromSharedPreferences(App.FILTER_NUMBER)
-            )
+            return results
         }
         filters?.forEach { it ->
-            if (it is OpenNowFilter) {
-                filteredResults = filterByOpen(results)
-            }
             if (it is StarsFilter) {
                 filteredResults = filterByStar(results, it)
             }

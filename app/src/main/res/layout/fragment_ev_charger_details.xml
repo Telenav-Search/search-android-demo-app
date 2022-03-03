@@ -6,6 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         xmlns:tools="http://schemas.android.com/tools"
+        android:layout_marginEnd="14dp"
         android:background="@color/grey_c2"
         android:id="@+id/entity_root">
 
@@ -29,7 +30,6 @@
             android:id="@+id/entity_always_closed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="14dp"
             android:layout_marginBottom="20dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -52,7 +52,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="14dp"
             android:layout_marginStart="6dp"
             android:textColor="@color/blue_c1"
             android:textSize="12sp"
@@ -77,7 +76,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="14dp"
             android:layout_marginStart="6dp"
             android:textColor="@color/blue_c1"
             android:textSize="12sp"
@@ -102,7 +100,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="14dp"
             android:layout_marginStart="6dp"
             android:textColor="@color/blue_c1"
             android:textSize="12sp"
@@ -123,17 +120,17 @@
             app:layout_constraintStart_toStartOf="@+id/entity_power_feed_header" />
 
         <TextView
-            android:id="@+id/entity_charger_brand_"
+            android:id="@+id/entity_charger_brand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="14dp"
+            android:layout_marginEnd="60dp"
             android:layout_marginStart="6dp"
             android:textColor="@color/blue_c1"
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@+id/entity_power_feed_header"
             app:layout_constraintStart_toEndOf="@+id/entity_charger_brand_header"
-            tools:text="eVgo"/>
+            tools:text="eVgfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffofdfdfjkejkrjek"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

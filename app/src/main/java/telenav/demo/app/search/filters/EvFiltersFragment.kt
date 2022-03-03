@@ -1,6 +1,7 @@
 package telenav.demo.app.search.filters
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +11,15 @@ import telenav.demo.app.databinding.EvFiltersFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.util.ArrayList
-import android.widget.RadioButton
+import androidx.core.content.ContextCompat
+import telenav.demo.app.R
 
 class EvFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
 
     private var openNowFilter = OpenNowFilter()
     private val starsFilter = StarsFilter()
     private var priceLevelFilter = PriceLevel()
+    private var reservationFilter = ReservationFilter()
     private var binding: EvFiltersFragmentLayoutBinding? = null
 
     override fun onCreateView(
@@ -34,21 +37,20 @@ class EvFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
         setUpCLickListeners()
 
         val connectionTypesArrayList: ArrayList<String> = ArrayList()
-        connectionTypesArrayList.add("Type1")
-        connectionTypesArrayList.add("Type2")
-        connectionTypesArrayList.add("Type3")
-        connectionTypesArrayList.add("Type4")
-        connectionTypesArrayList.add("Type5")
-        connectionTypesArrayList.add("Type6")
-        connectionTypesArrayList.add("Type7")
-        connectionTypesArrayList.add("Type8")
-        connectionTypesArrayList.add("Type9")
-        connectionTypesArrayList.add("Type10")
+        connectionTypesArrayList.add("J1772")
+        connectionTypesArrayList.add("Sae Combo")
+        connectionTypesArrayList.add("CHAdeMo")
+        connectionTypesArrayList.add("Type 2")
+        connectionTypesArrayList.add("Type 3")
+        connectionTypesArrayList.add("Teala")
+        connectionTypesArrayList.add("NEMA")
+        connectionTypesArrayList.add("NEMA 14-50")
+        connectionTypesArrayList.add("Plug Type F")
 
         val powerFeedLevelsArrayList: ArrayList<String> = ArrayList()
-        powerFeedLevelsArrayList.add("Type1")
-        powerFeedLevelsArrayList.add("Type2")
-        powerFeedLevelsArrayList.add("Type3")
+        powerFeedLevelsArrayList.add("Level 1")
+        powerFeedLevelsArrayList.add("Level 2")
+        powerFeedLevelsArrayList.add("DC Fast")
 
         val chargerBrandsArrayList: ArrayList<String> = ArrayList()
         chargerBrandsArrayList.add("Type1")
@@ -63,6 +65,8 @@ class EvFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
             val checkBox = CheckBox(requireContext())
             checkBox.text = item
             checkBox.id = View.generateViewId()
+            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
+            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
 
             binding?.evFiltersRoot?.addView(checkBox)
             evConnectionTypesIdArray.add(checkBox.id)
@@ -74,6 +78,8 @@ class EvFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
             val checkBox = CheckBox(requireContext())
             checkBox.text = item
             checkBox.id = View.generateViewId()
+            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
+            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
 
             binding?.evFiltersRoot?.addView(checkBox)
             powerFeedLevelsIdArray.add(checkBox.id)
@@ -85,18 +91,28 @@ class EvFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
             val checkBox = CheckBox(requireContext())
             checkBox.text = item
             checkBox.id = View.generateViewId()
+            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
+            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
 
             binding?.evFiltersRoot?.addView(checkBox)
             chargerBrandsIdArray.add(checkBox.id)
         }
         binding?.flowChargerBrands?.referencedIds = chargerBrandsIdArray.toIntArray()
+
+        binding?.reservation?.isChecked = false
+        binding?.reservation?.setOnClickListener {
+            if (it.isEnabled) {
+                reservationFilter.isReserved = Reservation.RESERVED
+            } else {
+                reservationFilter.isReserved = Reservation.DEFAULT
+            }
+        }
     }
 
     private fun setUpCLickListeners() {
         binding?.evFiltersAreaBack?.setOnClickListener {
             dismiss()
-            (activity as MapActivity).setFilters(getFilters())
-            (activity!! as MapActivity).onBackSearchInfoFragment()
+            (activity!! as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
         }
     }
 

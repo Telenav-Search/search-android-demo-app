@@ -67,7 +67,7 @@ class FiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
                         Integer.parseInt(number.toString())
                     )
                 }
-                (activity as MapActivity).setFilters(getFilters())
+                (activity as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
                 dismiss()
             }
 

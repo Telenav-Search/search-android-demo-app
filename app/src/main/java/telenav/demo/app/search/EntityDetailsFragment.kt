@@ -14,16 +14,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
-import com.telenav.sdk.entity.api.Callback
-import com.telenav.sdk.entity.api.EntityClient
-import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.entity.model.base.Entity
-import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
 import telenav.demo.app.databinding.FragmentEntityDetailsBinding
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.utils.addFavorite
 import telenav.demo.app.utils.deleteFavorite
@@ -38,7 +33,6 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
     private var searchResult: SearchResult? = null
     private var entity: Entity? = null
     private var isFavorite: Boolean = false
-    private val telenavService: EntityClient by lazy { EntityService.getClient() }
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
     override fun onCreateView(
@@ -53,7 +47,8 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        searchResult?.id?.let { it1 -> getDetails(it1) }
+        checkFavorite(entity!!)
+        attachAdditionalDetails()
 
         binding?.entityName?.text = searchResult?.name
 
@@ -99,29 +94,6 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
         }
     }
 
-    private fun getDetails(id: String) {
-        telenavService.detailRequest
-            .setEntityIds(listOf(id))
-            .asyncCall(
-                requireActivity().getUIExecutor(),
-                object : Callback<EntityGetDetailResponse> {
-                    override fun onSuccess(response: EntityGetDetailResponse) {
-                        Log.w("test", "result ${Gson().toJson(response.results)}")
-                        if (response.results != null && response.results.size > 0) {
-                            entity = response.results[0]
-                            checkFavorite(entity!!)
-                            attachAdditionalDetails()
-                        }
-                    }
-
-                    override fun onFailure(p1: Throwable?) {
-                        Log.e("testapp", "onFailure", p1)
-                        attachAdditionalDetails()
-                    }
-                }
-            )
-    }
-
     private fun checkFavorite(entity: Entity) {
         val prefs = requireActivity().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
@@ -143,16 +115,24 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
             }
     }
 
-    fun attachAdditionalDetails() {
+    fun updateItemVisibility(slideOffset: Float) {
+        val fragment: Fragment? = childFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+        if (fragment != null && fragment is FoodDetailsFragment) {
+            fragment.updateStartsVisibility(slideOffset)
+        }
+    }
+
+    private fun attachAdditionalDetails() {
         var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult)
         when {
-            searchResult?.categoryName.equals("Parking lot") -> {
+            searchResult?.categoryName.equals(PARKING_TAG) -> {
                 fragment = ParkingDetailsFragment.newInstance(searchResult)
             }
-            searchResult?.categoryName.equals("Fast Food") -> {
+            searchResult?.categoryName.equals(FAST_FOOD_TAG) -> {
                 fragment = FoodDetailsFragment.newInstance(searchResult)
             }
-            searchResult?.categoryName.equals("Charging") -> {
+            searchResult?.categoryName.equals(CHARGER_TAG1) ||
+                    searchResult?.categoryName.equals(CHARGER_TAG2) -> {
                 fragment = EvChargerDetailsFragment.newInstance(searchResult, entity)
             }
         }
@@ -161,24 +141,22 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
             R.id.frame_entity_additional_details, fragment, FRAGMENT_TAG).commit()
     }
 
-    fun updateItemVisibility(slideOffset: Float) {
-        val fragment: Fragment? = childFragmentManager.findFragmentByTag(FRAGMENT_TAG)
-        if (fragment != null && fragment is FoodDetailsFragment) {
-            fragment.updateStartsVisibility(slideOffset)
-        }
-    }
-
     private fun convertDpToPixel(dp: Float): Int {
         return (dp * (requireContext().resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
     }
 
     companion object {
-        private val FRAGMENT_TAG = "EntityDetailsFragment"
+        private const val FRAGMENT_TAG = "EntityDetailsFragment"
+        private const val PARKING_TAG = "Parking lot"
+        private const val FAST_FOOD_TAG = "Fast Food"
+        private const val CHARGER_TAG1 = "Charging"
+        private const val CHARGER_TAG2 = "Electric Charge"
 
         @JvmStatic
-        fun newInstance(searchResult: SearchResult) =
+        fun newInstance(searchResult: SearchResult, entity: Entity) =
             EntityDetailsFragment().apply {
                 this.searchResult = searchResult
+                this.entity = entity
             }
     }
 }

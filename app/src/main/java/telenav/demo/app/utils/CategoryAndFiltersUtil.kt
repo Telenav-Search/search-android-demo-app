@@ -30,10 +30,10 @@ object CategoryAndFiltersUtil {
     const val FUEL_TAG = "FUEL_STATION"
     const val SHOPPING_TAG = "SHOPPING"
     const val HOTELS_TAG = "HOTEL_MOTEL"
-    const val BANK_TAG = "BANK AND ATM"
+    const val ATM_TAG = "BANK AND ATM"
     const val ATTRACTIONS_TAG = "TOURIST_ATTRACTION"
     const val EV_CHARGER_TAG = "ELECTRIC_CHARGE_STATION"
-    const val BUS_TAG = "BUS"
+    const val ENTERTAINMENT_ARTS_TAG = "ENTERTAINMENT_ARTS"
     const val HOSPITAL_TAG = "HEALTH_MEDICINE"
 
     val hotCategoriesList = arrayListOf(
@@ -43,11 +43,11 @@ object CategoryAndFiltersUtil {
         HotCategory("Fuel", FUEL_TAG, R.drawable.ic_gas_color),
         HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_grocery_color),
         HotCategory("Hotels", HOTELS_TAG, R.drawable.ic_hotel_color),
-        HotCategory("Banks", BANK_TAG, R.drawable.ic_atm_color),
+        HotCategory("ATM", ATM_TAG, R.drawable.ic_atm_color),
         HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
         HotCategory("EV Charger", EV_CHARGER_TAG, R.drawable.ic_ev_color),
-        HotCategory("Bus", BUS_TAG, R.drawable.ic_bus),
-        HotCategory("Hospital", HOSPITAL_TAG, R.drawable.ic_hospital),
+        HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
+        HotCategory("Hospital", HOSPITAL_TAG, R.drawable.ic_hospital_color),
         HotCategory("More", "",  R.drawable.ic_more_color)
     )
 
@@ -77,19 +77,52 @@ object CategoryAndFiltersUtil {
     )
 
     fun getCategoryIcon(categoryTag: String, name: String): Int {
-        if (categoryTag.equals(FOOD_TAG)) {
-            return when {
-                name.contains("Burger") -> {
-                    R.drawable.ic_burger_color
-                }
-                name.contains("Pizza") -> {
-                    R.drawable.ic_pizza_color
-                }
-                else -> {
-                    R.drawable.ic_food_color
+        when {
+            categoryTag.equals(FOOD_TAG) -> {
+                return when {
+                    name.contains("Burger") -> {
+                        R.drawable.ic_burger_color
+                    }
+                    name.contains("Pizza") -> {
+                        R.drawable.ic_pizza_color
+                    }
+                    else -> {
+                        R.drawable.ic_food_color
+                    }
                 }
             }
+            categoryTag.equals(PARKING_TAG) -> {
+                return R.drawable.ic_parking_color
+            }
+            categoryTag.equals(COFFEE_TAG) -> {
+                return R.drawable.ic_coffee_color
+            }
+            categoryTag.equals(FUEL_TAG) -> {
+                return R.drawable.ic_gas_color
+            }
+            categoryTag.equals(SHOPPING_TAG) -> {
+                return R.drawable.ic_shopping_color
+            }
+            categoryTag.equals(HOTELS_TAG) -> {
+                return R.drawable.ic_hotel_color
+            }
+            categoryTag.equals(ATM_TAG) -> {
+                return R.drawable.ic_atm_color
+            }
+            categoryTag.equals(ATTRACTIONS_TAG) -> {
+                return R.drawable.ic_attraction_color
+            }
+            categoryTag.equals(EV_CHARGER_TAG) -> {
+                return R.drawable.ic_ev_color
+            }
+            categoryTag.equals(ENTERTAINMENT_ARTS_TAG) -> {
+                return R.drawable.ic_entertainment_color
+            }
+            categoryTag.equals(HOSPITAL_TAG) -> {
+                return R.drawable.ic_hospital_color
+            }
         }
+
         return 0
     }
 

@@ -33,10 +33,7 @@ import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
-import telenav.demo.app.search.filters.EvFiltersFragment
-import telenav.demo.app.search.filters.Filter
-import telenav.demo.app.search.filters.GeneralFiltersFragment
-import telenav.demo.app.search.filters.ParkingFiltersFragment
+import telenav.demo.app.search.filters.*
 import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.widgets.CategoryView
@@ -81,6 +78,7 @@ class MapActivity : AppCompatActivity() {
         showMapFragment(mapFragment!!)
         displayHotCategories()
         displayUserInfo()
+        resetFilters()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -98,7 +96,12 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    fun onBackSearchInfoFragment() {
+    fun onBackSearchInfoFragmentFromFilter(filters: List<Filter>) {
+        this.filters = filters
+        onBackSearchInfoFragment()
+    }
+
+    private fun onBackSearchInfoFragment() {
         entity_details.visibility = View.GONE
         top_navigation_panel.visibility = View.GONE
         showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
@@ -257,7 +260,7 @@ class MapActivity : AppCompatActivity() {
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
     private fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, filters)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
@@ -285,16 +288,11 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    fun setFilters(filters: List<Filter>) {
-        this.filters = filters
-        searchFragment?.setFilters(filters)
-    }
-
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
     }
 
-    fun showEntityDetails(searchResult: SearchResult) {
+    fun showEntityDetails(searchResult: SearchResult, entity: Entity) {
         entity_details.visibility = View.VISIBLE
         top_navigation_panel.visibility = View.VISIBLE
 
@@ -305,7 +303,7 @@ class MapActivity : AppCompatActivity() {
         behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
-            EntityDetailsFragment.newInstance(searchResult), FRAGMENT_TAG).commit()
+            EntityDetailsFragment.newInstance(searchResult, entity), FRAGMENT_TAG).commit()
 
         behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {}
@@ -328,6 +326,13 @@ class MapActivity : AppCompatActivity() {
 
     fun hideKeyboard(view: View) {
         view.hideKeyboard()
+    }
+
+    private fun resetFilters() {
+        App.writeToSharedPreferences(App.RATE_STARS, Stars.DEFAULT.starsNumber)
+        App.writeToSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel)
+        App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
+        App.writeBooleanToSharedPreferences(App.RESERVED, false)
     }
 }
 

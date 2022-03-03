@@ -51,13 +51,33 @@ class EvChargerDetailsFragment : Fragment() {
 
         facetEvConnectors?.let {
             it.connectors.forEachIndexed { index, entity ->
+                val powerFeed = entity.powerFeedLevel.name
+                val chargerBrand = entity.chargerBrand.brandName
+                val connectorType = entity.connectorType.name
+
                 if (index != 0) {
-                    entityConnectorsType += ", "
-                    entityPowerFeed += ", "
+                    connectorType?.let {
+                        entityConnectorsType += ", "
+                    }
+                    chargerBrand?.let {
+                        entityChargerBrand += ", "
+                    }
+                    powerFeed?.let {
+                        entityPowerFeed += ", "
+                    }
                 }
-                entityConnectorsType += entity.connectorType.id
-                entityPowerFeed += entity.powerFeedLevel.name
-                entityChargerBrand += entity.chargerBrand.brandName
+
+                connectorType?.let {
+                    entityConnectorsType += it
+                }
+
+                chargerBrand?.let {
+                    entityChargerBrand += it
+                }
+
+                powerFeed?.let {
+                    entityPowerFeed += it
+                }
 
             }
         }

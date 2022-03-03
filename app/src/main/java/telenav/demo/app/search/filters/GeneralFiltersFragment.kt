@@ -48,52 +48,43 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.priceReset?.setOnClickListener(this)
         binding?.parkingFiltersAreaBack?.setOnClickListener {
             dismiss()
-            (activity as MapActivity).setFilters(getFilters())
-            (activity!! as MapActivity).onBackSearchInfoFragment()
+            (activity!! as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
         }
     }
 
     override fun onClick(v: View) {
         when (v.id) {
             R.id.price_level_one_dollar -> {
-                priceLevelFilter.priceLevel = PriceLevelType.ONE_DOLLAR
+                initPriceLevelValue(PriceLevelType.ONE_DOLLAR.priceLevel)
             }
             R.id.price_level_two_dollars -> {
-                priceLevelFilter.priceLevel = PriceLevelType.TWO_DOLLAR
+                initPriceLevelValue(PriceLevelType.TWO_DOLLAR.priceLevel)
             }
             R.id.price_level_three_dollars -> {
-                priceLevelFilter.priceLevel = PriceLevelType.THREE_DOLLAR
+                initPriceLevelValue(PriceLevelType.THREE_DOLLAR.priceLevel)
             }
             R.id.price_level_four_dollars -> {
-                priceLevelFilter.priceLevel = PriceLevelType.FOUR_DOLLAR
+                initPriceLevelValue(PriceLevelType.FOUR_DOLLAR.priceLevel)
             }
             R.id.star_0 -> {
-                binding?.starCount?.text = "1.0"
                 initRateValue(1)
             }
             R.id.star_1 -> {
-                binding?.starCount?.text = "2.0"
                 initRateValue(2)
             }
             R.id.star_2 -> {
-                binding?.starCount?.text = "3.0"
                 initRateValue(3)
             }
             R.id.star_3 -> {
-                binding?.starCount?.text = "4.0"
                 initRateValue(4)
             }
             R.id.star_4 -> {
-                binding?.starCount?.text = "5.0"
                 initRateValue(5)
             }
             R.id.rating_reset -> {
-                binding?.starCount?.text = ""
-                App.writeToSharedPreferences(App.RATE_STARS, Stars.DEFAULT.starsNumber)
-                initRateValue( Stars.DEFAULT.starsNumber)
+                initRateValue(Stars.DEFAULT.starsNumber)
             }
             R.id.price_reset -> {
-                App.writeToSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel)
                 initPriceLevelValue(PriceLevelType.DEFAULT.priceLevel)
             }
         }
@@ -102,35 +93,57 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
     private fun getFilters(): List<Filter> {
         val filtersToApply = arrayListOf<Filter>()
         if (openNowFilter.isOpened != OpenNow.DEFAULT) filtersToApply.add(openNowFilter)
-        if (priceLevelFilter.priceLevel != PriceLevelType.DEFAULT) filtersToApply.add(
-            priceLevelFilter
+        if (priceLevelFilter.priceLevel != PriceLevelType.DEFAULT)
+            filtersToApply.add(priceLevelFilter
         )
         if (starsFilter.stars != Stars.DEFAULT) filtersToApply.add(starsFilter)
         return filtersToApply
     }
 
     private fun initDefaultValues() {
-        binding?.openNow?.isChecked = false
-        binding?.openNow?.setOnClickListener {
-            if (it.isEnabled) {
+        binding?.openNow?.isChecked = App.readBooleanFromSharedPreferences(App.OPEN_TIME, false)
+        binding?.openNow?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
                 openNowFilter.isOpened = OpenNow.OPEN
+                App.writeBooleanToSharedPreferences(App.OPEN_TIME, true)
             } else {
                 openNowFilter.isOpened = OpenNow.DEFAULT
+                App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
             }
         }
-        initRateValue(App.readIntFromSharedPreferences(App.RATE_STARS, Stars.DEFAULT.ordinal))
-        initPriceLevelValue(App.readIntFromSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.ordinal))
+
+        initRateValue(App.readIntFromSharedPreferences(App.RATE_STARS, Stars.DEFAULT.starsNumber))
+        initPriceLevelValue(App.readIntFromSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel))
     }
 
     private fun initRateValue(rate: Int) {
         when (rate) {
-            -1 -> { starsFilter.stars = Stars.DEFAULT }
-            1 -> { starsFilter.stars = Stars.ONE }
-            2 -> { starsFilter.stars = Stars.TWO }
-            3 -> { starsFilter.stars = Stars.TREE }
-            4 -> { starsFilter.stars = Stars.FOUR }
-            5 -> { starsFilter.stars = Stars.FIVE }
+            -1 -> {
+                starsFilter.stars = Stars.DEFAULT
+                binding?.starCount?.text = ""
+            }
+            1 -> {
+                starsFilter.stars = Stars.ONE
+                binding?.starCount?.text = "1.0"
+            }
+            2 -> {
+                starsFilter.stars = Stars.TWO
+                binding?.starCount?.text = "2.0"
+            }
+            3 -> {
+                starsFilter.stars = Stars.TREE
+                binding?.starCount?.text = "3.0"
+            }
+            4 -> {
+                starsFilter.stars = Stars.FOUR
+                binding?.starCount?.text = "4.0"
+            }
+            5 -> {
+                starsFilter.stars = Stars.FIVE
+                binding?.starCount?.text = "5.0"
+            }
         }
+        App.writeToSharedPreferences(App.RATE_STARS, rate)
         CategoryAndFiltersUtil.setStarsViewBasedOnRating(
             view!!,
             starsFilter.stars.starsNumber.toDouble(),
@@ -176,6 +189,7 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
                 binding?.priceLevelFourDollars?.isChecked = true
             }
         }
+        App.writeToSharedPreferences(App.PRICE_LEVEL, priceLevel)
     }
 
     companion object {

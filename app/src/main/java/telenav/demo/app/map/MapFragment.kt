@@ -24,27 +24,22 @@ import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
 import telenav.demo.app.entitydetails.EntityDetailFragment
 import telenav.demo.app.entitydetails.EntityDetailViewModel
-import telenav.demo.app.infoui.CustomInfoWindowAdapter
 import telenav.demo.app.model.SearchResult
-import telenav.demo.app.search.SearchViewModel
 import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.entityClick
-import java.util.concurrent.Executor
 
 class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     GoogleMap.OnMarkerClickListener {
 
     private lateinit var map: SupportMapFragment
     private var googleMap: GoogleMap? = null
-    private lateinit var customInfoWindowAdapter: CustomInfoWindowAdapter
     private var searchResultList: MutableList<SearchResult> = mutableListOf()
     private var entitiesList: MutableList<Entity> = mutableListOf()
     private var coordinatesList: MutableList<LatLng> = mutableListOf()
     private lateinit var entityDetailViewModel: EntityDetailViewModel
     private lateinit var entityDetailFragment: EntityDetailFragment
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-    private val viewModel: SearchViewModel by viewModels()
     private var alreadyInitialized = false
 
     override fun onCreateView(
@@ -53,7 +48,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentMapBinding.inflate(inflater, container, false)
-        binding.viewModel = viewModel
         return binding.root
     }
 
@@ -65,21 +59,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
     }
 
-    fun searchInRegion(
-        query: String?,
-        categoryId: String?,
-        location: Location,
-        executor: Executor,
-        nearLeft: LatLng? = null,
-        farRight: LatLng? = null
-    ) {
-        viewModel.search(query, categoryId, location, executor, nearLeft, farRight)
-    }
-
-    fun setFilters(filters: List<Filter>?) {
-        viewModel.filters = filters
-    }
-
     override fun onInfoWindowClick(marker: Marker?) {
         dataCollectorClient.entityClick(
             App.readStringFromSharedPreferences(
@@ -89,7 +68,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             EntityActionEvent.DisplayMode.MAP_VIEW
         )
         entityDetailViewModel.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        //entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
         marker.hideInfoWindow()
     }
 
@@ -98,7 +76,10 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
-        (activity!! as MapActivity).showEntityDetails(searchResultList[marker?.zIndex!!.toInt() - 1])
+        val index= marker?.zIndex!!.toInt() - 1
+        val searchResult = searchResultList[index]
+        val entity = entitiesList[index]
+        (activity!! as MapActivity).showEntityDetails(searchResult, entity)
         return false
     }
 
@@ -175,7 +156,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         )
 
         if (shouldOpenEntityDetails) {
-            (activity!! as MapActivity).showEntityDetails(searchResult)
+            (activity!! as MapActivity).showEntityDetails(searchResult, entity)
         }
     }
 
