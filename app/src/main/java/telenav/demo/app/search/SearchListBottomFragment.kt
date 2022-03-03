@@ -14,11 +14,11 @@ import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import telenav.demo.app.R
 import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
-import telenav.demo.app.searchlist.SearchListInfoRecyclerAdapter
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.text.Editable
 import android.text.TextWatcher
 import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
+import telenav.demo.app.personalinfo.FavoriteResultsListRecyclerAdapterNew
 
 private const val TAG = "SearchListBottomFragment"
 
@@ -62,14 +62,19 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 if (s.isNotEmpty()) {
                     binding?.clearText?.visibility = View.VISIBLE
-                } else{
+                    binding?.recentHeader?.visibility = View.GONE
+                } else {
                     binding?.clearText?.visibility = View.GONE
+                    binding?.recentHeader?.visibility = View.VISIBLE
+                    viewModel.getRecentSearchData(requireContext())
                 }
             }
         })
 
         binding?.clearText?.setOnClickListener {
             search.setText("")
+            binding?.recentHeader?.visibility = View.VISIBLE
+            viewModel.getRecentSearchData(requireContext())
         }
 
         searchList.layoutManager = LinearLayoutManager(activity)
@@ -79,6 +84,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             if (it.isNotEmpty()) {
                 searchList.visibility = View.VISIBLE
                 searchError.visibility = View.GONE
+                viewModel.saveRecentSearchData(requireContext())
             } else {
                 searchList.visibility = View.GONE
                 searchError.visibility = View.GONE
@@ -88,9 +94,10 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             (activity as MapActivity).displaySearchResults(
                 it as List<Entity>?, currentSearchHotCategoryTag)
 
-            searchList.adapter = SearchListInfoRecyclerAdapter(it,
-                object : SearchListInfoRecyclerAdapter.OnEntityClickListener {
+            searchList.adapter = FavoriteResultsListRecyclerAdapterNew(it,
+                object : FavoriteResultsListRecyclerAdapterNew.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
+                        dismiss()
                         (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
                     }
                 }
@@ -113,7 +120,13 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                 searchLoading.visibility = View.GONE
             }
         })
+
+        binding?.searchListAreaBack?.setOnClickListener {
+            dismiss()
+            (activity!! as MapActivity).showBottomSheet()
+        }
     }
+
 
     companion object {
         @JvmStatic

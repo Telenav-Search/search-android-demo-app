@@ -26,6 +26,8 @@ class App : Application() {
         const val OPEN_TIME = "open_time"
         const val RESERVED = "reserved"
         const val CONNECTION_TYPES = "connection_types"
+        const val CHARGER_BRAND = "charger_brand"
+        const val POWER_FEED = "power_feed"
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =

@@ -1,4 +1,4 @@
-package telenav.demo.app.personalinfo
+package telenav.demo.app.search
 
 import android.content.Intent
 import android.view.LayoutInflater

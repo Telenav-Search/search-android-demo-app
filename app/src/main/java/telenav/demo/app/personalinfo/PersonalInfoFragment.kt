@@ -15,6 +15,7 @@ import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
 import telenav.demo.app.utils.deleteFavorite
 import java.lang.reflect.Type
 import androidx.recyclerview.widget.ItemTouchHelper
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
@@ -73,7 +74,12 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
 
         binding?.favorites?.visibility = View.VISIBLE
         binding?.personalFavoriteList?.layoutManager = LinearLayoutManager(requireContext())
-        binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(favoriteEntities)
+        binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(favoriteEntities,
+            object : FavoriteResultsListRecyclerAdapterNew.OnEntityClickListener {
+                override fun onEntityClick(entity: Entity) {
+                }
+            }
+        )
 
         val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -96,7 +102,6 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
     }
 
     companion object {
-        fun newInstance() =
-            PersonalInfoFragment()
+        fun newInstance() = PersonalInfoFragment()
     }
 }

@@ -1,11 +1,13 @@
 package telenav.demo.app.search
 
+import android.content.Context
 import android.location.Location
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -22,8 +24,8 @@ import java.util.concurrent.Executor
 import com.telenav.sdk.entity.model.base.ParkingParameters
 
 import com.telenav.sdk.entity.model.base.FacetParameters
-
-
+import telenav.demo.app.R
+import java.lang.reflect.Type
 
 
 private const val TAG = "SearchInfoViewModel"
@@ -232,5 +234,38 @@ class SearchInfoViewModel : ViewModel() {
             )
         }
         return filteredResults
+    }
+
+    fun getRecentSearchData(context: Context) {
+        val prefs =
+            context.getSharedPreferences(
+                context.getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE)
+
+        val listType: Type = object : TypeToken<List<Entity>>() {}.type
+        val searchResultEntities = Gson().fromJson<List<Entity>>(
+            prefs?.getString(
+                context.getString(R.string.saved_recent_search_key),
+                ""
+            ), listType
+        )
+        searchResultEntities?.let {
+            searchResults.value = it
+        }
+    }
+
+    fun saveRecentSearchData(context: Context) {
+        val prefs =
+            context.getSharedPreferences(
+                context.getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE)
+
+        with(prefs.edit()) {
+            putString(
+                context.getString(R.string.saved_recent_search_key),
+                Gson().toJson(searchResults.value)
+            )
+            apply()
+        }
     }
 }

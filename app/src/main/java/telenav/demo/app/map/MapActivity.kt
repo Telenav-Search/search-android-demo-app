@@ -88,7 +88,8 @@ class MapActivity : AppCompatActivity() {
         app_personal_info.setOnClickListener { showPersonalInfoActivity() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
-            showPersonalInfoFragment()
+           // showPersonalInfoFragment()
+            showSearchListBottomFragment()
         }
 
         entity_details_back.setOnClickListener {
@@ -282,6 +283,12 @@ class MapActivity : AppCompatActivity() {
         generalFiltersFragment!!.show(supportFragmentManager, generalFiltersFragment!!.tag)
     }
 
+    var searchListBottomFragment: SearchListBottomFragment? = null
+    fun showSearchListBottomFragment() {
+        searchListBottomFragment = SearchListBottomFragment.newInstance(hotCategoryTag)
+        searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
+    }
+
     fun setFiltersSub() {
         if (filters != null) {
             subcategoriesFragment?.setFilters(filters!!)
@@ -333,6 +340,9 @@ class MapActivity : AppCompatActivity() {
         App.writeToSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel)
         App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
         App.writeBooleanToSharedPreferences(App.RESERVED, false)
+        App.writeStringToSharedPreferences(App.CONNECTION_TYPES, "")
+        App.writeStringToSharedPreferences(App.CHARGER_BRAND, "")
+        App.writeStringToSharedPreferences(App.POWER_FEED, "")
     }
 }
 

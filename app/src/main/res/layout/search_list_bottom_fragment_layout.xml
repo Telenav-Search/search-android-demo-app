@@ -18,20 +18,31 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/search_list_area_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="22dp"
+            android:src="@drawable/ic_back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/separate_line"
+            app:tint="@color/blue_c1"/>
+
         <FrameLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/search_frame_layout"
+            android:layout_marginStart="60dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/separate_line">
+            app:layout_constraintStart_toEndOf="@+id/search_list_area_back"
+            app:layout_constraintTop_toTopOf="@+id/separate_line">
 
             <EditText
                 android:id="@+id/search"
                 android:layout_width="match_parent"
                 android:layout_height="46dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="60dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="10dp"
                 android:maxLength="30"
                 android:background="@drawable/rounded_corners_background"
@@ -55,7 +66,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginTop="4dp"
-                android:layout_marginEnd="65dp"
+                android:layout_marginEnd="35dp"
                 android:layout_gravity="right|center_vertical"
                 android:src="@drawable/ic_clear" />
 
@@ -73,6 +84,21 @@
             android:indeterminateTint="@color/colorAccent" />
 
         <TextView
+            android:id="@+id/recentHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="21dp"
+            android:layout_marginEnd="21dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"
+            android:text="@string/recent"
+            android:textColor="@color/blue_c1"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_frame_layout"/>
+
+        <TextView
             android:id="@+id/searchError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -87,7 +113,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchList"
             android:layout_width="match_parent"
-            android:layout_height="190dp"
+            android:layout_height="500dp"
             android:layout_marginStart="21dp"
             android:layout_marginEnd="18dp"
             android:layout_marginTop="12dp"
