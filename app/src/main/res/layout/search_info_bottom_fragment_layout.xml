@@ -34,6 +34,7 @@
                 android:layout_marginEnd="60dp"
                 android:layout_marginTop="10dp"
                 android:maxLength="30"
+                android:maxLines="1"
                 android:background="@drawable/rounded_corners_background"
                 android:backgroundTint="@color/grey_c2"
                 android:drawableStart="@drawable/ic_search"

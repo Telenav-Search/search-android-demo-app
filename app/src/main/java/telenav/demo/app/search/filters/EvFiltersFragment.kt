@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
 import telenav.demo.app.App
 import telenav.demo.app.R
+import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.StringUtil
 
 class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
 
@@ -38,27 +40,6 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
 
         setUpCLickListeners()
 
-        val connectionTypesArrayList: ArrayList<String> = ArrayList()
-        connectionTypesArrayList.add("J1772")
-        connectionTypesArrayList.add("Sae Combo")
-        connectionTypesArrayList.add("CHAdeMo")
-        connectionTypesArrayList.add("NEMA")
-        connectionTypesArrayList.add("NEMA 14-50")
-        connectionTypesArrayList.add("Plug Type F")
-        connectionTypesArrayList.add("Type 2")
-        connectionTypesArrayList.add("Type 3")
-        connectionTypesArrayList.add("Teala")
-
-        val powerFeedLevelsArrayList: ArrayList<String> = ArrayList()
-        powerFeedLevelsArrayList.add("Level 1")
-        powerFeedLevelsArrayList.add("Level 2")
-        powerFeedLevelsArrayList.add("DC Fast")
-
-        val chargerBrandsArrayList: ArrayList<String> = ArrayList()
-        chargerBrandsArrayList.add("Type1")
-        chargerBrandsArrayList.add("Type2")
-        chargerBrandsArrayList.add("Type3")
-
         val set = ConstraintSet()
         set.clone(binding?.evFiltersRoot)
 
@@ -66,9 +47,10 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         val connectionTypesLstValues: List<String>? = connectionTypes?.split(",")?.map { it -> it.trim() }
         val evConnectionTypesIdArray = ArrayList<Int>()
 
-        for (item in connectionTypesArrayList) {
+        for (item in CategoryAndFiltersUtil.connectionTypesArrayList) {
             val checkBox = CheckBox(requireContext())
-            checkBox.text = item
+            checkBox.text = StringUtil.formatName(item)
+            checkBox.tag = item
             checkBox.id = View.generateViewId()
             checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
@@ -88,9 +70,10 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         val lstPowerFeedLevelsValues: List<String>? = powerFeedLevels?.split(",")?.map { it -> it.trim() }
         val powerFeedLevelsIdArray = ArrayList<Int>()
 
-        for (item in powerFeedLevelsArrayList) {
+        for (item in CategoryAndFiltersUtil.powerFeedLevelsArrayList) {
             val checkBox = CheckBox(requireContext())
-            checkBox.text = item
+            checkBox.text = StringUtil.formatName(item)
+            checkBox.tag = item
             checkBox.id = View.generateViewId()
             checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
@@ -110,9 +93,16 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         val lstChargerBrandsValues: List<String>? = chargerBrandsLevels?.split(",")?.map { it -> it.trim() }
         val chargerBrandsIdArray = ArrayList<Int>()
 
+        val chargerBrandsArrayList = arrayListOf(
+            "ChargePoint",
+            "Blink",
+            "eVgo"
+        )
+
         for (item in chargerBrandsArrayList) {
             val checkBox = CheckBox(requireContext())
-            checkBox.text = item
+            checkBox.text = StringUtil.formatName(item)
+            checkBox.tag = item
             checkBox.id = View.generateViewId()
             checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)

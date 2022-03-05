@@ -1,5 +1,6 @@
 package telenav.demo.app.search
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,16 +18,22 @@ import telenav.demo.app.map.MapActivity
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.inputmethod.InputMethodManager
+import telenav.demo.app.utils.*
+import com.telenav.sdk.datacollector.api.DataCollectorService
 import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
-import telenav.demo.app.personalinfo.FavoriteResultsListRecyclerAdapterNew
 
 private const val TAG = "SearchListBottomFragment"
 
 class SearchListBottomFragment : RoundedBottomSheetLayout() {
 
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     private val viewModel: SearchInfoViewModel by viewModels()
     private var currentSearchHotCategoryTag: String? = null
     private var binding: SearchListBottomFragmentLayoutBinding? = null
+    private var shouldUpdateWorkAddress = false
+    private var shouldUpdateHomeAddress = false
+    private var openedFromMainScreen = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,6 +50,26 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
     }
 
     private fun init() {
+        var shouldRequestRecentData = true
+        if (shouldUpdateHomeAddress) {
+            val homeEntity = viewModel.getHome(requireContext())
+            homeEntity?.let {
+                shouldRequestRecentData = false
+                search.setText(homeEntity.place.address.formattedAddress)
+            }
+        } else if (shouldUpdateWorkAddress) {
+            val workEntity = viewModel.getWork(requireContext())
+            workEntity?.let {
+                shouldRequestRecentData = false
+                search.setText(workEntity.place.address.formattedAddress)
+            }
+        }
+
+        if (shouldRequestRecentData) {
+            viewModel.getRecentSearchData(requireContext())
+        }
+
+        search.requestFocus()
         search.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
                 val loc = (activity!! as MapActivity).lastKnownLocation
@@ -79,7 +106,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
 
         searchList.layoutManager = LinearLayoutManager(activity)
 
-        viewModel.searchResults.observe(viewLifecycleOwner, Observer {
+        viewModel.searchResults.observe(viewLifecycleOwner, {
             Log.d(TAG, "result count ->  ${it.size} ")
             if (it.isNotEmpty()) {
                 searchList.visibility = View.VISIBLE
@@ -90,21 +117,25 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                 searchError.visibility = View.GONE
                 searchError.text = getString(R.string.no_result)
             }
+            initAdapter(it)
+            (activity as MapActivity).displaySearchResults(it, currentSearchHotCategoryTag)
 
-            (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?, currentSearchHotCategoryTag)
-
-            searchList.adapter = FavoriteResultsListRecyclerAdapterNew(it,
-                object : FavoriteResultsListRecyclerAdapterNew.OnEntityClickListener {
-                    override fun onEntityClick(entity: Entity) {
-                        dismiss()
-                        (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
-                    }
-                }
-            )
         })
 
-        viewModel.searchError.observe(viewLifecycleOwner, Observer {
+        viewModel.savedAddress.observe(viewLifecycleOwner, {
+            Log.d(TAG, "result count ->  ${it.size} ")
+            if (it.isNotEmpty()) {
+                searchList.visibility = View.VISIBLE
+                searchError.visibility = View.GONE
+            } else {
+                searchList.visibility = View.GONE
+                searchError.visibility = View.GONE
+                searchError.text = getString(R.string.no_result)
+            }
+            initAdapter(it)
+        })
+
+        viewModel.searchError.observe(viewLifecycleOwner, {
             if (!it.isNullOrBlank()) {
                 searchError.visibility = View.VISIBLE
                 searchError.text = it
@@ -113,7 +144,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             }
         })
 
-        viewModel.loading.observe(viewLifecycleOwner, Observer {
+        viewModel.loading.observe(viewLifecycleOwner, {
             if (it) {
                 searchLoading.visibility = View.VISIBLE
             } else {
@@ -122,17 +153,71 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.searchListAreaBack?.setOnClickListener {
+            if (shouldUpdateHomeAddress || shouldUpdateWorkAddress) {
+                if (!openedFromMainScreen) {
+                    (activity!! as MapActivity).showPersonalInfoFragment()
+                }
+            } else {
+                (activity!! as MapActivity).expandBottomSheet()
+            }
+            (activity!! as MapActivity).hideKeyboard(search)
             dismiss()
-            (activity!! as MapActivity).showBottomSheet()
         }
+        if (search.text.isNotEmpty()) {
+            binding?.clearText?.visibility = View.VISIBLE
+        } else {
+            binding?.clearText?.visibility = View.GONE
+        }
+
+        showKeyboard()
     }
 
+    private fun initAdapter(items: List<Entity>) {
+        searchList.adapter = SearchResultsListRecyclerAdapter(items,
+            object : SearchResultsListRecyclerAdapter.OnEntityClickListener {
+                override fun onEntityClick(entity: Entity) {
+                    (activity!! as MapActivity).hideKeyboard(search)
+                    when {
+                        shouldUpdateHomeAddress -> {
+                            dataCollectorClient.setHome(requireActivity(), entity)
+                            if (!openedFromMainScreen) {
+                                (activity!! as MapActivity).showPersonalInfoFragment()
+                            }
+                        }
+                        shouldUpdateWorkAddress -> {
+                            dataCollectorClient.setWork(requireActivity(), entity)
+                            if (!openedFromMainScreen) {
+                                (activity!! as MapActivity).showPersonalInfoFragment()
+                            }
+                        }
+                        else -> {
+                            (activity as MapActivity).collapseBottomSheet()
+                            (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
+                        }
+                    }
+                    (activity as MapActivity).displayUserInfo()
+                    dismiss()
+                }
+            }
+        )
+    }
+
+    private fun showKeyboard() {
+        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    }
 
     companion object {
         @JvmStatic
-        fun newInstance(categoryTag: String?) =
+        fun newInstance(categoryTag: String?,
+                        shouldUpdateWorkAddress: Boolean = false,
+                        shouldUpdateHomeAddress: Boolean = false,
+                        openedFromMainScreen: Boolean = false) =
             SearchListBottomFragment().apply {
                 this.currentSearchHotCategoryTag = categoryTag
+                this.shouldUpdateWorkAddress = shouldUpdateWorkAddress
+                this.shouldUpdateHomeAddress = shouldUpdateHomeAddress
+                this.openedFromMainScreen = openedFromMainScreen
             }
     }
 }

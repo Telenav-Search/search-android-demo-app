@@ -1,6 +1,5 @@
 package telenav.demo.app.search
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +10,9 @@ import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
-import telenav.demo.app.entitydetails.EntityDetailsActivity
 import telenav.demo.app.utils.entityCachedClick
 
-class FavoriteResultsListRecyclerAdapterNew(
+class SearchResultsListRecyclerAdapter(
     entities: List<Entity>,
     val onClickListener: OnEntityClickListener
 ) :
@@ -54,18 +52,7 @@ class FavoriteResultsListRecyclerAdapterNew(
                 entity.id,
                 EntityCacheActionEvent.SourceType.FAVORITE
             )
-            holder.itemView.context.startActivity(
-                Intent(
-                    holder.itemView.context,
-                    EntityDetailsActivity::class.java
-                ).apply {
-                    putExtra(
-                        EntityDetailsActivity.PARAM_SOURCE,
-                        EntityCacheActionEvent.SourceType.FAVORITE.name
-                    )
-                    putExtra(EntityDetailsActivity.PARAM_ID, entity.id)
-                })
-            onClickListener?.onEntityClick(entity)
+            onClickListener.onEntityClick(entity)
             return@setOnClickListener
         }
     }

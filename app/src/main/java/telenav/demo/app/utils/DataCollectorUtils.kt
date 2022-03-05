@@ -141,7 +141,6 @@ fun DataCollectorClient.removeAllFavorites(context: Context) {
             Context.MODE_PRIVATE
         )
 
-
     val listType: Type = object : TypeToken<ArrayList<Entity>>() {}.type
     val favoriteEntities = Gson().fromJson<ArrayList<Entity>>(
         prefs.getString(
@@ -260,6 +259,24 @@ fun DataCollectorClient.removeWork(context: Context) {
             e.printStackTrace()
         }
     })
+}
+
+fun DataCollectorClient.getHome(context: Context) : Entity? {
+    val prefs =
+        context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+    return Gson().fromJson(
+        prefs.getString(context.getString(R.string.saved_home_address_key), ""),
+        Entity::class.java
+    )
+}
+
+fun DataCollectorClient.getWork(context: Context) : Entity? {
+    val prefs =
+        context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+    return Gson().fromJson(
+        prefs.getString(context.getString(R.string.saved_work_address_key), ""),
+        Entity::class.java
+    )
 }
 
 private fun getHomeEventBuilder(entity: Entity): SetHomeEvent.Builder {

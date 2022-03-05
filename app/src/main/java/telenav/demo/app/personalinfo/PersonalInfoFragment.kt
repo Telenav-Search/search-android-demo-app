@@ -1,5 +1,6 @@
 package telenav.demo.app.personalinfo
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -15,8 +16,8 @@ import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
 import telenav.demo.app.utils.deleteFavorite
 import java.lang.reflect.Type
 import androidx.recyclerview.widget.ItemTouchHelper
-import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.search.SearchResultsListRecyclerAdapter
 import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
@@ -27,21 +28,24 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
     private var binding : FragmentPersonalInfoBottomBinding? = null
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentPersonalInfoBottomBinding.inflate(inflater, container, false)
+
         return binding?.root
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding?.personalInfoAreaBack?.setOnClickListener {
             dismiss()
-            (activity!! as MapActivity).showBottomSheet()
+            (activity!! as MapActivity).expandBottomSheet()
         }
         binding?.personalInfoOta?.setOnClickListener { showHomeAreaActivity() }
 
@@ -65,6 +69,7 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
         fillFavoriteList(favoriteEntities)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun fillFavoriteList(favoriteEntities: List<Entity>?) {
         if (favoriteEntities.isNullOrEmpty()) {
             binding?.personalFavoriteList?.visibility = View.GONE
@@ -74,8 +79,8 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
 
         binding?.favorites?.visibility = View.VISIBLE
         binding?.personalFavoriteList?.layoutManager = LinearLayoutManager(requireContext())
-        binding?.personalFavoriteList?.adapter = FavoriteResultsListRecyclerAdapterNew(favoriteEntities,
-            object : FavoriteResultsListRecyclerAdapterNew.OnEntityClickListener {
+        binding?.personalFavoriteList?.adapter = SearchResultsListRecyclerAdapter(favoriteEntities,
+            object : SearchResultsListRecyclerAdapter.OnEntityClickListener {
                 override fun onEntityClick(entity: Entity) {
                 }
             }

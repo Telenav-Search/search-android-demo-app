@@ -55,11 +55,11 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
         if (searchResult?.phoneNo.isNullOrEmpty()) {
             binding?.entityCall?.visibility = View.GONE
             binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(-130f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(160f), 0 ,0 ,0)
+            binding?.entityFavorite?.setPadding(convertDpToPixel(140f), 0 ,0 ,0)
         } else {
             binding?.entityCall?.visibility = View.VISIBLE
             binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(-30f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(60f), 0 ,0 ,0)
+            binding?.entityFavorite?.setPadding(convertDpToPixel(40f), 0 ,0 ,0)
         }
 
         binding?.entityDistance?.text = binding?.entityDistance?.context?.convertNumberToDistance(searchResult?.distance!!)

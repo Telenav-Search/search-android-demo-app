@@ -76,6 +76,56 @@ object CategoryAndFiltersUtil {
         "Terrace"
     )
 
+    val chargerBrandsArrayList = arrayListOf(
+        "ChargePoint",
+        "Blink",
+        "eVgo",
+        "SemaConnect",
+        "Greenlots",
+        "Tesla Destination",
+        "Supercharger",
+        "OpConnect",
+        "EV Connect",
+        "ElectrifyAmerica",
+        "Sun Country",
+        "GE WattStation",
+        "Volta",
+        "Circuit Electrique",
+        "FLO",
+        "Innogy",
+        "Aerovironment",
+        "Shorepower",
+        "RWE",
+        "Oplaadpalen",
+        "Endesa",
+        "Lastestasjoner",
+        "EnelDrive",
+        "CarCharging",
+        "JNSH",
+        "ChargeNet",
+        "Recargo",
+        "KSI",
+        "POLAR"
+    )
+
+    val connectionTypesArrayList = arrayListOf(
+        "J1772",
+        "Sae Combo",
+        "CHAdeMo",
+        "NEMA",
+        "NEMA 14-50",
+        "Plug Type F",
+        "Type 2",
+        "Type 3",
+        "Teala"
+    )
+
+    val powerFeedLevelsArrayList = arrayListOf(
+        "Level 1",
+        "Level 2",
+        "DC Fast"
+    )
+
     fun getCategoryIcon(categoryTag: String, name: String): Int {
         when {
             categoryTag.equals(FOOD_TAG) -> {

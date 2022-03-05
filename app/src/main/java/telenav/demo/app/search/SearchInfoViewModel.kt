@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
 import com.telenav.sdk.entity.api.EntityService
@@ -21,12 +22,9 @@ import telenav.demo.app.search.filters.PriceLevel
 import telenav.demo.app.search.filters.ReservationFilter
 import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
-import com.telenav.sdk.entity.model.base.ParkingParameters
-
-import com.telenav.sdk.entity.model.base.FacetParameters
 import telenav.demo.app.R
 import java.lang.reflect.Type
-
+import telenav.demo.app.utils.*
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -35,9 +33,11 @@ const val SEARCH_INFO_LIMIT_WITH_FILTERS = 30
 @Suppress("DEPRECATION")
 class SearchInfoViewModel : ViewModel() {
 
-    var filters: List<Any>? = null
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
-    var searchResults = MutableLiveData<List<Any>>().apply { listOf<Any>() }
+    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    var filters: List<Any>? = null
+    var searchResults = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
+    var savedAddress = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
     var searchError = MutableLiveData<String>().apply { postValue("") }
     var loading = MutableLiveData<Boolean>().apply { postValue(false) }
     val categories = MutableLiveData<List<Category>>().apply { listOf<Any>() }
@@ -58,7 +58,6 @@ class SearchInfoViewModel : ViewModel() {
             filtersSearch.setCategoryFilter(
                     CategoryFilter.builder().addCategory(categoryTag).build()
             )
-           // filtersSearch.setBrandFilter(BrandFilter.builder().addBrand())
         }
         if (nearLeft != null && farRight != null) {
             val bBox: BBox = BBox
@@ -92,10 +91,6 @@ class SearchInfoViewModel : ViewModel() {
             }
 
         }
-
-        //val facetParameters = FacetParameters.builder().setParkingParameters(
-        //    ParkingParameters.builder().setDuration(30).setEntryTime("time string").build()
-        //).build()
 
         telenavEntityClient.searchRequest().setFacetParameters(null)
             .apply {
@@ -267,5 +262,22 @@ class SearchInfoViewModel : ViewModel() {
             )
             apply()
         }
+    }
+
+    fun getHome(context: Context) : Entity? {
+        val homeEntity = dataCollectorClient.getHome(context)
+        homeEntity?.let {
+            savedAddress.value = listOf(it)
+        }
+        return homeEntity
+
+    }
+
+    fun getWork(context: Context) : Entity? {
+        val workEntity = dataCollectorClient.getWork(context)
+        workEntity?.let {
+            savedAddress.value = listOf(it)
+        }
+        return workEntity
     }
 }

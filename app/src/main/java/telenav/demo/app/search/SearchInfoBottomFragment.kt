@@ -103,13 +103,13 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
                 searchError.text = getString(R.string.no_result)
             }
 
-            (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?, currentSearchHotCategoryTag)
+            (activity as MapActivity).displaySearchResults(it, currentSearchHotCategoryTag)
 
             searchList.adapter = SearchListInfoRecyclerAdapter(it,
                 object : SearchListInfoRecyclerAdapter.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
-                        (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
+                        (activity as MapActivity).displayEntityClicked(entity,
+                            currentSearchHotCategoryTag, true)
                     }
                 }
             )

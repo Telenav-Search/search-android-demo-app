@@ -9,6 +9,7 @@ import telenav.demo.app.R
 import telenav.demo.app.databinding.CategoryViewBinding
 import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.StringUtil
 
 class CategoryView : ConstraintLayout {
 
@@ -32,12 +33,13 @@ class CategoryView : ConstraintLayout {
     }
 
     fun init(category: HotCategory) {
-        binding?.categoryName?.text = category.name
+        binding?.categoryName?.text = StringUtil.formatName(category.name)
         binding?.categoryIcon?.setImageResource(category.iconPurple)
     }
 
     fun init(category: Category, categoryTag: String?) {
-        binding?.categoryName?.text = category.name
+
+        binding?.categoryName?.text = StringUtil.formatName(category.name)
         categoryTag?.let {
             val icon = CategoryAndFiltersUtil.getCategoryIcon(it, category.name)
             if (icon != 0) {

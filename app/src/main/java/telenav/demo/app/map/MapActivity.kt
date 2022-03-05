@@ -39,6 +39,7 @@ import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.widgets.CategoryView
 import java.util.*
 import java.util.concurrent.Executor
+import android.view.View.OnFocusChangeListener
 
 class MapActivity : AppCompatActivity() {
 
@@ -52,14 +53,15 @@ class MapActivity : AppCompatActivity() {
 
     private var filters: List<Filter>? = null
     private var lastSearch: String = ""
+    private var navigationFromSearchInfo = false
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
             lastKnownLocation = locationResult.lastLocation
             mapFragment?.animateCameraToCurrentLocation(
                 LatLng(
-                    lastKnownLocation!!.latitude,
-                    lastKnownLocation!!.longitude
+                    lastKnownLocation.latitude,
+                    lastKnownLocation.longitude
                 )
             )
         }
@@ -88,13 +90,19 @@ class MapActivity : AppCompatActivity() {
         app_personal_info.setOnClickListener { showPersonalInfoActivity() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
-           // showPersonalInfoFragment()
-            showSearchListBottomFragment()
+            showPersonalInfoFragment()
         }
 
         entity_details_back.setOnClickListener {
             onBackSearchInfoFragment()
         }
+
+        search.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchListBottomFragment()
+            }
+        }
+        search.setOnClickListener { showSearchListBottomFragment() }
     }
 
     fun onBackSearchInfoFragmentFromFilter(filters: List<Filter>) {
@@ -105,7 +113,12 @@ class MapActivity : AppCompatActivity() {
     private fun onBackSearchInfoFragment() {
         entity_details.visibility = View.GONE
         top_navigation_panel.visibility = View.GONE
-        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
+        if (navigationFromSearchInfo) {
+            showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
+            navigationFromSearchInfo = true
+        } else {
+            expandBottomSheet()
+        }
     }
 
     private fun showPersonalInfoActivity() {
@@ -175,13 +188,13 @@ class MapActivity : AppCompatActivity() {
         mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
     }
 
-    fun showBottomSheet() {
+    fun expandBottomSheet() {
         if (this::behavior.isInitialized) {
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
     }
 
-    private fun collapseBottomSheet() {
+    fun collapseBottomSheet() {
         if (this::behavior.isInitialized) {
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
@@ -219,7 +232,7 @@ class MapActivity : AppCompatActivity() {
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
-    private fun displayUserInfo() {
+    fun displayUserInfo() {
         supportFragmentManager.beginTransaction().replace(R.id.user_address,
             UserAddressFragment.newInstance()).commit()
     }
@@ -232,13 +245,15 @@ class MapActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-    fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?) {
+    fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?,
+                             navigationFromSearchInfo: Boolean = false) {
         mapFragment?.addEntityResultOnMap(
             entity,
             lastKnownLocation,
             currentSearchHotCategory
         )
         searchInfoBottomFragment?.dismiss()
+        this.navigationFromSearchInfo = navigationFromSearchInfo
     }
 
     var searchListFragment: SearchHotCategoriesFragment? = null
@@ -254,7 +269,7 @@ class MapActivity : AppCompatActivity() {
     }
 
     var personalInfoFragment: PersonalInfoFragment? = null
-    private fun showPersonalInfoFragment() {
+    fun showPersonalInfoFragment() {
         personalInfoFragment = PersonalInfoFragment.newInstance()
         personalInfoFragment!!.show(supportFragmentManager, personalInfoFragment!!.tag)
     }
@@ -284,8 +299,24 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchListBottomFragment: SearchListBottomFragment? = null
-    fun showSearchListBottomFragment() {
+    private fun showSearchListBottomFragment() {
         searchListBottomFragment = SearchListBottomFragment.newInstance(hotCategoryTag)
+        searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
+    }
+
+    fun showSearchListBottomFragmentFromUserAddress(
+        shouldUpdateWorkAddress: Boolean = false,
+        shouldUpdateHomeAddress: Boolean = false) {
+        searchListBottomFragment = if (personalInfoFragment?.isAdded == true) {
+            personalInfoFragment?.dismiss()
+            SearchListBottomFragment.newInstance(
+                hotCategoryTag, shouldUpdateWorkAddress,
+                shouldUpdateHomeAddress, false)
+        } else {
+            SearchListBottomFragment.newInstance(
+                hotCategoryTag, shouldUpdateWorkAddress,
+                shouldUpdateHomeAddress, true)
+        }
         searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
     }
 
@@ -297,6 +328,14 @@ class MapActivity : AppCompatActivity() {
 
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
+    }
+
+    fun updateHomeAddress() {
+
+    }
+
+    fun updateWorkAddress() {
+
     }
 
     fun showEntityDetails(searchResult: SearchResult, entity: Entity) {
