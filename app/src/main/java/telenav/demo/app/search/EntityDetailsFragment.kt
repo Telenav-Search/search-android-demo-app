@@ -24,7 +24,7 @@ import telenav.demo.app.utils.addFavorite
 import telenav.demo.app.utils.deleteFavorite
 import telenav.demo.app.utils.entityCall
 import java.lang.reflect.Type
-import android.util.DisplayMetrics
+import telenav.demo.app.utils.Converter.convertDpToPixel
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 class EntityDetailsFragment : RoundedBottomSheetLayout() {
@@ -54,12 +54,12 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
         if (searchResult?.phoneNo.isNullOrEmpty()) {
             binding?.entityCall?.visibility = View.GONE
-            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(-130f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(140f), 0 ,0 ,0)
+            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(requireContext(),-130f)
+            binding?.entityFavorite?.setPadding(convertDpToPixel(requireContext(),140f), 0 ,0 ,0)
         } else {
             binding?.entityCall?.visibility = View.VISIBLE
-            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(-30f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(40f), 0 ,0 ,0)
+            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(requireContext(),-30f)
+            binding?.entityFavorite?.setPadding(convertDpToPixel(requireContext(),40f), 0 ,0 ,0)
         }
 
         binding?.entityDistance?.text = binding?.entityDistance?.context?.convertNumberToDistance(searchResult?.distance!!)
@@ -126,7 +126,7 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
         var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult)
         when {
             searchResult?.categoryName.equals(PARKING_TAG) -> {
-                fragment = ParkingDetailsFragment.newInstance(searchResult)
+                fragment = ParkingDetailsFragment.newInstance(searchResult, entity)
             }
             searchResult?.categoryName.equals(FAST_FOOD_TAG) -> {
                 fragment = FoodDetailsFragment.newInstance(searchResult)
@@ -139,10 +139,6 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
         childFragmentManager.beginTransaction().replace(
             R.id.frame_entity_additional_details, fragment, FRAGMENT_TAG).commit()
-    }
-
-    private fun convertDpToPixel(dp: Float): Int {
-        return (dp * (requireContext().resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
     }
 
     companion object {

@@ -119,5 +119,18 @@
             app:layout_constraintTop_toBottomOf="@+id/entity_open_hours_header"
             app:layout_constraintStart_toStartOf="@+id/entity_open_hours_header" />
 
+        <LinearLayout
+            android:id="@+id/entity_available_service_liner_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="14dp"
+            android:textColor="@color/grey_c3"
+            android:textSize="12sp"
+            android:text="@string/available_service"
+            app:layout_constraintTop_toBottomOf="@+id/entity_open_hours_header"
+            app:layout_constraintStart_toEndOf="@+id/entity_available_service_header" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

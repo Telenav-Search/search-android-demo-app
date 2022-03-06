@@ -111,7 +111,7 @@ class SearchInfoViewModel : ViewModel() {
                             App.LAST_ENTITY_RESPONSE_REF_ID,
                             response.referenceId
                         )
-                        if (categories.value == null) {
+                        if (categories.value.isNullOrEmpty()) {
                             requestSubcategories(categoryTag,
                                 location, executor, filters != null, response.results)
                         } else {
@@ -146,11 +146,7 @@ class SearchInfoViewModel : ViewModel() {
                 override fun onSuccess(response: EntityDiscoverCategoryResponse?) {
                     // log response in JSON format
                     Log.d("TAG", EntityJsonConverter.toPrettyJson(response))
-                    val categories1: List<Category> = response?.results as List<Category>
-                    for (category in categories1) {
-                        Log.d("TAG", " Categories ${category.name}")
-                    }
-                    categories.value = categories1
+                    categories.value= response?.results as List<Category>
                     handleSearchResponse(filtersAvailable, results)
                 }
 

@@ -10,11 +10,17 @@ import com.telenav.sdk.entity.model.base.ParkingPriceItem
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentParkingDetailsBinding
 import telenav.demo.app.model.SearchResult
+import android.widget.ImageView
+import android.widget.LinearLayout.LayoutParams
+import com.telenav.sdk.entity.model.base.DataField
+import com.telenav.sdk.entity.model.base.Entity
+import telenav.demo.app.utils.Converter.convertDpToPixel
 
 class ParkingDetailsFragment : Fragment() {
 
     private var binding: FragmentParkingDetailsBinding? = null
     private var searchResult: SearchResult? = null
+    private var entity: Entity? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,13 +71,51 @@ class ParkingDetailsFragment : Fragment() {
         searchResult?.parking?.spacesAvailable?.let {
             binding?.availableParkingLot?.text = it.toString()
         }
+
+        val imagesId = arrayListOf<Int>()
+
+        entity?.let {
+            val amenities = it.facets.amenities
+            for (value in amenities) {
+                when (value.id.toInt()) {
+                    1 -> {
+                        imagesId.add(R.drawable.ic_handicap_accessible)
+                    }
+                    2 -> {
+                        imagesId.add(R.drawable.ic_electrical_vehicle_charge)
+                    }
+                    5 -> {
+                        imagesId.add(R.drawable.ic_valet)
+                    }
+                    8 -> {
+                        imagesId.add(R.drawable.ic_security_camera)
+                    }
+                }
+            }
+        }
+
+        for (id in imagesId) {
+            val imageView = ImageView(requireContext())
+            imageView.setImageResource(id)
+            val params = LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT)
+            params.setMargins(convertDpToPixel(requireContext(), 10f), 0, 0, 0)
+            imageView.layoutParams = params
+            binding?.entityAvailableServiceLinerLayout?.addView(imageView)
+        }
+
+        if (imagesId.isEmpty()) {
+            binding?.entityAvailableServiceHeader?.visibility = View.GONE
+        }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance(searchResult: SearchResult?) =
+        fun newInstance(searchResult: SearchResult?, entity: Entity?) =
             ParkingDetailsFragment().apply {
                 this.searchResult = searchResult
+                this.entity = entity
             }
     }
 }

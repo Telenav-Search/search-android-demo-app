@@ -1,5 +1,7 @@
 package telenav.demo.app.utils
 
+import android.content.Context
+import android.util.DisplayMetrics
 import com.google.android.gms.maps.model.LatLng
 
 object Converter {
@@ -24,4 +26,7 @@ object Converter {
         return latLngs
     }
 
+    fun convertDpToPixel(context: Context, dp: Float): Int {
+        return (dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)).toInt()
+    }
 }

@@ -41,10 +41,10 @@ class FoodDetailsFragment : Fragment() {
 
         if (searchResult?.phoneNo.isNullOrEmpty()) {
             binding?.entityPhoneNumber?.text = ""
-            binding?.entityPhoneNumberHeader?.visibility = View.VISIBLE
+            binding?.entityPhoneNumberHeader?.visibility = View.GONE
         } else {
             binding?.entityPhoneNumber?.text = searchResult?.phoneNo
-            binding?.entityPhoneNumberHeader?.visibility = View.GONE
+            binding?.entityPhoneNumberHeader?.visibility = View.VISIBLE
         }
 
         if (searchResult?.permanentlyClosed != null) {
