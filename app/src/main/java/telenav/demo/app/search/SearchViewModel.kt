@@ -22,7 +22,6 @@ import com.telenav.sdk.entity.model.search.*
 import com.telenav.sdk.entity.utils.EntityJsonConverter
 import telenav.demo.app.App
 import telenav.demo.app.homepage.HotCategory
-import telenav.demo.app.search.filters.OpenNowFilter
 import telenav.demo.app.search.filters.PriceLevel
 import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
@@ -298,9 +297,6 @@ class SearchViewModel : ViewModel() {
             )
         }
         filters?.forEach { it ->
-            if (it is OpenNowFilter) {
-                filteredResults = filterByOpen(results)
-            }
             if (it is StarsFilter) {
                 filteredResults = filterByStar(results, it)
             }

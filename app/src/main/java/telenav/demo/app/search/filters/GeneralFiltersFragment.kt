@@ -13,7 +13,6 @@ import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
 
-    private var openNowFilter = OpenNowFilter()
     private val starsFilter = StarsFilter()
     private var priceLevelFilter = PriceLevel()
     private var binding: GeneralFiltersFragmentLayoutBinding? = null
@@ -48,7 +47,7 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.priceReset?.setOnClickListener(this)
         binding?.parkingFiltersAreaBack?.setOnClickListener {
             dismiss()
-            (activity!! as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
+            (activity!! as MapActivity).onBackFromFilterFragment()
         }
     }
 
@@ -90,24 +89,12 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         }
     }
 
-    private fun getFilters(): List<Filter> {
-        val filtersToApply = arrayListOf<Filter>()
-        if (openNowFilter.isOpened != OpenNow.DEFAULT) filtersToApply.add(openNowFilter)
-        if (priceLevelFilter.priceLevel != PriceLevelType.DEFAULT)
-            filtersToApply.add(priceLevelFilter
-        )
-        if (starsFilter.stars != Stars.DEFAULT) filtersToApply.add(starsFilter)
-        return filtersToApply
-    }
-
     private fun initDefaultValues() {
         binding?.openNow?.isChecked = App.readBooleanFromSharedPreferences(App.OPEN_TIME, false)
         binding?.openNow?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                openNowFilter.isOpened = OpenNow.OPEN
                 App.writeBooleanToSharedPreferences(App.OPEN_TIME, true)
             } else {
-                openNowFilter.isOpened = OpenNow.DEFAULT
                 App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
             }
         }

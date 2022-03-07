@@ -17,14 +17,13 @@ import com.telenav.sdk.entity.model.discover.EntityDiscoverCategoryResponse
 import com.telenav.sdk.entity.model.search.*
 import com.telenav.sdk.entity.utils.EntityJsonConverter
 import telenav.demo.app.App
-import telenav.demo.app.search.filters.OpenNowFilter
-import telenav.demo.app.search.filters.PriceLevel
-import telenav.demo.app.search.filters.ReservationFilter
-import telenav.demo.app.search.filters.StarsFilter
 import java.util.concurrent.Executor
 import telenav.demo.app.R
+import telenav.demo.app.search.filters.*
 import java.lang.reflect.Type
 import telenav.demo.app.utils.*
+import com.telenav.sdk.entity.model.base.ParkingParameters
+import com.telenav.sdk.entity.model.base.FacetParameters
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -35,7 +34,6 @@ class SearchInfoViewModel : ViewModel() {
 
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-    var filters: List<Any>? = null
     var searchResults = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
     var savedAddress = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
     var searchError = MutableLiveData<String>().apply { postValue("") }
@@ -47,6 +45,8 @@ class SearchInfoViewModel : ViewModel() {
         categoryTag: String?,
         location: Location,
         executor: Executor,
+        filterCategory: String? = null,
+        filtersAvailable: Boolean = false,
         nearLeft: LatLng? = null,
         farRight: LatLng? = null) {
 
@@ -71,34 +71,71 @@ class SearchInfoViewModel : ViewModel() {
             filtersSearch.setGeoFilter(geoFilter)
         }
 
-        if (filters != null) {
-            val builder: BusinessFilter.Builder = BusinessFilter.builder()
-            var shouldApplyFilter = false
+        if (filtersAvailable) {
+            when {
+                filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG) -> {
+                    val builder: BusinessFilter.Builder = BusinessFilter.builder()
+                    var shouldApplyFilter = false
+                    if (isOpened()) {
+                        shouldApplyFilter = true
+                        builder.setNewlyOpen()
+                    }
+                    if (isReserved()) {
+                        shouldApplyFilter = true
+                        builder.setReservation()
+                    }
 
-            filters?.forEach { it ->
-                if (it is OpenNowFilter) {
-                    shouldApplyFilter = true
-                    builder.setNewlyOpen()
+                    if (shouldApplyFilter) {
+                        filtersSearch.setBusinessFilter(builder.build())
+                    }
                 }
-                if (it is ReservationFilter) {
-                    shouldApplyFilter = true
-                    builder.setReservation()
+                filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG) -> {
+                    val builder: EvFilter.Builder = EvFilter.builder()
+                    val connectionTypes = getConnectionTypes()
+                    val chargeBrands = getChargerBrands()
+                    val powerFeed = getPowerFeed()
+
+                    if (!connectionTypes.isNullOrEmpty()) {
+                        builder.setConnectorTypes(connectionTypes.split(","))
+                    }
+
+                    if (!chargeBrands.isNullOrEmpty()) {
+                        builder.setChargerBrands(chargeBrands.split(","))
+                    }
+
+                    if (!powerFeed.isNullOrEmpty()) {
+                        builder.setChargerBrands(powerFeed.split(","))
+                    }
+
+                    builder.setFreeCharge(isFreeCharger())
+                    filtersSearch.setEvFilter(builder.build())
+                }
+                else -> {
+                    val builder: BusinessFilter.Builder = BusinessFilter.builder()
+                    if (isOpened()) {
+                        builder.setNewlyOpen()
+                        filtersSearch.setBusinessFilter(builder.build())
+                    }
                 }
             }
-
-            if (shouldApplyFilter) {
-                filtersSearch.setBusinessFilter(builder.build())
-            }
-
         }
 
-        telenavEntityClient.searchRequest().setFacetParameters(null)
+        telenavEntityClient.searchRequest()
             .apply {
                 if (query != null)
                     setQuery(query)
             }.apply {
-                    setFilters(filtersSearch.build())
+                setFilters(filtersSearch.build())
+            }.apply {
+                if (filtersAvailable && filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG)) {
+                    val parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0)
+                    if (parkingDuration != 0) {
+                        val facetParameters = FacetParameters.builder().setParkingParameters(
+                            ParkingParameters.builder().setDuration(parkingDuration).build()).build()
+                        setFacetParameters(facetParameters)
+                    }
                 }
+            }
             .setLocation(37.39877104671623, -121.97739243507385)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_INFO_LIMIT_WITH_FILTERS.toString())!!.toInt())
@@ -113,9 +150,9 @@ class SearchInfoViewModel : ViewModel() {
                         )
                         if (categories.value.isNullOrEmpty()) {
                             requestSubcategories(categoryTag,
-                                location, executor, filters != null, response.results)
+                                location, executor, filtersAvailable, filterCategory, response.results)
                         } else {
-                            handleSearchResponse(filters != null, response.results)
+                            handleSearchResponse(filtersAvailable, filterCategory, response.results)
                         }
                     }
 
@@ -134,6 +171,7 @@ class SearchInfoViewModel : ViewModel() {
         location: Location,
         executor: Executor,
         filtersAvailable: Boolean,
+        filterCategory: String?,
         results: List<Entity>
     ) {
         telenavEntityClient.discoverCategoryRequest()
@@ -147,11 +185,11 @@ class SearchInfoViewModel : ViewModel() {
                     // log response in JSON format
                     Log.d("TAG", EntityJsonConverter.toPrettyJson(response))
                     categories.value= response?.results as List<Category>
-                    handleSearchResponse(filtersAvailable, results)
+                    handleSearchResponse(filtersAvailable, filterCategory, results)
                 }
 
                 override fun onFailure(t: Throwable?) {
-                    handleSearchResponse(filtersAvailable, results)
+                    handleSearchResponse(filtersAvailable, filterCategory, results)
                     Log.e(
                         "TAG",
                         "Get unsuccessful response or throwable happened when executing the request."
@@ -160,10 +198,10 @@ class SearchInfoViewModel : ViewModel() {
             })
     }
 
-    private fun handleSearchResponse(filtersAvailable: Boolean, results: List<Entity>) {
+    private fun handleSearchResponse(filtersAvailable: Boolean, filterCategory: String?, results: List<Entity>) {
         loading.postValue(false)
         if (filtersAvailable) {
-            searchResults.value = applyFilters(results)
+            searchResults.value = applyFilters(results, filterCategory)
         } else {
             searchResults.postValue(results)
         }
@@ -179,12 +217,12 @@ class SearchInfoViewModel : ViewModel() {
         return filteredResults
     }
 
-    private fun filterByStar(results: List<Entity>, filter: StarsFilter): ArrayList<Entity> {
+    private fun filterByStar(results: List<Entity>, starsNumber: Int): ArrayList<Entity> {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
             if (entity.facets.rating != null && entity.facets.rating.size > 0
-                    && entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() >= 0.0 &&
-                    entity.facets.rating[0].averageRating - filter.stars.starsNumber.toDouble() < 1.0
+                    && entity.facets.rating[0].averageRating - starsNumber.toDouble() >= 0.0 &&
+                    entity.facets.rating[0].averageRating - starsNumber.toDouble() < 1.0
             ) {
                 filteredResults.add(entity)
             }
@@ -192,32 +230,36 @@ class SearchInfoViewModel : ViewModel() {
         return filteredResults
     }
 
-    private fun filterByPrice(results: List<Entity>, filter: PriceLevel): ArrayList<Entity> {
+    private fun filterByPrice(results: List<Entity>, priceLevel: Int): ArrayList<Entity> {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
-            if (entity.facets?.priceInfo?.priceLevel == filter.priceLevel.priceLevel) {
+            if (entity.facets?.priceInfo?.priceLevel == priceLevel) {
                 filteredResults.add(entity)
             }
         }
         return filteredResults
     }
 
-    private fun applyFilters(results: List<Entity>): List<Entity> {
+    private fun applyFilters(results: List<Entity>, filterCategory: String?): List<Entity> {
         var filteredResults = results.toMutableList()
         if (filteredResults.size == 0) {
             return filteredResults
         }
-        if (filters?.size == 0) {
-            return results
-        }
-        filters?.forEach { it ->
-            if (it is StarsFilter) {
-                filteredResults = filterByStar(results, it)
+
+        if (!filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG) &&
+            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)) {
+            val starsNumber = getRateStars()
+            if (starsNumber != Stars.DEFAULT.starsNumber) {
+                filteredResults = filterByStar(results, starsNumber)
             }
-            if (it is PriceLevel) {
-                filteredResults = filterByPrice(results, it)
+        } else if (filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG) &&
+            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)) {
+            val priceNumber = getPriceLevel()
+            if (priceNumber != PriceLevelType.DEFAULT.priceLevel) {
+                filteredResults = filterByPrice(results, priceNumber)
             }
         }
+
         if (filteredResults.size > App.readFromSharedPreferences(App.FILTER_NUMBER)) {
             return filteredResults.subList(
                 0,
@@ -275,5 +317,37 @@ class SearchInfoViewModel : ViewModel() {
             savedAddress.value = listOf(it)
         }
         return workEntity
+    }
+
+    private fun getRateStars(): Int {
+        return App.readIntFromSharedPreferences(App.RATE_STARS, Stars.DEFAULT.starsNumber)
+    }
+
+    private fun getPriceLevel(): Int {
+        return App.readIntFromSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel)
+    }
+
+    private fun isOpened(): Boolean {
+        return App.readBooleanFromSharedPreferences(App.OPEN_TIME, false)
+    }
+
+    private fun isReserved(): Boolean {
+        return App.readBooleanFromSharedPreferences(App.RESERVED, false)
+    }
+
+    private fun isFreeCharger(): Boolean {
+        return App.readBooleanFromSharedPreferences(App.FREE_CHARGER, false)
+    }
+
+    private fun getConnectionTypes(): String? {
+        return App.readStringFromSharedPreferences(App.CONNECTION_TYPES, "")
+    }
+
+    private fun getChargerBrands(): String? {
+        return App.readStringFromSharedPreferences(App.CHARGER_BRAND, "")
+    }
+
+    private fun getPowerFeed(): String? {
+        return App.readStringFromSharedPreferences(App.POWER_FEED, "")
     }
 }

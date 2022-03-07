@@ -34,7 +34,6 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
     private var currentSearchHotCategoryName: String? = null
     private var currentSearchHotCategoryTag: String? = null
     private var binding: SearchInfoBottomFragmentLayoutBinding? = null
-    private var filters: List<Filter>? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,12 +50,11 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
     }
 
     private fun init() {
-        viewModel.filters = filters
         val location = (activity!! as MapActivity).lastKnownLocation
         activity?.getUIExecutor()?.let { executor ->
             currentSearchHotCategoryTag?.let {
                 (activity!! as MapActivity).setLastSearch(it)
-                viewModel.search(null, it, location, executor)
+                viewModel.search(null, it, location, executor, currentSearchHotCategoryTag, true)
             }
         }
 
@@ -68,7 +66,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
                 (activity!! as MapActivity).hideKeyboard(search)
                 searchList.removeAllViewsInLayout()
                 activity?.getUIExecutor()?.let {
-                    viewModel.search(search.text.toString(), null, loc, it)
+                    viewModel.search(search.text.toString(), null, loc, it, currentSearchHotCategoryTag, true)
                 }
             }
             false
@@ -181,11 +179,10 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
 
     companion object {
         @JvmStatic
-        fun newInstance(categoryName: String?, categoryTag: String?, filters: List<Filter>?) =
+        fun newInstance(categoryName: String?, categoryTag: String?) =
             SearchInfoBottomFragment().apply {
                 this.currentSearchHotCategoryName = categoryName
                 this.currentSearchHotCategoryTag = categoryTag
-                this.filters = filters
             }
     }
 }

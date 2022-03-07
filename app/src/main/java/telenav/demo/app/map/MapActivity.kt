@@ -51,7 +51,6 @@ class MapActivity : AppCompatActivity() {
         private val FRAGMENT_TAG = "EntityDetailsFragment"
     }
 
-    private var filters: List<Filter>? = null
     private var lastSearch: String = ""
     private var navigationFromSearchInfo = false
     private var locationCallback: LocationCallback = object : LocationCallback() {
@@ -105,12 +104,7 @@ class MapActivity : AppCompatActivity() {
         search.setOnClickListener { showSearchListBottomFragment() }
     }
 
-    fun onBackSearchInfoFragmentFromFilter(filters: List<Filter>) {
-        this.filters = filters
-        onBackSearchInfoFragment()
-    }
-
-    private fun onBackSearchInfoFragment() {
+    fun onBackSearchInfoFragment() {
         entity_details.visibility = View.GONE
         top_navigation_panel.visibility = View.GONE
         if (navigationFromSearchInfo) {
@@ -119,6 +113,10 @@ class MapActivity : AppCompatActivity() {
         } else {
             expandBottomSheet()
         }
+    }
+
+    fun onBackFromFilterFragment() {
+        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
     }
 
     private fun showPersonalInfoActivity() {
@@ -148,7 +146,6 @@ class MapActivity : AppCompatActivity() {
 
     var searchFragment: SearchBottomFragment? = null
     private fun openSearch() {
-        filters = null
         searchFragment = SearchBottomFragment()
         searchFragment!!.setSearchType(SearchBottomFragment.CATEGORY_SEARCH)
         searchFragment!!.show(supportFragmentManager, searchFragment!!.tag)
@@ -276,7 +273,7 @@ class MapActivity : AppCompatActivity() {
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
     private fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, filters)
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
@@ -320,22 +317,8 @@ class MapActivity : AppCompatActivity() {
         searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
     }
 
-    fun setFiltersSub() {
-        if (filters != null) {
-            subcategoriesFragment?.setFilters(filters!!)
-        }
-    }
-
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
-    }
-
-    fun updateHomeAddress() {
-
-    }
-
-    fun updateWorkAddress() {
-
     }
 
     fun showEntityDetails(searchResult: SearchResult, entity: Entity) {
@@ -382,6 +365,7 @@ class MapActivity : AppCompatActivity() {
         App.writeStringToSharedPreferences(App.CONNECTION_TYPES, "")
         App.writeStringToSharedPreferences(App.CHARGER_BRAND, "")
         App.writeStringToSharedPreferences(App.POWER_FEED, "")
+        App.writeToSharedPreferences(App.PARKING_DURATION, 0)
     }
 }
 

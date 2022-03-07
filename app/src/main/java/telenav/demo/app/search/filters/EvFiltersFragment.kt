@@ -20,10 +20,6 @@ import telenav.demo.app.utils.StringUtil
 
 class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
 
-    private var openNowFilter = OpenNowFilter()
-    private val starsFilter = StarsFilter()
-    private var priceLevelFilter = PriceLevel()
-    private var reservationFilter = ReservationFilter()
     private var binding: EvFiltersFragmentLayoutBinding? = null
 
     override fun onCreateView(
@@ -118,14 +114,12 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         }
         binding?.flowChargerBrands?.referencedIds = chargerBrandsIdArray.toIntArray()
 
-        binding?.reservation?.isChecked = App.readBooleanFromSharedPreferences(App.RESERVED, false)
-        binding?.reservation?.setOnCheckedChangeListener { _, isChecked ->
+        binding?.freeCharger?.isChecked = App.readBooleanFromSharedPreferences(App.FREE_CHARGER, false)
+        binding?.freeCharger?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                reservationFilter.isReserved = Reservation.RESERVED
-                App.writeBooleanToSharedPreferences(App.RESERVED, true)
+                App.writeBooleanToSharedPreferences(App.FREE_CHARGER, true)
             } else {
-                reservationFilter.isReserved = Reservation.DEFAULT
-                App.writeBooleanToSharedPreferences(App.RESERVED, false)
+                App.writeBooleanToSharedPreferences(App.FREE_CHARGER, false)
             }
         }
     }
@@ -167,22 +161,16 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
 
     private fun setUpCLickListeners() {
         binding?.evFiltersAreaBack?.setOnClickListener {
+            saveFilters()
+            (activity!! as MapActivity).onBackFromFilterFragment()
             dismiss()
-            (activity!! as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
         }
         binding?.evConnectorTypesReset?.setOnClickListener(this)
         binding?.evPowerFeedLevelsReset?.setOnClickListener(this)
         binding?.evChargerBrandsReset?.setOnClickListener(this)
     }
 
-    private fun getFilters(): List<Filter> {
-        val filtersToApply = arrayListOf<Filter>()
-        if (openNowFilter.isOpened != OpenNow.DEFAULT) filtersToApply.add(openNowFilter)
-        if (priceLevelFilter.priceLevel != PriceLevelType.DEFAULT) filtersToApply.add(
-            priceLevelFilter
-        )
-        if (starsFilter.stars != Stars.DEFAULT) filtersToApply.add(starsFilter)
-
+    private fun saveFilters() {
         var connectionTypes = ""
         var chargerBrands = ""
         var powerFeed = ""
@@ -190,13 +178,13 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
             if (it is CheckBox && it.isChecked) {
                 when {
                     binding?.flowConnectorTypes?.referencedIds?.contains(it.id) == true -> {
-                        connectionTypes = connectionTypes + it.text + ", "
+                        connectionTypes = connectionTypes + it.tag + ", "
                     }
                     binding?.flowChargerBrands?.referencedIds?.contains(it.id) == true -> {
-                        chargerBrands = chargerBrands + it.text + ", "
+                        chargerBrands = chargerBrands + it.tag + ", "
                     }
                     binding?.flowPowerFeedLevels?.referencedIds?.contains(it.id) == true -> {
-                        powerFeed = powerFeed + it.text + ","
+                        powerFeed = powerFeed + it.tag + ","
                     }
                 }
             }
@@ -204,8 +192,6 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         App.writeStringToSharedPreferences(App.CONNECTION_TYPES, connectionTypes)
         App.writeStringToSharedPreferences(App.CHARGER_BRAND, chargerBrands)
         App.writeStringToSharedPreferences(App.POWER_FEED, powerFeed)
-
-        return filtersToApply
     }
 
     companion object {

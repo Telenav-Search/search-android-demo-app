@@ -12,10 +12,9 @@ import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
 class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
 
-    private var openNowFilter = OpenNowFilter()
     private var priceLevelFilter = PriceLevel()
-    private var reservationFilter = ReservationFilter()
     private var binding: ParkingFiltersFragmentLayoutBinding? = null
+    private var parkingDuration = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,9 +39,12 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.priceLevelFourDollars?.setOnClickListener(this)
         binding?.parkingFiltersAreaBack?.setOnClickListener {
             dismiss()
-            (activity as MapActivity).onBackSearchInfoFragmentFromFilter(getFilters())
+            App.writeToSharedPreferences(App.PARKING_DURATION, parkingDuration)
+            (activity as MapActivity).onBackFromFilterFragment()
         }
         binding?.priceReset?.setOnClickListener(this)
+        binding?.parkingDurationAdd?.setOnClickListener(this)
+        binding?.parkingDurationSubstract?.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -62,27 +64,25 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
             R.id.price_reset -> {
                 initPriceLevelValue(PriceLevelType.DEFAULT.priceLevel)
             }
+            R.id.parking_duration_add -> {
+                parkingDuration++
+                initParkingDuration()
+            }
+            R.id.parking_duration_substract -> {
+                if (parkingDuration != 0) {
+                    parkingDuration--
+                }
+                initParkingDuration()
+            }
         }
-    }
-
-    private fun getFilters(): List<Filter> {
-        val filtersToApply = arrayListOf<Filter>()
-        if (openNowFilter.isOpened != OpenNow.DEFAULT) filtersToApply.add(openNowFilter)
-        if (priceLevelFilter.priceLevel != PriceLevelType.DEFAULT) filtersToApply.add(
-            priceLevelFilter
-        )
-        if (reservationFilter.isReserved != Reservation.DEFAULT) filtersToApply.add(reservationFilter)
-        return filtersToApply
     }
 
     private fun initDefaultValues() {
         binding?.openNow?.isChecked = App.readBooleanFromSharedPreferences(App.OPEN_TIME, false)
         binding?.openNow?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                openNowFilter.isOpened = OpenNow.OPEN
                 App.writeBooleanToSharedPreferences(App.OPEN_TIME, true)
             } else {
-                openNowFilter.isOpened = OpenNow.DEFAULT
                 App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
             }
         }
@@ -90,17 +90,16 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.reservation?.isChecked = App.readBooleanFromSharedPreferences(App.RESERVED, false)
         binding?.reservation?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                reservationFilter.isReserved = Reservation.RESERVED
                 App.writeBooleanToSharedPreferences(App.RESERVED, true)
             } else {
-                reservationFilter.isReserved = Reservation.DEFAULT
                 App.writeBooleanToSharedPreferences(App.RESERVED, false)
             }
         }
 
         initPriceLevelValue(App.readIntFromSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.ordinal))
+        parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0)
+        initParkingDuration()
     }
-
 
     private fun initPriceLevelValue(priceLevel: Int) {
         when (priceLevel) {
@@ -141,6 +140,10 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
             }
         }
         App.writeToSharedPreferences(App.PRICE_LEVEL, priceLevel)
+    }
+
+    private fun initParkingDuration() {
+        binding?.parkingDuration?.text = "$parkingDuration:00 MN"
     }
 
     companion object {

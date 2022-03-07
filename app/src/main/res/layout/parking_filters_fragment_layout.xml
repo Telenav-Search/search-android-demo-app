@@ -156,7 +156,7 @@
             app:layout_constraintTop_toBottomOf="@id/separate_line2" />
 
         <ImageView
-            android:id="@+id/parking_duration_subtract"
+            android:id="@+id/parking_duration_substract"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_remove_circle"
@@ -172,7 +172,7 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="@android:color/black"
-            android:text="12:00 HR"
+            android:text="00:00 MN"
             android:layout_marginTop="9dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

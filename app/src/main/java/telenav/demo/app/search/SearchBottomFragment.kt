@@ -37,10 +37,8 @@ import telenav.demo.app.homepage.SuggestionRecyclerAdapter
 import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.search.filters.Filter
-import telenav.demo.app.search.filters.FiltersFragment
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
-import java.util.concurrent.Executor
 
 private const val TAG = "SearchBottomFragment"
 
@@ -212,9 +210,6 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
         CategoryAndFiltersUtil.hotCategoriesList.forEach {
             addCategoryChip(it)
         }
-        show_filters.setOnClickListener {
-            goToFiltersFragment()
-        }
 
         viewModel.searchResults.observe(this, Observer {
             Log.d(TAG, "result count ->  ${it.size} ")
@@ -227,17 +222,6 @@ class SearchBottomFragment : RoundedBottomSheetLayout() {
             )
             fragmentManager?.beginTransaction()?.remove(this)?.commit()
         })
-    }
-
-    private fun goToFiltersFragment() {
-        val filtersFragment =
-            FiltersFragment()
-        activity?.supportFragmentManager?.let { it1 ->
-            filtersFragment.show(
-                it1,
-                filtersFragment.tag
-            )
-        }
     }
 
     private fun addCategoryChip(hotCategory: HotCategory) {

@@ -21,13 +21,16 @@ class App : Application() {
         const val PREDICTIONS_LIMIT = "predictions_limit"
         const val ENVIRONMENT = "environment"
         const val FILTER_NUMBER_VALUE = 10
+
         const val RATE_STARS = "rate_stars"
         const val PRICE_LEVEL = "price_level"
         const val OPEN_TIME = "open_time"
         const val RESERVED = "reserved"
+        const val FREE_CHARGER = "free_charger"
         const val CONNECTION_TYPES = "connection_types"
         const val CHARGER_BRAND = "charger_brand"
         const val POWER_FEED = "power_feed"
+        const val PARKING_DURATION = "parking_duration"
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =

@@ -54,7 +54,6 @@ open class CategoriesResultFragment : RoundedBottomSheetLayout() {
 
         vCategoryTree.layoutManager = LinearLayoutManager(activity)
         requestCategories()
-        (activity as MapActivity).setFiltersSub()
         viewModel.searchResults.observe(this, Observer {
             (activity as MapActivity).displaySearchResults(
                 it as List<Entity>?,
