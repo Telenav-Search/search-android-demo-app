@@ -153,6 +153,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.searchListAreaBack?.setOnClickListener {
+            (activity!! as MapActivity).hideKeyboard(search)
             if (shouldUpdateHomeAddress || shouldUpdateWorkAddress) {
                 if (!openedFromMainScreen) {
                     (activity!! as MapActivity).showPersonalInfoFragment()
@@ -160,7 +161,6 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             } else {
                 (activity!! as MapActivity).expandBottomSheet()
             }
-            (activity!! as MapActivity).hideKeyboard(search)
             dismiss()
         }
         if (search.text.isNotEmpty()) {
@@ -195,7 +195,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                             (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
                         }
                     }
-                    (activity as MapActivity).displayUserInfo()
+                    (activity as MapActivity).updateBottomView()
                     dismiss()
                 }
             }

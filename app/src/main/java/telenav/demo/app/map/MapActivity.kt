@@ -40,6 +40,12 @@ import telenav.demo.app.widgets.CategoryView
 import java.util.*
 import java.util.concurrent.Executor
 import android.view.View.OnFocusChangeListener
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
+import kotlinx.android.synthetic.main.view_header_search.*
+import java.lang.reflect.Type
 
 class MapActivity : AppCompatActivity() {
 
@@ -79,14 +85,13 @@ class MapActivity : AppCompatActivity() {
         showMapFragment(mapFragment!!)
         displayHotCategories()
         displayUserInfo()
+        displayRecentSearchInfo()
         resetFilters()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
         fab_search.setOnClickListener { openSearch() }
-        app_mode_select.setOnClickListener { showSettingsActivity() }
-        app_personal_info.setOnClickListener { showPersonalInfoActivity() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
             showPersonalInfoFragment()
@@ -104,7 +109,11 @@ class MapActivity : AppCompatActivity() {
         search.setOnClickListener { showSearchListBottomFragment() }
     }
 
-    fun onBackSearchInfoFragment() {
+    fun onBackFromFilterFragment() {
+        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
+    }
+
+    private fun onBackSearchInfoFragment() {
         entity_details.visibility = View.GONE
         top_navigation_panel.visibility = View.GONE
         if (navigationFromSearchInfo) {
@@ -115,15 +124,7 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    fun onBackFromFilterFragment() {
-        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
-    }
-
-    private fun showPersonalInfoActivity() {
-        startActivity(Intent(this, PersonalInfoActivity::class.java))
-    }
-
-    private fun showSettingsActivity() {
+    fun showSettingsActivity() {
         startActivityForResult(Intent(this, SettingsActivity::class.java), CODE_SETTINGS)
     }
 
@@ -229,9 +230,35 @@ class MapActivity : AppCompatActivity() {
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
-    fun displayUserInfo() {
+    fun updateBottomView() {
+        displayUserInfo()
+        displayRecentSearchInfo()
+    }
+
+    private fun displayUserInfo() {
         supportFragmentManager.beginTransaction().replace(R.id.user_address,
             UserAddressFragment.newInstance()).commit()
+    }
+
+    private fun displayRecentSearchInfo() {
+        val entities: List<Entity>? = getRecentSearchData()
+        supportFragmentManager.beginTransaction().replace(R.id.search_recent_data,
+            RecentSearchListFragment.newInstance(entities)).commit()
+
+        expend.setOnClickListener {
+            collapseBottomSheet()
+            showRecentSearchFullListFragment()
+        }
+
+        if (entities.isNullOrEmpty()) {
+            search_recent_data.visibility = View.GONE
+            expend.visibility = View.GONE
+            search_recent_data_header.visibility = View.GONE
+        } else {
+            search_recent_data.visibility = View.VISIBLE
+            expend.visibility = View.VISIBLE
+            search_recent_data_header.visibility = View.VISIBLE
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -296,9 +323,15 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchListBottomFragment: SearchListBottomFragment? = null
-    private fun showSearchListBottomFragment() {
+    fun showSearchListBottomFragment() {
         searchListBottomFragment = SearchListBottomFragment.newInstance(hotCategoryTag)
         searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
+    }
+
+    var recentSearchFullListFragment: RecentSearchFullListFragment? = null
+    private fun showRecentSearchFullListFragment() {
+        recentSearchFullListFragment = RecentSearchFullListFragment.newInstance(getRecentSearchData())
+        recentSearchFullListFragment!!.show(supportFragmentManager, recentSearchFullListFragment!!.tag)
     }
 
     fun showSearchListBottomFragmentFromUserAddress(
@@ -355,6 +388,26 @@ class MapActivity : AppCompatActivity() {
 
     fun hideKeyboard(view: View) {
         view.hideKeyboard()
+    }
+    private fun getRecentSearchData(): List<Entity>? {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+
+        val listType: Type = object : TypeToken<List<Entity>>() {}.type
+        val recentSearchEntities: List<Entity>? =  Gson().fromJson(
+            prefs?.getString(
+                getString(R.string.saved_recent_search_key),
+                ""
+            ), listType
+        )
+
+        recentSearchEntities?.let {
+            return  it
+        }
+        return null
     }
 
     private fun resetFilters() {

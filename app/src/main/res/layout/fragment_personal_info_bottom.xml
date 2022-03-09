@@ -4,13 +4,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/root_personal_info"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <View
-            android:id="@+id/separate_line1"
+            android:id="@+id/separate_line"
             android:layout_width="26dp"
             android:layout_height="3dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:background="@color/blue_c1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -24,10 +24,11 @@
             android:layout_marginTop="19dp"
             android:src="@drawable/ic_back"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/separate_line1"
+            app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/blue_c1"/>
 
         <TextView
+            android:id="@+id/personal_info_area_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/user_title"
@@ -62,57 +63,80 @@
             app:layout_constraintBottom_toBottomOf="@id/personal_info_ota"
             app:tint="@color/blue_c1"/>
 
-        <TextView
-            android:id="@+id/my_place"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="27dp"
-            android:layout_marginStart="25dp"
-            android:text="@string/my_place"
-            android:textSize="14sp"
-            android:textColor="@color/blue_c1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/personal_info_area_back" />
-
-        <FrameLayout
-            android:id="@+id/user_address"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/personal_info_constraint_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
+            android:layout_height="390dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/my_place" />
+            app:layout_constraintTop_toBottomOf="@+id/personal_info_area_back" >
 
-        <View
-            android:id="@+id/separate_line"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="20dp"
-            android:background="@color/blue_c2"
-            app:layout_constraintStart_toStartOf="@+id/user_address"
-            app:layout_constraintEnd_toEndOf="@+id/user_address"
-            app:layout_constraintTop_toBottomOf="@+id/user_address" />
+            <TextView
+                android:id="@+id/my_place"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="27dp"
+                android:layout_marginStart="25dp"
+                android:text="@string/my_place"
+                android:textSize="14sp"
+                android:textColor="@color/blue_c1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/personal_info_constraint_layout" />
 
-        <TextView
-            android:id="@+id/favorites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/favorites"
-            android:textSize="14sp"
-            android:textColor="@color/blue_c1"
-            app:layout_constraintStart_toStartOf="@id/my_place"
-            app:layout_constraintTop_toBottomOf="@+id/separate_line" />
+            <FrameLayout
+                android:id="@+id/user_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/my_place" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/personal_favorite_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_weight="1"
-            app:layout_constraintTop_toBottomOf="@+id/favorites" />
+            <View
+                android:id="@+id/separate_line1"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/blue_c2"
+                app:layout_constraintStart_toStartOf="@+id/user_address"
+                app:layout_constraintEnd_toEndOf="@+id/user_address"
+                app:layout_constraintTop_toBottomOf="@+id/user_address" />
+
+            <TextView
+                android:id="@+id/favorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="192dp"
+                android:layout_marginStart="25dp"
+                android:text="@string/favorites"
+                android:textSize="14sp"
+                android:textColor="@color/blue_c1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/personal_info_constraint_layout" />
+
+            <TextView
+                android:id="@+id/resize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="25dp"
+                android:text="@string/expend"
+                android:textSize="14sp"
+                android:textColor="@color/blue_c1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/favorites" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/personal_favorite_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:scrollbars="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/favorites" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

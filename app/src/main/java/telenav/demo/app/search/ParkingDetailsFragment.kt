@@ -12,7 +12,6 @@ import telenav.demo.app.databinding.FragmentParkingDetailsBinding
 import telenav.demo.app.model.SearchResult
 import android.widget.ImageView
 import android.widget.LinearLayout.LayoutParams
-import com.telenav.sdk.entity.model.base.DataField
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.utils.Converter.convertDpToPixel
 
