@@ -61,6 +61,9 @@
     <string name="connectors_type">Connectors type</string>
     <string name="power_feed">Power feed</string>
     <string name="charger_brand">Charger brand</string>
+    <string name="extend">Extend</string>
+    <string name="collapse">Collapse</string>
+    <string name="visit_again">Some place you may want to visit again...</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>

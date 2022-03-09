@@ -1,5 +1,6 @@
 package telenav.demo.app.search
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,15 @@ import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import telenav.demo.app.R
 import telenav.demo.app.utils.entityCachedClick
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 
 class SearchResultsListRecyclerAdapter(
-    entities: List<Entity>,
-    val onClickListener: OnEntityClickListener
+    val entities: List<Entity>,
+    val context: Context,
+    private val onClickListener: OnEntityClickListener,
+    private val pattern: String = "",
 ) :
     RecyclerView.Adapter<EntityFavoriteHolder>() {
 
@@ -23,8 +29,7 @@ class SearchResultsListRecyclerAdapter(
     }
 
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-
-    var list: List<Entity> = entities
+    private var list: List<Entity> = entities
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityFavoriteHolder {
         val view = LayoutInflater.from((parent.context))
@@ -38,12 +43,13 @@ class SearchResultsListRecyclerAdapter(
         val name =
             if (entity.type == EntityType.ADDRESS) entity.address.formattedAddress else entity.place.name
 
-        holder.vName.text = name
+        holder.vName.text = getSpannableNameText(name)
 
         if (entity.type == EntityType.ADDRESS) {
             holder.vAddress.visibility = View.GONE
         } else {
-            holder.vAddress.text = entity.place.address.formattedAddress
+            val address = entity.place.address.formattedAddress
+            holder.vAddress.text = getSpannableNameText(address)
             holder.vAddress.visibility = View.VISIBLE
         }
 
@@ -55,6 +61,18 @@ class SearchResultsListRecyclerAdapter(
             onClickListener.onEntityClick(entity)
             return@setOnClickListener
         }
+    }
+
+    private fun getSpannableNameText(text: String): SpannableString {
+        val spannableNameString = SpannableString(text)
+        val color = context.getColor(R.color.blue_c1)
+        val blueColor = ForegroundColorSpan(color)
+        val index = text.lowercase().indexOf(pattern.lowercase())
+        if (index != -1) {
+            spannableNameString.setSpan(blueColor, index, index + pattern.length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        return spannableNameString
     }
 
     override fun getItemCount(): Int {

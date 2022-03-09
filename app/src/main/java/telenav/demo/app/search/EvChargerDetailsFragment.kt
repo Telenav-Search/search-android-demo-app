@@ -48,6 +48,10 @@ class EvChargerDetailsFragment : Fragment() {
         var entityConnectorsType = ""
         var entityPowerFeed = ""
         var entityChargerBrand = ""
+        val maxCount = 4
+        var connectorsCount = 0
+        var powerFeedCount = 0
+        var chargerBrandCount = 0
 
         facetEvConnectors?.let {
             it.connectors.forEachIndexed { index, entity ->
@@ -55,30 +59,33 @@ class EvChargerDetailsFragment : Fragment() {
                 val chargerBrand = entity.chargerBrand.brandName
                 val connectorType = entity.connectorType.name
 
-                if (index != 0) {
-                    connectorType?.let {
-                        entityConnectorsType += ", "
-                    }
-                    chargerBrand?.let {
-                        entityChargerBrand += ", "
-                    }
-                    powerFeed?.let {
-                        entityPowerFeed += ", "
-                    }
-                }
-
                 connectorType?.let {
-                    entityConnectorsType += it
+                    if (!entityConnectorsType.contains(it) && connectorsCount < maxCount) {
+                        if (index != 0) {
+                            entityConnectorsType += ", "
+                        }
+                        entityConnectorsType += it
+                        connectorsCount++
+                    }
                 }
-
                 chargerBrand?.let {
-                    entityChargerBrand += it
+                    if (!entityChargerBrand.contains(it) && powerFeedCount < maxCount) {
+                        if (index != 0) {
+                            entityChargerBrand += ", "
+                        }
+                        entityChargerBrand += it
+                        powerFeedCount++
+                    }
                 }
-
                 powerFeed?.let {
-                    entityPowerFeed += it
+                    if (!entityPowerFeed.contains(it) && chargerBrandCount < maxCount) {
+                        if (index != 0) {
+                            entityPowerFeed += ", "
+                        }
+                        entityPowerFeed += it
+                        chargerBrandCount++
+                    }
                 }
-
             }
         }
 

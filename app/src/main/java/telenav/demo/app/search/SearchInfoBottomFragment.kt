@@ -12,7 +12,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
-import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import telenav.demo.app.R
 import telenav.demo.app.databinding.SearchInfoBottomFragmentLayoutBinding
 import telenav.demo.app.homepage.getUIExecutor
@@ -23,7 +22,6 @@ import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.util.ArrayList
 import android.text.Editable
 import android.text.TextWatcher
-import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 
 private const val TAG = "SearchInfoBottomFragment"
@@ -58,21 +56,21 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
             }
         }
 
-        search.setText(currentSearchHotCategoryName)
-        search.setOnEditorActionListener { _, actionId, _ ->
+        binding?.search?.setText(currentSearchHotCategoryName)
+        binding?.search?.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
                 val loc = (activity!! as MapActivity).lastKnownLocation
-                (activity!! as MapActivity).setLastSearch(search.text.toString())
-                (activity!! as MapActivity).hideKeyboard(search)
-                searchList.removeAllViewsInLayout()
+                (activity!! as MapActivity).setLastSearch(binding?.search?.text.toString())
+                (activity!! as MapActivity).hideKeyboard(binding?.search!!)
+                binding?.searchList?.removeAllViewsInLayout()
                 activity?.getUIExecutor()?.let {
-                    viewModel.search(search.text.toString(), null, loc, it, currentSearchHotCategoryTag, true)
+                    viewModel.search(binding?.search?.text.toString(), null, loc, it, currentSearchHotCategoryTag, true)
                 }
             }
             false
         }
 
-        search.addTextChangedListener(object : TextWatcher {
+        binding?.search?.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable) {}
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
@@ -85,25 +83,27 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.clearText?.setOnClickListener {
-            search.setText("")
+            binding?.search?.setText("")
+            (activity as MapActivity).expandBottomSheet()
+            dismiss()
         }
 
-        searchList.layoutManager = LinearLayoutManager(activity)
+        binding?.searchList?.layoutManager = LinearLayoutManager(activity)
 
-        viewModel.searchResults.observe(viewLifecycleOwner, Observer {
+        viewModel.searchResults.observe(viewLifecycleOwner, {
             Log.d(TAG, "result count ->  ${it.size} ")
             if (it.isNotEmpty()) {
-                searchList.visibility = View.VISIBLE
-                searchError.visibility = View.GONE
+                binding?.searchList?.visibility = View.VISIBLE
+                binding?.searchError?.visibility = View.GONE
             } else {
-                searchList.visibility = View.GONE
-                searchError.visibility = View.GONE
-                searchError.text = getString(R.string.no_result)
+                binding?.searchList?.visibility = View.GONE
+                binding?.searchError?.visibility = View.GONE
+                binding?.searchError?.text = getString(R.string.no_result)
             }
 
             (activity as MapActivity).displaySearchResults(it, currentSearchHotCategoryTag)
 
-            searchList.adapter = SearchListInfoRecyclerAdapter(it,
+            binding?.searchList?.adapter = SearchListInfoRecyclerAdapter(it,
                 object : SearchListInfoRecyclerAdapter.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
                         (activity as MapActivity).displayEntityClicked(entity,
@@ -113,24 +113,24 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
             )
         })
 
-        viewModel.searchError.observe(viewLifecycleOwner, Observer {
+        viewModel.searchError.observe(viewLifecycleOwner, {
             if (!it.isNullOrBlank()) {
-                searchError.visibility = View.VISIBLE
-                searchError.text = it
+                binding?.searchError?.visibility = View.VISIBLE
+                binding?.searchError?.text = it
             } else {
-                searchError.visibility = View.GONE
+                binding?.searchError?.visibility = View.GONE
             }
         })
 
-        viewModel.loading.observe(viewLifecycleOwner, Observer {
+        viewModel.loading.observe(viewLifecycleOwner, {
             if (it) {
-                searchLoading.visibility = View.VISIBLE
+                binding?.searchLoading?.visibility = View.VISIBLE
             } else {
-                searchLoading.visibility = View.GONE
+                binding?.searchLoading?.visibility = View.GONE
             }
         })
 
-        viewModel.categories.observe(viewLifecycleOwner, Observer {
+        viewModel.categories.observe(viewLifecycleOwner, {
             displayHotCategories(it)
         })
 

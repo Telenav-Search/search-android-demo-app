@@ -54,7 +54,7 @@
                 android:paddingVertical="16dp"
                 android:hint="@string/search_hint"
                 android:textColorHint="@color/grey_c1"
-                android:inputType="text"
+                android:inputType="textNoSuggestions|textVisiblePassword"
                 android:textSize="12sp"
                 android:textColor="@color/blue_c1"
                 app:layout_constraintEnd_toStartOf="@+id/clear_text"
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="21dp"
             android:layout_marginEnd="21dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="6dp"
             android:layout_gravity="center_horizontal"
             android:visibility="visible"
             android:text="@string/recent"
@@ -108,13 +108,13 @@
             android:layout_gravity="center_horizontal"
             android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/search_frame_layout"/>
+            app:layout_constraintTop_toBottomOf="@+id/recentHeader"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchList"
             android:layout_width="match_parent"
             android:layout_height="500dp"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="42dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/search_frame_layout"

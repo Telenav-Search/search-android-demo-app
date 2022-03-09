@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
@@ -20,13 +21,19 @@ import telenav.demo.app.map.MapActivity
 import telenav.demo.app.search.SearchResultsListRecyclerAdapter
 import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import telenav.demo.app.utils.Converter.convertDpToPixel
 
 private const val TAG = "PersonalInfoFragment"
+private const val USER_INFO_TAG = "UserAddressFragment"
 
 class PersonalInfoFragment : RoundedBottomSheetLayout() {
 
     private var binding : FragmentPersonalInfoBottomBinding? = null
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private var shouldExtend: Boolean = false
+    private var entities: List<Entity>? = null
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -47,10 +54,20 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
             dismiss()
             (activity!! as MapActivity).expandBottomSheet()
         }
+
+        binding?.settings?.setOnClickListener {
+            dismiss()
+            (activity!! as MapActivity).showSettingsActivity()
+        }
+
         binding?.personalInfoOta?.setOnClickListener { showHomeAreaActivity() }
+        binding?.resize?.setOnClickListener {
+            updateUserInfoVisibility()
+            shouldExtend = !shouldExtend
+        }
 
         childFragmentManager.beginTransaction().replace(R.id.user_address,
-            UserAddressFragment.newInstance()).commit()
+            UserAddressFragment.newInstance(), USER_INFO_TAG).commit()
 
         getFavoriteData()
     }
@@ -66,6 +83,7 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
                 ""
             ), listType
         )
+        this.entities = favoriteEntities
         fillFavoriteList(favoriteEntities)
     }
 
@@ -74,22 +92,32 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
         if (favoriteEntities.isNullOrEmpty()) {
             binding?.personalFavoriteList?.visibility = View.GONE
             binding?.favorites?.visibility = View.GONE
+            binding?.resize?.visibility = View.GONE
+            shouldExtend = true
+            updateUserInfoVisibility()
             return
         }
 
         binding?.favorites?.visibility = View.VISIBLE
+        binding?.resize?.visibility = View.VISIBLE
         binding?.personalFavoriteList?.layoutManager = LinearLayoutManager(requireContext())
-        binding?.personalFavoriteList?.adapter = SearchResultsListRecyclerAdapter(favoriteEntities,
+        binding?.personalFavoriteList?.adapter = SearchResultsListRecyclerAdapter(favoriteEntities, requireContext(),
             object : SearchResultsListRecyclerAdapter.OnEntityClickListener {
                 override fun onEntityClick(entity: Entity) {
+                    (activity as MapActivity).collapseBottomSheet()
+                    (activity as MapActivity).displayEntityClicked(entity, "",
+                        navigationFromSearchInfo = false, navigationFromPersonalInfo = true)
+                    dismiss()
                 }
             }
         )
 
         val swipeHandler = object : SwipeToDeleteCallback(requireContext()) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val entity = favoriteEntities[viewHolder.adapterPosition]
-                deleteFavoriteEntity(entity)
+                entities?.let {
+                    val entity = it[viewHolder.adapterPosition]
+                    deleteFavoriteEntity(entity)
+                }
             }
         }
 
@@ -100,6 +128,30 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
     private fun deleteFavoriteEntity(entity: Entity) {
         dataCollectorClient.deleteFavorite(requireContext(), entity)
         getFavoriteData()
+    }
+
+    private fun updateUserInfoVisibility() {
+        val params = binding?.favorites?.layoutParams as MarginLayoutParams
+        val marginStart =  convertDpToPixel(requireContext(), 25f)
+
+        if (shouldExtend) {
+            childFragmentManager.beginTransaction().replace(R.id.user_address,
+                UserAddressFragment.newInstance(), USER_INFO_TAG).commit()
+            binding?.myPlace?.visibility = View.VISIBLE
+            binding?.separateLine1?.visibility = View.VISIBLE
+            params.setMargins(marginStart, convertDpToPixel(requireContext(), 192f), 0, 0)
+            binding?.resize?.setText(R.string.extend)
+        } else {
+            val fragment: Fragment? = childFragmentManager.findFragmentByTag(USER_INFO_TAG)
+            if (fragment != null) {
+                childFragmentManager.beginTransaction().remove(fragment).commit()
+            }
+            binding?.myPlace?.visibility = View.GONE
+            binding?.separateLine1?.visibility = View.GONE
+            params.setMargins(marginStart, convertDpToPixel(requireContext(), 20f), 0, 0)
+            binding?.resize?.setText(R.string.collapse)
+        }
+        binding?.favorites?.layoutParams = params
     }
 
     private fun showHomeAreaActivity() {

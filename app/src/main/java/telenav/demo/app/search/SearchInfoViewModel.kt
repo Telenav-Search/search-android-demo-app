@@ -24,10 +24,14 @@ import java.lang.reflect.Type
 import telenav.demo.app.utils.*
 import com.telenav.sdk.entity.model.base.ParkingParameters
 import com.telenav.sdk.entity.model.base.FacetParameters
+import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
+import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
+import com.telenav.sdk.entity.model.prediction.WordPrediction
 
 private const val TAG = "SearchInfoViewModel"
 
 const val SEARCH_INFO_LIMIT_WITH_FILTERS = 30
+const val PREDICTIONS_LIMIT = 5
 
 @Suppress("DEPRECATION")
 class SearchInfoViewModel : ViewModel() {
@@ -35,10 +39,12 @@ class SearchInfoViewModel : ViewModel() {
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     var searchResults = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
+    var suggestionResults = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
     var savedAddress = MutableLiveData<List<Entity>>().apply { listOf<Entity>() }
     var searchError = MutableLiveData<String>().apply { postValue("") }
     var loading = MutableLiveData<Boolean>().apply { postValue(false) }
     val categories = MutableLiveData<List<Category>>().apply { listOf<Any>() }
+    var predictions = MutableLiveData<List<WordPrediction>>().apply { listOf<WordPrediction>() }
 
     fun search(
         query: String?,
@@ -196,6 +202,54 @@ class SearchInfoViewModel : ViewModel() {
                     )
                 }
             })
+    }
+
+    fun requestSuggestions(text: String, location: Location, executor: Executor) {
+        searchError.postValue("")
+
+        telenavEntityClient.suggestionPredictionRequest()
+            .setQuery(text)
+            .setLocation(location.latitude, location.longitude)
+            .setLimit(App.readStringFromSharedPreferences(App.SUGGESTIONS_LIMIT,
+                SUGGESTIONS_LIMIT_DEF.toString())!!.toInt())
+            .asyncCall(executor,
+                object : Callback<EntitySuggestionPredictionResponse> {
+                    override fun onSuccess(response: EntitySuggestionPredictionResponse) {
+                        val entities = ArrayList<Entity>()
+                        for (result in response.results) {
+                            if (result.entity != null) {
+                                entities.add(result.entity)
+                            }
+                        }
+
+                        if (!entities.isNullOrEmpty()) {
+                            suggestionResults.postValue(entities)
+                        }
+                    }
+
+                    override fun onFailure(error: Throwable) {
+                        Log.e(TAG, "", error)
+                    }
+                })
+    }
+
+    fun requestPrediction(text: String, location: Location, executor: Executor) {
+        telenavEntityClient.wordPredictionRequest()
+            .setQuery(text)
+            .setLocation(location.latitude, location.longitude)
+            .setLimit(App.readStringFromSharedPreferences(App.PREDICTIONS_LIMIT,
+                PREDICTIONS_LIMIT.toString())!!.toInt())
+            .asyncCall(executor,
+                object : com.telenav.sdk.core.Callback<EntityWordPredictionResponse> {
+                    override fun onSuccess(response: EntityWordPredictionResponse) {
+                        predictions.postValue(response.results)
+                    }
+
+                    override fun onFailure(p1: Throwable?) {
+                        Log.e("testapp", "onFailure prediction ${text}", p1)
+                    }
+                }
+            )
     }
 
     private fun handleSearchResponse(filtersAvailable: Boolean, filterCategory: String?, results: List<Entity>) {
