@@ -136,7 +136,7 @@ class SearchInfoViewModel : ViewModel() {
                     }
                 }
             }
-            .setLocation(location.longitude, location.latitude)
+            .setLocation(location.latitude, location.longitude)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_INFO_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(
@@ -175,7 +175,7 @@ class SearchInfoViewModel : ViewModel() {
         results: List<Entity>
     ) {
         telenavEntityClient.discoverCategoryRequest()
-            .setLocation(location.longitude, location.latitude)
+            .setLocation(location.latitude, location.longitude)
             .setLimit(App.readFromSharedPreferences(App.FILTER_NUMBER))
             .setCategory(categoryTag)
             .asyncCall(

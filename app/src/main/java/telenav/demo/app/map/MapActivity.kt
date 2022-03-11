@@ -85,8 +85,6 @@ class MapActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
         fab_search.setOnClickListener { openSearch() }
-        app_mode_select.setOnClickListener { showSettingsActivity() }
-        app_personal_info.setOnClickListener { showPersonalInfoActivity() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
             showPersonalInfoFragment()

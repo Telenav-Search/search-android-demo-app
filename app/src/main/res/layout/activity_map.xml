@@ -5,38 +5,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/buttons_area"
-        android:paddingVertical="@dimen/padding_5"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/app_personal_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/app_mode_select"
-            android:background="?android:attr/selectableItemBackground"
-            android:paddingHorizontal="5dp"
-            android:src="@drawable/ic_places" />
-
-        <ImageView
-            android:id="@+id/app_mode_select"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:paddingHorizontal="5dp"
-            android:layout_marginEnd="@dimen/padding_5"
-            android:src="@drawable/ic_settings" />
-    </RelativeLayout>
-
     <FrameLayout
         android:id="@+id/map_fragment_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/buttons_area"
         android:background="#eee" />
 
     <ImageView
