@@ -30,6 +30,7 @@ import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
 import telenav.demo.app.dip
+import java.util.*
 
 private const val TAG = "SearchListBottomFragment"
 
@@ -65,13 +66,24 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             val homeEntity = viewModel.getHome(requireContext())
             homeEntity?.let {
                 shouldRequestRecentData = false
-                binding?.search?.setText(homeEntity.place.address.formattedAddress)
+                val name = if (homeEntity.place != null) {
+                    homeEntity.place?.address?.formattedAddress
+                } else {
+                    homeEntity.address?.formattedAddress
+                }
+
+                binding?.search?.setText(name)
             }
         } else if (shouldUpdateWorkAddress) {
             val workEntity = viewModel.getWork(requireContext())
             workEntity?.let {
                 shouldRequestRecentData = false
-                binding?.search?.setText(workEntity.place.address.formattedAddress)
+                val name = if (workEntity.place != null) {
+                    workEntity.place?.address?.formattedAddress
+                } else {
+                    workEntity.address?.formattedAddress
+                }
+                binding?.search?.setText(name)
             }
         }
 
@@ -87,31 +99,55 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             false
         }
 
-        binding?.search?.doOnTextChanged { text, _, _, _ ->
-            hidePredictions()
-            if (!text.isNullOrBlank()) {
-                binding?.clearText?.visibility = View.VISIBLE
-                binding?.recentHeader?.visibility = View.GONE
-                activity?.getUIExecutor()?.let {
-                    if (searchByPrediction) {
-                        searchByPrediction = false
-                        searchText()
-                    } else {
-                        val location = (activity!! as MapActivity).lastKnownLocation
-                        viewModel.requestPrediction(text.toString(), location, it)
-                        viewModel.requestSuggestions(
-                            text.toString(),
-                            location,
-                            activity!!.getUIExecutor()
-                        )
-                    }
+        binding?.search?.addTextChangedListener(
+            object : TextWatcher {
+                override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+                override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+                private var timer: Timer = Timer()
+                private val DELAY: Long = 1000
+                override fun afterTextChanged(text: Editable) {
+                    timer.cancel()
+                    timer = Timer()
+                    timer.schedule(
+                        object : TimerTask() {
+                            override fun run() {
+                                activity?.runOnUiThread {
+                                    hidePredictions()
+                                    if (text.toString().isNotBlank()) {
+                                        binding?.clearText?.visibility = View.VISIBLE
+                                        binding?.recentHeader?.visibility = View.GONE
+                                        activity?.getUIExecutor()?.let {
+                                            if (searchByPrediction) {
+                                                searchByPrediction = false
+                                                searchText()
+                                            } else {
+                                                val location =
+                                                    (activity!! as MapActivity).lastKnownLocation
+                                                viewModel.requestPrediction(
+                                                    text.toString(),
+                                                    location,
+                                                    it
+                                                )
+                                                viewModel.requestSuggestions(
+                                                    text.toString(),
+                                                    location,
+                                                    activity!!.getUIExecutor()
+                                                )
+                                            }
+                                        }
+                                    } else {
+                                        binding?.clearText?.visibility = View.GONE
+                                        binding?.recentHeader?.visibility = View.VISIBLE
+                                        viewModel.getRecentSearchData(requireContext())
+                                    }
+                                }
+                            }
+                        },
+                        DELAY
+                    )
                 }
-            } else {
-                binding?.clearText?.visibility = View.GONE
-                binding?.recentHeader?.visibility = View.VISIBLE
-                viewModel.getRecentSearchData(requireContext())
             }
-        }
+        )
 
         binding?.clearText?.setOnClickListener {
             hidePredictions()
@@ -209,9 +245,9 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             dismiss()
         }
         if (binding?.search?.text?.isEmpty() == true) {
-            binding?.clearText?.visibility = View.VISIBLE
-        } else {
             binding?.clearText?.visibility = View.GONE
+        } else {
+            binding?.clearText?.visibility = View.VISIBLE
         }
 
         showKeyboard()
@@ -288,7 +324,11 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             view.text = word.predictWord
             view.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue_c1))
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
-            view.setPadding(0, 0, requireActivity().dip(10), requireActivity().dip(10))
+            if (index == 0) {
+                view.setPadding(0, 0, requireActivity().dip(10), requireActivity().dip(30))
+            } else {
+                view.setPadding(0, 0, requireActivity().dip(10), requireActivity().dip(5))
+            }
             view.ellipsize = TextUtils.TruncateAt.END
             view.setLines(1)
 

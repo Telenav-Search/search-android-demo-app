@@ -130,7 +130,7 @@
             android:textSize="12sp"
             app:layout_constraintTop_toBottomOf="@+id/entity_power_feed_header"
             app:layout_constraintStart_toEndOf="@+id/entity_charger_brand_header"
-            tools:text="eVgfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffofdfdfjkejkrjek"/>
+            tools:text="eVg"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

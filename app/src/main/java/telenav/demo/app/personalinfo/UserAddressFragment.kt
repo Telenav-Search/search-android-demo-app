@@ -58,7 +58,11 @@ class UserAddressFragment : Fragment() {
             binding?.homeAddressConfigure?.text = requireContext().getString(R.string.edit)
         }
 
-        val name = storedHome.place.address.formattedAddress
+        val name = if (storedHome.place != null) {
+            storedHome.place?.address?.formattedAddress
+        } else {
+            storedHome.address?.formattedAddress
+        }
 
         binding?.homeAddress?.text = name
         binding?.homeAddress?.setOnClickListener {
@@ -76,7 +80,11 @@ class UserAddressFragment : Fragment() {
             binding?.workAddressConfigure?.text = requireContext().getString(R.string.edit)
         }
 
-        val name = storedWork.place.address.formattedAddress
+        val name = if (storedWork.place != null) {
+            storedWork.place?.address?.formattedAddress
+        } else {
+            storedWork.address?.formattedAddress
+        }
 
         binding?.workAddress?.text = name
         binding?.workAddress?.setOnClickListener {
