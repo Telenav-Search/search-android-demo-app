@@ -215,7 +215,11 @@ class MapActivity : AppCompatActivity() {
             hotCategoryName = hotCategory.name
             hotCategoryTag = hotCategory.tag
             collapseBottomSheet()
-            showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag)
+            if (hotCategoryTag.isNotEmpty()) {
+                showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag)
+            } else {
+                showMoreCategoriesFragment()
+            }
         }
 
         return categoryView
@@ -342,6 +346,12 @@ class MapActivity : AppCompatActivity() {
     private fun showRecentSearchFullListFragment() {
         recentSearchFullListFragment = RecentSearchFullListFragment.newInstance(getRecentSearchData())
         recentSearchFullListFragment!!.show(supportFragmentManager, recentSearchFullListFragment!!.tag)
+    }
+
+    var moreCategoriesFragment: MoreCategoriesFragment? = null
+    private fun showMoreCategoriesFragment() {
+        moreCategoriesFragment = MoreCategoriesFragment.newInstance()
+        moreCategoriesFragment!!.show(supportFragmentManager, moreCategoriesFragment!!.tag)
     }
 
     fun showSearchListBottomFragmentFromUserAddress(
