@@ -60,15 +60,17 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onInfoWindowClick(marker: Marker?) {
-        dataCollectorClient.entityClick(
-            App.readStringFromSharedPreferences(
-                App.LAST_ENTITY_RESPONSE_REF_ID, ""
-            ) ?: "",
-            entitiesList[marker?.zIndex!!.toInt() - 1].id,
-            EntityActionEvent.DisplayMode.MAP_VIEW
-        )
-        entityDetailViewModel.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        marker.hideInfoWindow()
+        marker?.zIndex?.let {
+            dataCollectorClient.entityClick(
+                App.readStringFromSharedPreferences(
+                    App.LAST_ENTITY_RESPONSE_REF_ID, ""
+                ) ?: "",
+                entitiesList[it.toInt() - 1].id,
+                EntityActionEvent.DisplayMode.MAP_VIEW
+            )
+            entityDetailViewModel.setSearchResult(searchResultList[it.toInt() - 1])
+            marker.hideInfoWindow()
+        }
     }
 
     fun getRegion(): VisibleRegion? {
@@ -76,10 +78,17 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
-        val index= marker?.zIndex!!.toInt() - 1
-        val searchResult = searchResultList[index]
-        val entity = entitiesList[index]
-        (activity!! as MapActivity).showEntityDetails(searchResult, entity)
+        marker?.zIndex?.let {
+            val index = it.toInt() - 1
+            if (index < searchResultList.size) {
+                val searchResult = searchResultList[index]
+                if (index < entitiesList.size) {
+                    val entity = entitiesList[index]
+                    (activity!! as MapActivity).showEntityDetails(searchResult, entity)
+                }
+            }
+        }
+
         return false
     }
 
