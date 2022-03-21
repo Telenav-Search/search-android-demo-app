@@ -3,6 +3,7 @@ package telenav.demo.app.search
 import android.content.Context
 import android.location.Location
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -24,9 +25,13 @@ import java.lang.reflect.Type
 import telenav.demo.app.utils.*
 import com.telenav.sdk.entity.model.base.ParkingParameters
 import com.telenav.sdk.entity.model.base.FacetParameters
+import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
 import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
+import telenav.demo.app.homepage.CategoriesRecyclerAdapter
+import telenav.demo.app.homepage.HomePageActivity
+import telenav.demo.app.searchlist.SearchListFragment
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -206,7 +211,6 @@ class SearchInfoViewModel : ViewModel() {
 
     fun requestSuggestions(text: String, location: Location, executor: Executor) {
         searchError.postValue("")
-
         telenavEntityClient.suggestionPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
@@ -250,6 +254,25 @@ class SearchInfoViewModel : ViewModel() {
                     }
                 }
             )
+    }
+
+    fun requestCategories(executor: Executor) {
+        loading.postValue(true)
+        searchError.postValue("")
+        telenavEntityClient.categoriesRequest.asyncCall(executor,
+            object : Callback<EntityGetCategoriesResponse> {
+                override fun onSuccess(response: EntityGetCategoriesResponse) {
+                    loading.postValue(false)
+                    categories.value= response.results as List<Category>
+                }
+
+                override fun onFailure(p1: Throwable?) {
+                    loading.postValue(false)
+                    searchError.postValue(p1?.message)
+                    Log.e("testapp", "", p1)
+                }
+            }
+        )
     }
 
     private fun handleSearchResponse(filtersAvailable: Boolean, filterCategory: String?, results: List<Entity>) {

@@ -37,7 +37,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         setUpCLickListeners()
 
         val set = ConstraintSet()
-        set.clone(binding?.evFiltersRoot)
+        set.clone(binding?.evConstraintLayout)
 
         val connectionTypes: String? = App.readStringFromSharedPreferences(App.CONNECTION_TYPES, "")
         val connectionTypesLstValues: List<String>? = connectionTypes?.split(",")?.map { it -> it.trim() }
@@ -57,7 +57,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
                 }
             }
 
-            binding?.evFiltersRoot?.addView(checkBox)
+            binding?.evConstraintLayout?.addView(checkBox)
             evConnectionTypesIdArray.add(checkBox.id)
         }
         binding?.flowConnectorTypes?.referencedIds = evConnectionTypesIdArray.toIntArray()
@@ -80,7 +80,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
                 }
             }
 
-            binding?.evFiltersRoot?.addView(checkBox)
+            binding?.evConstraintLayout?.addView(checkBox)
             powerFeedLevelsIdArray.add(checkBox.id)
         }
         binding?.flowPowerFeedLevels?.referencedIds = powerFeedLevelsIdArray.toIntArray()
@@ -89,13 +89,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         val lstChargerBrandsValues: List<String>? = chargerBrandsLevels?.split(",")?.map { it -> it.trim() }
         val chargerBrandsIdArray = ArrayList<Int>()
 
-        val chargerBrandsArrayList = arrayListOf(
-            "ChargePoint",
-            "Blink",
-            "eVgo"
-        )
-
-        for (item in chargerBrandsArrayList) {
+        for (item in CategoryAndFiltersUtil.chargerBrandsArrayList) {
             val checkBox = CheckBox(requireContext())
             checkBox.text = StringUtil.formatName(item)
             checkBox.tag = item
@@ -109,7 +103,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
                 }
             }
 
-            binding?.evFiltersRoot?.addView(checkBox)
+            binding?.evConstraintLayout?.addView(checkBox)
             chargerBrandsIdArray.add(checkBox.id)
         }
         binding?.flowChargerBrands?.referencedIds = chargerBrandsIdArray.toIntArray()
@@ -128,7 +122,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         when (v.id) {
             R.id.ev_connector_types_reset -> {
                 App.writeStringToSharedPreferences(App.CONNECTION_TYPES, "")
-                binding?.evFiltersRoot?.forEach {
+                binding?.evConstraintLayout?.forEach {
                     if (it is CheckBox) {
                         if (binding?.flowConnectorTypes?.referencedIds?.contains(it.id) == true) {
                             it.isChecked = false
@@ -138,7 +132,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
             }
             R.id.ev_power_feed_levels_reset -> {
                 App.writeStringToSharedPreferences(App.POWER_FEED, "")
-                binding?.evFiltersRoot?.forEach {
+                binding?.evConstraintLayout?.forEach {
                     if (it is CheckBox) {
                         if (binding?.flowPowerFeedLevels?.referencedIds?.contains(it.id) == true) {
                             it.isChecked = false
@@ -148,7 +142,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
             }
             R.id.ev_charger_brands_reset -> {
                 App.writeStringToSharedPreferences(App.CHARGER_BRAND, "")
-                binding?.evFiltersRoot?.forEach {
+                binding?.evConstraintLayout?.forEach {
                     if (it is CheckBox) {
                         if (binding?.flowChargerBrands?.referencedIds?.contains(it.id) == true) {
                             it.isChecked = false
@@ -174,7 +168,7 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         var connectionTypes = ""
         var chargerBrands = ""
         var powerFeed = ""
-        binding?.evFiltersRoot?.forEach {
+        binding?.evConstraintLayout?.forEach {
             if (it is CheckBox && it.isChecked) {
                 when {
                     binding?.flowConnectorTypes?.referencedIds?.contains(it.id) == true -> {

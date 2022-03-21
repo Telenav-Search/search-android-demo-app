@@ -64,6 +64,7 @@
     <string name="extend">Extend</string>
     <string name="collapse">Collapse</string>
     <string name="visit_again">Some place you may want to visit again...</string>
+    <string name="more_categories">More categories</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>

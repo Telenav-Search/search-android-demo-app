@@ -14,10 +14,15 @@ import telenav.demo.app.databinding.FragmentMoreCategoriesBinding
 import telenav.demo.app.utils.Converter
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.widget.TextView
+import androidx.fragment.app.viewModels
+import com.telenav.sdk.entity.model.base.Category
+import telenav.demo.app.homepage.getUIExecutor
+import telenav.demo.app.map.MapActivity
 
 class MoreCategoriesFragment : RoundedBottomSheetLayout() {
 
     private var binding: FragmentMoreCategoriesBinding? = null
+    private val viewModel: SearchInfoViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,9 +35,41 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        activity?.getUIExecutor()?.let { executor ->
+            viewModel.requestCategories(executor)
+        }
+
+        viewModel.categories.observe(viewLifecycleOwner, {
+            for (category in it) {
+                setupChipGroupDynamically(category.name, category.childNodes)
+            }
+        })
+
+        viewModel.loading.observe(viewLifecycleOwner, {
+            if (it) {
+                binding?.loadingView?.visibility = View.VISIBLE
+            } else {
+                binding?.loadingView?.visibility = View.GONE
+            }
+        })
+
+        viewModel.searchError.observe(viewLifecycleOwner, {
+            if (!it.isNullOrBlank()) {
+                binding?.searchErrorView?.visibility = View.VISIBLE
+                binding?.searchError?.text = it
+            } else {
+                binding?.searchErrorView?.visibility = View.GONE
+            }
+        })
+
+        binding?.moreCategoriesAreaBack?.setOnClickListener {
+            (activity!! as MapActivity).expandBottomSheet()
+            dismiss()
+        }
     }
 
-    private fun setupChipGroupDynamically(header: String, list: ArrayList<String>) {
+    private fun setupChipGroupDynamically(header: String, list: List<Category>) {
         val chipGroup = ChipGroup(requireContext())
         val layoutParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
@@ -46,8 +83,8 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
         chipGroup.isSingleLine = false
         chipGroup.layoutParams
 
-        for (name in list) {
-            val chip = getChip(name)
+        for (category in list) {
+            val chip = getChip(category.name)
             chipGroup.addView(chip as View)
         }
         setHeader(header)
@@ -68,7 +105,10 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
         chip.isCloseIconVisible = false
         chip.textStartPadding = margin.toFloat()
         chip.textEndPadding = margin.toFloat()
-        chip.setOnClickListener {}
+        chip.setOnClickListener {
+            (activity!! as MapActivity).showSearchInfoBottomFragment(chip.text.toString(), "")
+            dismiss()
+        }
         return chip
     }
 

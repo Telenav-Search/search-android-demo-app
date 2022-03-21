@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
@@ -52,7 +51,11 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         activity?.getUIExecutor()?.let { executor ->
             currentSearchHotCategoryTag?.let {
                 (activity!! as MapActivity).setLastSearch(it)
-                viewModel.search(null, it, location, executor, currentSearchHotCategoryTag, true)
+                if (it.isNotEmpty()) {
+                    viewModel.search(null, it, location, executor, currentSearchHotCategoryTag, true)
+                } else {
+                    viewModel.search(currentSearchHotCategoryName, null, location, executor, currentSearchHotCategoryTag, true)
+                }
             }
         }
 

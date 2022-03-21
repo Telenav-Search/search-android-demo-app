@@ -63,49 +63,36 @@ object CategoryAndFiltersUtil {
         R.color.c9
     )
 
-    val searchLabelsList = arrayListOf(
-        "Pizza",
-        "Coffee",
-        "Breakfast",
-        "Burgers",
-        "Vegan",
-        "Vegetarian",
-        "Seafood",
-        "Beagles",
-        "Dinner",
-        "Terrace"
-    )
-
     val chargerBrandsArrayList = arrayListOf(
-        "ChargePoint",
-        "Blink",
-        "eVgo",
-        "SemaConnect",
-        "Greenlots",
-        "Tesla Destination",
-        "Supercharger",
-        "OpConnect",
-        "EV Connect",
-        "ElectrifyAmerica",
-        "Sun Country",
-        "GE WattStation",
-        "Volta",
         "Circuit Electrique",
-        "FLO",
-        "Innogy",
-        "Aerovironment",
-        "Shorepower",
-        "RWE",
-        "Oplaadpalen",
-        "Endesa",
+        "Tesla Destination",
+        "ElectrifyAmerica",
         "Lastestasjoner",
-        "EnelDrive",
+        "GE WattStation",
+        "Aerovironment",
+        "Supercharger",
+        "ChargePoint",
+        "Oplaadpalen",
+        "SemaConnect",
         "CarCharging",
-        "JNSH",
+        "Sun Country",
+        "Greenlots",
+        "OpConnect",
+        "Shorepower",
+        "EV Connect",
         "ChargeNet",
+        "EnelDrive",
         "Recargo",
-        "KSI",
-        "POLAR"
+        "Endesa",
+        "Innogy",
+        "Volta",
+        "Blink",
+        "POLAR",
+        "FLO",
+        "eVgo",
+        "JNSH",
+        "RWE",
+        "KSI"
     )
 
     val connectionTypesArrayList = arrayListOf(

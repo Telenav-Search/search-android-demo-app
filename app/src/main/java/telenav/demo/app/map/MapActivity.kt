@@ -313,7 +313,8 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
-    private fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
+    fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
+        categoryName?.let { this.hotCategoryName = it }
         searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
