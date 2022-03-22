@@ -32,6 +32,9 @@ import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.homepage.CategoriesRecyclerAdapter
 import telenav.demo.app.homepage.HomePageActivity
 import telenav.demo.app.searchlist.SearchListFragment
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -140,10 +143,36 @@ class SearchInfoViewModel : ViewModel() {
             }.apply {
                 if (filtersAvailable && filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG)) {
                     val parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0)
-                    if (parkingDuration != 0) {
-                        val facetParameters = FacetParameters.builder().setParkingParameters(
-                            ParkingParameters.builder().setDuration(parkingDuration).build()).build()
-                        setFacetParameters(facetParameters)
+                    val parkingStartDuration = App.readIntFromSharedPreferences(App.PARKING_START_FROM, 0)
+                    if (parkingDuration != 0 || parkingStartDuration != 0) {
+                        val entryTime = getParkingStartFromDate()
+                        when {
+                            parkingStartDuration == 0 -> {
+                                val facetParameters = FacetParameters.builder()
+                                    .setParkingParameters(
+                                        ParkingParameters.builder()
+                                            .setDuration(parkingDuration)
+                                            .build()).build()
+                                setFacetParameters(facetParameters)
+                            }
+                            parkingDuration == 0 -> {
+                                val facetParameters = FacetParameters.builder()
+                                    .setParkingParameters(
+                                        ParkingParameters.builder()
+                                            .setEntryTime(entryTime)
+                                            .build()).build()
+                                setFacetParameters(facetParameters)
+                            }
+                            else -> {
+                                val facetParameters = FacetParameters.builder()
+                                    .setParkingParameters(
+                                        ParkingParameters.builder()
+                                            .setDuration(parkingDuration)
+                                            .setEntryTime(entryTime)
+                                            .build()).build()
+                                setFacetParameters(facetParameters)
+                            }
+                        }
                     }
                 }
             }
@@ -344,6 +373,21 @@ class SearchInfoViewModel : ViewModel() {
             )
         }
         return filteredResults
+    }
+
+    private fun getParkingStartFromDate(): String {
+        val parkingStartDuration = App.readIntFromSharedPreferences(App.PARKING_START_FROM, 0)
+        if (parkingStartDuration != 0) {
+            val min = parkingStartDuration / 60 % 60
+            val sec = parkingStartDuration % 60
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.MINUTE, min)
+            calendar.set(Calendar.SECOND, sec)
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+            sdf.timeZone = TimeZone.getTimeZone("GMT")
+            return (sdf.format(calendar.time))
+        }
+        return ""
     }
 
     fun getRecentSearchData(context: Context) {

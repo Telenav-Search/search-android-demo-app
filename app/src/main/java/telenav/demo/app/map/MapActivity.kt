@@ -440,6 +440,7 @@ class MapActivity : AppCompatActivity() {
         App.writeStringToSharedPreferences(App.CHARGER_BRAND, "")
         App.writeStringToSharedPreferences(App.POWER_FEED, "")
         App.writeToSharedPreferences(App.PARKING_DURATION, 0)
+        App.writeToSharedPreferences(App.PARKING_START_FROM, 0)
     }
 }
 

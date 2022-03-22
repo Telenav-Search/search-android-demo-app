@@ -31,6 +31,7 @@ class App : Application() {
         const val CHARGER_BRAND = "charger_brand"
         const val POWER_FEED = "power_feed"
         const val PARKING_DURATION = "parking_duration"
+        const val PARKING_START_FROM = "parking_start_from"
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =

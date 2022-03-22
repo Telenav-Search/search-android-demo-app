@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -102,11 +103,11 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="@android:color/black"
-            android:text="13:15"
             android:layout_marginTop="9dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/parking_time_start_from_header" />
+            app:layout_constraintTop_toBottomOf="@id/parking_time_start_from_header"
+            tools:text="00:00"/>
 
         <ImageView
             android:id="@+id/parking_time_start_add"
@@ -172,11 +173,11 @@
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:textColor="@android:color/black"
-            android:text="00:00 MN"
             android:layout_marginTop="9dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/parking_duration_header" />
+            app:layout_constraintTop_toBottomOf="@id/parking_duration_header"
+            tools:text="00:00 MN"/>
 
         <ImageView
             android:id="@+id/parking_duration_add"
