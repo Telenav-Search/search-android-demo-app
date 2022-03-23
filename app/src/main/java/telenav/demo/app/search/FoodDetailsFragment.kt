@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.telenav.sdk.entity.model.base.Entity
 import kotlinx.android.synthetic.main.view_entity_details_bottom.*
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentFoodDetailsBinding
@@ -16,6 +17,7 @@ class FoodDetailsFragment : Fragment() {
 
     private var binding: FragmentFoodDetailsBinding? = null
     private var searchResult: SearchResult? = null
+    private var entity: Entity? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,9 +70,10 @@ class FoodDetailsFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(searchResult: SearchResult?) =
+        fun newInstance(searchResult: SearchResult?, entity: Entity?) =
             FoodDetailsFragment().apply {
                 this.searchResult = searchResult
+                this.entity = entity
             }
     }
 }

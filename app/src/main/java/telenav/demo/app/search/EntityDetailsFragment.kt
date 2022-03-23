@@ -123,13 +123,13 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
     }
 
     private fun attachAdditionalDetails() {
-        var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult)
+        var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult, entity)
         when {
             searchResult?.categoryName.equals(PARKING_TAG) -> {
                 fragment = ParkingDetailsFragment.newInstance(searchResult, entity)
             }
             searchResult?.categoryName.equals(FAST_FOOD_TAG) -> {
-                fragment = FoodDetailsFragment.newInstance(searchResult)
+                fragment = FoodDetailsFragment.newInstance(searchResult, entity)
             }
             searchResult?.categoryName.equals(CHARGER_TAG1) ||
                     searchResult?.categoryName.equals(CHARGER_TAG2) -> {

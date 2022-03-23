@@ -30,7 +30,7 @@ import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.entityClick
 
 class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
-    GoogleMap.OnMarkerClickListener {
+    GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     private lateinit var map: SupportMapFragment
     private var googleMap: GoogleMap? = null
@@ -212,6 +212,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
 
             googleMap?.setOnMarkerClickListener(this)
             googleMap?.setOnInfoWindowClickListener(this)
+            googleMap?.setOnMapClickListener(this)
         }
     }
 
@@ -223,4 +224,8 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
 
     fun getScreenLocation(screenPoint: Point): LatLng? =
         googleMap?.projection?.fromScreenLocation(screenPoint)
+
+    override fun onMapClick(p0: LatLng?) {
+        (activity!! as MapActivity).collapseEntityDetails()
+    }
 }

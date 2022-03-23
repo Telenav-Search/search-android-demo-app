@@ -73,6 +73,7 @@ class MapActivity : AppCompatActivity() {
         }
     }
     lateinit var behavior: BottomSheetBehavior<*>
+    lateinit var entityDetailsBehavior: BottomSheetBehavior<*>
     var lastKnownLocation: Location = Location("")
     private var mapFragment: MapFragment? = null
     private var hotCategoryName = ""
@@ -382,13 +383,13 @@ class MapActivity : AppCompatActivity() {
         navigation_header.text = hotCategoryName
 
         val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.entity_root)
-        val behavior = BottomSheetBehavior.from(bottomSheetLayout)
-        behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        entityDetailsBehavior= BottomSheetBehavior.from(bottomSheetLayout)
+        entityDetailsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
         supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
             EntityDetailsFragment.newInstance(searchResult, entity), FRAGMENT_TAG).commit()
 
-        behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        entityDetailsBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {}
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -401,9 +402,15 @@ class MapActivity : AppCompatActivity() {
         })
 
         bottomSheetLayout.setOnClickListener {
-            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            if (entityDetailsBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                entityDetailsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             }
+        }
+    }
+
+    fun collapseEntityDetails() {
+        if (this::entityDetailsBehavior.isInitialized) {
+            entityDetailsBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
 
