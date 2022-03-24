@@ -31,6 +31,10 @@ import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
 import telenav.demo.app.dip
 import java.util.*
+import androidx.core.content.ContextCompat.getSystemService
+
+
+
 
 private const val TAG = "SearchListBottomFragment"
 
@@ -250,7 +254,13 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             binding?.clearText?.visibility = View.VISIBLE
         }
 
-        showKeyboard()
+        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        binding?.search?.postDelayed({
+            binding?.search?.requestFocus()
+            binding?.search?.let {
+                inputMethodManager.showSoftInput(it, 0)
+            }
+        }, 500)
     }
 
     private fun searchText() {
@@ -374,11 +384,6 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
         if (popupWindow != null) {
             hidePredictions()
         }
-    }
-
-    private fun showKeyboard() {
-        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
     }
 
     companion object {
