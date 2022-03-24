@@ -87,7 +87,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
 
         binding?.clearText?.setOnClickListener {
             binding?.search?.setText("")
-            (activity as MapActivity).expandBottomSheet()
+            (activity as MapActivity).updateBottomSheetState()
             dismiss()
         }
 

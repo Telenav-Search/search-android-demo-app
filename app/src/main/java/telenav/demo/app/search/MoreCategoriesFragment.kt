@@ -64,7 +64,7 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.moreCategoriesAreaBack?.setOnClickListener {
-            (activity!! as MapActivity).expandBottomSheet()
+            (activity!! as MapActivity).updateBottomSheetState()
             dismiss()
         }
     }

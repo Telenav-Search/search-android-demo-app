@@ -240,7 +240,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                 }
             } else {
                 (activity!! as MapActivity).updateBottomView()
-                (activity!! as MapActivity).expandBottomSheet()
+                (activity!! as MapActivity).updateBottomSheetState()
             }
             dismiss()
         }

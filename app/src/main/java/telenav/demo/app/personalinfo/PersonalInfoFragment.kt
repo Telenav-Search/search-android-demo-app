@@ -52,7 +52,7 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
 
         binding?.personalInfoAreaBack?.setOnClickListener {
             dismiss()
-            (activity!! as MapActivity).expandBottomSheet()
+            (activity!! as MapActivity).updateBottomSheetState()
         }
 
         binding?.settings?.setOnClickListener {

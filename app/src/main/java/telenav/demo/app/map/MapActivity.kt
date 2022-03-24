@@ -78,6 +78,7 @@ class MapActivity : AppCompatActivity() {
     private var mapFragment: MapFragment? = null
     private var hotCategoryName = ""
     private var hotCategoryTag = ""
+    private var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,7 +129,7 @@ class MapActivity : AppCompatActivity() {
                 navigationFromPersonalInfo = false
             }
             else -> {
-                expandBottomSheet()
+                updateBottomSheetState()
             }
         }
     }
@@ -195,14 +196,15 @@ class MapActivity : AppCompatActivity() {
         mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
     }
 
-    fun expandBottomSheet() {
+    fun updateBottomSheetState() {
         if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.state = bottomSheetState
         }
     }
 
     fun collapseBottomSheet() {
         if (this::behavior.isInitialized) {
+            bottomSheetState = behavior.state
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
