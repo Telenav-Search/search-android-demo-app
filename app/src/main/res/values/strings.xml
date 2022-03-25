@@ -86,7 +86,7 @@
     <string name="ev_charger_brands">Ev charger brands</string>
     <string name="free_charge">Free charge</string>
     <string name="rating">Rating</string>
-    <string name="recent">Recent</string>
+    <string name="recent">Recents</string>
 
     <string name="suggestions_label">Suggestions: </string>
     <string name="no_suggestion">No suggestions found</string>
