@@ -169,6 +169,11 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
             hotCategoryIdArray.add(categoryView.id)
         }
 
+        if (hotCategoryIdArray.isEmpty()) {
+            flowLayout?.visibility = View.GONE
+        } else {
+            flowLayout?.visibility = View.VISIBLE
+        }
         flowLayout?.referencedIds = hotCategoryIdArray.toIntArray()
     }
 
