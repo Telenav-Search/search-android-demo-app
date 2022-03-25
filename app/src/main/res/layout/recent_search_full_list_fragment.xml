@@ -14,8 +14,8 @@
             android:id="@+id/search_recent_data_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="18dp"
             android:textSize="12sp"
             android:text="@string/visit_again"
             android:textColor="@color/blue_c1"
@@ -23,11 +23,10 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/view_header_search" />
 
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchList"
             android:layout_width="match_parent"
-            android:layout_height="390dp"
+            android:layout_height="510dp"
             android:layout_marginTop="12dp"
             android:scrollbars="vertical"
             app:layout_constraintEnd_toEndOf="parent"

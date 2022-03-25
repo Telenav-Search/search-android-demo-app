@@ -13,7 +13,7 @@
             android:id="@+id/separate_line"
             android:layout_width="26dp"
             android:layout_height="3dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:background="@color/blue_c1"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,8 +56,8 @@
             android:id="@+id/open_now"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
             android:buttonTint="@color/telenav_indigo_mid_tone"
+            android:layout_marginEnd="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/open_now_header"
             app:layout_constraintBottom_toBottomOf="@id/open_now_header" />
@@ -128,7 +128,7 @@
             android:textColor="@color/blue_c1"
             android:text="@string/reset"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/parking_time_start_from_header" />
 
@@ -198,7 +198,7 @@
             android:textColor="@color/blue_c1"
             android:text="@string/reset"
             android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/parking_duration_header" />
 
@@ -242,8 +242,8 @@
             android:id="@+id/reservation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
             android:buttonTint="@color/telenav_indigo_mid_tone"
+            android:layout_marginEnd="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/reservation_header"
             app:layout_constraintBottom_toBottomOf="@id/reservation_header" />

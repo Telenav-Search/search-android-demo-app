@@ -7,7 +7,7 @@
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toBottomOf="@+id/home_address_info"
     android:layout_height="58dp"
-    android:layout_marginBottom="8dp"
+    android:layout_marginBottom="6dp"
     android:background="@drawable/rounded_corners_background"
     android:backgroundTint="@color/grey_c2">
 
