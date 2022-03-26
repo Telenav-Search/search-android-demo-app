@@ -285,19 +285,20 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                             if (!openedFromMainScreen) {
                                 (activity!! as MapActivity).showPersonalInfoFragment()
                             }
+                            (activity as MapActivity).updateBottomView()
                         }
                         shouldUpdateWorkAddress -> {
                             dataCollectorClient.setWork(requireActivity(), entity)
                             if (!openedFromMainScreen) {
                                 (activity!! as MapActivity).showPersonalInfoFragment()
                             }
+                            (activity as MapActivity).updateBottomView()
                         }
                         else -> {
                             (activity as MapActivity).collapseBottomSheet()
                             (activity as MapActivity).displayEntityClicked(entity, currentSearchHotCategoryTag)
                         }
                     }
-                    (activity as MapActivity).updateBottomView()
                     dismiss()
                 }
             }, pattern

@@ -22,6 +22,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/search_frame_layout"
+            android:layout_marginTop="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/separate_line">
@@ -32,7 +33,6 @@
                 android:layout_height="46dp"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="60dp"
-                android:layout_marginTop="10dp"
                 android:maxLength="30"
                 android:maxLines="1"
                 android:background="@drawable/rounded_corners_background"
@@ -91,8 +91,8 @@
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/searchLoading"
             style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
