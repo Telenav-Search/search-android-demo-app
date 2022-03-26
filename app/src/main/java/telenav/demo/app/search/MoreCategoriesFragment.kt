@@ -16,8 +16,8 @@ import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import com.telenav.sdk.entity.model.base.Category
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.map.getUIExecutor
 
 class MoreCategoriesFragment : RoundedBottomSheetLayout() {
 

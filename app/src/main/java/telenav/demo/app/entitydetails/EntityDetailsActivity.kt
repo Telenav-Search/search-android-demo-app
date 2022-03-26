@@ -1,5 +1,6 @@
 package telenav.demo.app.entitydetails
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -40,10 +41,10 @@ import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.lookup.EntityGetDetailResponse
 import telenav.demo.app.R
 import telenav.demo.app.dip
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.utils.*
 import java.lang.reflect.Type
 import java.util.*
+import java.util.concurrent.Executor
 import kotlin.collections.ArrayList
 
 class EntityDetailsActivity : AppCompatActivity() {
@@ -614,4 +615,8 @@ fun String.convertHour(): String {
     } catch (e: Exception) {
         return this
     }
+}
+
+fun Activity.getUIExecutor(): Executor {
+    return Executor { r -> runOnUiThread(r) }
 }

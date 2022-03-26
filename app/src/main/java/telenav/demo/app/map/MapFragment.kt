@@ -22,10 +22,8 @@ import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
-import telenav.demo.app.entitydetails.EntityDetailFragment
 import telenav.demo.app.entitydetails.EntityDetailViewModel
 import telenav.demo.app.model.SearchResult
-import telenav.demo.app.search.filters.Filter
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.entityClick
 
@@ -38,7 +36,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     private var entitiesList: MutableList<Entity> = mutableListOf()
     private var coordinatesList: MutableList<LatLng> = mutableListOf()
     private lateinit var entityDetailViewModel: EntityDetailViewModel
-    private lateinit var entityDetailFragment: EntityDetailFragment
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     private var alreadyInitialized = false
 
@@ -54,7 +51,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initMap()
-        entityDetailFragment = EntityDetailFragment()
         entityDetailViewModel =
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
     }

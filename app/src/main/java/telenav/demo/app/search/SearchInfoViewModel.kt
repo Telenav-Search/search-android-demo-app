@@ -29,9 +29,6 @@ import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
 import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
-import telenav.demo.app.homepage.CategoriesRecyclerAdapter
-import telenav.demo.app.homepage.HomePageActivity
-import telenav.demo.app.searchlist.SearchListFragment
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList

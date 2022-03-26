@@ -16,13 +16,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.R
-import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.model.SearchResult
-import java.util.*
 
 object CategoryAndFiltersUtil {
-    const val PREFS_NAME = "telenav.demo.app.searchwidgets.NewAppWidget"
-    const val PREF_PREFIX_KEY = "appwidget_"
 
     const val FOOD_TAG = "RESTAURANT"
     const val PARKING_TAG = "PARKING"
@@ -428,16 +424,5 @@ object CategoryAndFiltersUtil {
         return websitesArray[position]
     }
 
-    fun generateRandomInt(): Int {
-        val rand = Random()
-        return rand.nextInt(100)
-    }
-
-    fun getOriginalQuery(fullQuery: String): String {
-        val referenceWord = "originalQuery="
-        val delimitingWord = ";source="
-        val firstIndex = fullQuery.lastIndexOf(referenceWord) + referenceWord.length
-        val lastIndex = fullQuery.indexOf(delimitingWord)
-        return fullQuery.substring(firstIndex, lastIndex)
-    }
+    class HotCategory(val name: String, val tag: String, val iconPurple: Int)
 }

@@ -22,14 +22,11 @@ import com.telenav.sdk.entity.model.base.Entity
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.view_bottom.*
 import telenav.demo.app.R
-import telenav.demo.app.homepage.HotCategory
-import kotlinx.android.synthetic.main.entity_detail_fragment_layout.*
 import kotlinx.android.synthetic.main.info_window.view.*
 import kotlinx.android.synthetic.main.view_entity_details_bottom.*
 import telenav.demo.app.*
 import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.model.SearchResult
-import telenav.demo.app.personalinfo.PersonalInfoActivity
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
@@ -45,6 +42,7 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
 import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
 import kotlinx.android.synthetic.main.view_header_search.*
+import telenav.demo.app.utils.CategoryAndFiltersUtil
 import java.lang.reflect.Type
 
 class MapActivity : AppCompatActivity() {
@@ -94,7 +92,6 @@ class MapActivity : AppCompatActivity() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
-        fab_search.setOnClickListener { openSearch() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
             showPersonalInfoFragment()
@@ -155,13 +152,6 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    var searchFragment: SearchBottomFragment? = null
-    private fun openSearch() {
-        searchFragment = SearchBottomFragment()
-        searchFragment!!.setSearchType(SearchBottomFragment.CATEGORY_SEARCH)
-        searchFragment!!.show(supportFragmentManager, searchFragment!!.tag)
-    }
-
     override fun onResume() {
         super.onResume()
         setGPSListener(locationCallback)
@@ -209,7 +199,7 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    private fun getCategoryView(hotCategory: HotCategory): CategoryView {
+    private fun getCategoryView(hotCategory: CategoryAndFiltersUtil.HotCategory): CategoryView {
         val categoryView = CategoryView(this)
         categoryView.init(hotCategory)
         categoryView.id = View.generateViewId()
@@ -295,18 +285,6 @@ class MapActivity : AppCompatActivity() {
         searchInfoBottomFragment?.dismiss()
         this.navigationFromSearchInfo = navigationFromSearchInfo
         this.navigationFromPersonalInfo = navigationFromPersonalInfo
-    }
-
-    var searchListFragment: SearchHotCategoriesFragment? = null
-    fun showSearchHotCategoriesFragment(results: List<Entity>, categoryId: String?) {
-        searchListFragment = SearchHotCategoriesFragment.newInstance(results, categoryId)
-        searchListFragment!!.show(supportFragmentManager, searchListFragment!!.tag)
-    }
-
-    var subcategoriesFragment: CategoriesResultFragment? = null
-    fun showSubcategoriesFragment() {
-        subcategoriesFragment = CategoriesResultFragment.newInstance()
-        subcategoriesFragment!!.show(supportFragmentManager, subcategoriesFragment!!.tag)
     }
 
     var personalInfoFragment: PersonalInfoFragment? = null

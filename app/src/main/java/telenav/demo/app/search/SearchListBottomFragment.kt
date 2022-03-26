@@ -1,7 +1,6 @@
 package telenav.demo.app.search
 
 import android.content.Context
-import android.location.Location
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -13,7 +12,6 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.R
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.text.TextUtils
@@ -32,8 +30,7 @@ import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
 import telenav.demo.app.dip
 import java.util.*
 import androidx.core.content.ContextCompat.getSystemService
-
-
+import telenav.demo.app.map.getUIExecutor
 
 
 private const val TAG = "SearchListBottomFragment"

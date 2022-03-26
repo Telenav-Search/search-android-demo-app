@@ -1,6 +1,7 @@
 package telenav.demo.app.initialization
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -26,10 +27,10 @@ import telenav.demo.app.App
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
 import java.io.File
 import java.util.*
+import java.util.concurrent.Executor
 
 class InitializationActivity : AppCompatActivity() {
 
@@ -265,3 +266,7 @@ fun Context.checkLocationPermission(): Boolean =
 fun Context.checkExternalStoragePermissions(): Boolean =
     checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&
             checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
+
+fun Activity.getUIExecutor(): Executor {
+    return Executor { r -> runOnUiThread(r) }
+}

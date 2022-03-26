@@ -24,17 +24,11 @@
             android:name=".entitydetails.EntityDetailsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".personalinfo.PersonalInfoActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".map.MapActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name=".personalinfo.HomeAreaActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".homepage.HomePageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".settings.SettingsActivity"

@@ -13,7 +13,6 @@ import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.R
 import telenav.demo.app.databinding.SearchInfoBottomFragmentLayoutBinding
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.searchlist.SearchListInfoRecyclerAdapter
 import telenav.demo.app.widgets.CategoryView
@@ -21,6 +20,7 @@ import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.util.ArrayList
 import android.text.Editable
 import android.text.TextWatcher
+import telenav.demo.app.map.getUIExecutor
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 
 private const val TAG = "SearchInfoBottomFragment"
