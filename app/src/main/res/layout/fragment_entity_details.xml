@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         xmlns:tools="http://schemas.android.com/tools"
-        android:background="@color/grey_c2"
+        android:color="@android:color/white"
         android:id="@+id/entity_root">
 
         <TextView
@@ -17,7 +17,7 @@
             android:textColor="@color/black_c1"
             android:textStyle="bold"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="6dp"
             android:ellipsize="end"
             android:maxLines="1"
             app:layout_constraintStart_toStartOf="parent"
@@ -73,14 +73,14 @@
                 android:layout_weight="0.5"
                 android:layout_height="33dp"
                 android:background="@drawable/button_round_white"
-                android:backgroundTint="@android:color/white"
-                android:drawableTint="@color/blue_c1"
                 android:layout_marginStart="19dp"
                 android:layout_marginEnd="19dp"
                 android:layout_marginBottom="4dp"
+                android:drawableLeft="@drawable/ic_call"
+                android:drawablePadding="-30dp"
+                android:paddingStart="60dp"
                 android:textColor="@color/blue_c1"
                 android:textAllCaps="false"
-                android:visibility="visible"
                 android:text="@string/call"/>
         </LinearLayout>
 

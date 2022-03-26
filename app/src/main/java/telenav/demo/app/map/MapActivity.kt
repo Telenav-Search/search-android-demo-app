@@ -101,6 +101,10 @@ class MapActivity : AppCompatActivity() {
             onBackSearchInfoFragment()
         }
 
+        entity_header_clear.setOnClickListener {
+            onBackSearchInfoFragment()
+        }
+
         search.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 showSearchListBottomFragment()
@@ -116,6 +120,7 @@ class MapActivity : AppCompatActivity() {
     private fun onBackSearchInfoFragment() {
         entity_details.visibility = View.GONE
         top_navigation_panel.visibility = View.GONE
+        view_bottom.visibility = View.VISIBLE
         when {
             navigationFromSearchInfo -> {
                 showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
@@ -359,6 +364,7 @@ class MapActivity : AppCompatActivity() {
     fun showEntityDetails(searchResult: SearchResult, entity: Entity) {
         entity_details.visibility = View.VISIBLE
         top_navigation_panel.visibility = View.VISIBLE
+        view_bottom.visibility = View.GONE
 
         navigation_header.text = hotCategoryName
 
