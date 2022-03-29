@@ -37,9 +37,15 @@ class FoodDetailsFragment : Fragment() {
             binding?.entityAddress?.text = searchResult?.address
         }
 
-        if (!searchResult?.hours.isNullOrEmpty()) {
-            binding?.entityOpenHours?.text = searchResult?.hours
+        val regularOpenHours = entity?.facets?.openHours?.regularOpenHours
+        var openHours = ""
+        if (!regularOpenHours.isNullOrEmpty()) {
+            val openTime = regularOpenHours[0].openTime
+            if (!openTime.isNullOrEmpty()) {
+                openHours = openTime[0].from + " - " +  openTime[0].to;
+            }
         }
+        binding?.entityOpenHours?.text = openHours
 
         if (searchResult?.phoneNo.isNullOrEmpty()) {
             binding?.entityPhoneNumber?.text = ""
@@ -49,15 +55,25 @@ class FoodDetailsFragment : Fragment() {
             binding?.entityPhoneNumberHeader?.visibility = View.VISIBLE
         }
 
-        if (searchResult?.permanentlyClosed != null) {
-            binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
-            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
-        } else {
+        if (entity?.facets?.openHours?.isOpenNow == true) {
             binding?.entityAlwaysClosed?.text = getString(R.string.open)
             binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_c1))
+        } else {
+            binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
+            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
         }
 
-        CategoryAndFiltersUtil.setStarsViewBasedOnRating(entity_root, searchResult?.ratingLevel!!, requireContext())
+        val rating = entity?.facets?.rating
+        if (!rating.isNullOrEmpty()) {
+            binding?.entityRoot?.visibility = View.VISIBLE
+            binding?.entityReviewCount?.visibility = View.VISIBLE
+            binding?.entityReviewCount?.text = getString(R.string.reviews, rating[0].totalCount)
+            CategoryAndFiltersUtil.setStarsViewBasedOnRating( binding?.entityRoot!!, rating[0].averageRating, requireContext())
+        } else {
+            binding?.entityRoot?.visibility = View.GONE
+            binding?.entityReviewCount?.visibility = View.GONE
+        }
+
     }
 
     fun updateStartsVisibility(slideOffset: Float) {

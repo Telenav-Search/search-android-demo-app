@@ -30,6 +30,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
     private val viewModel: SearchInfoViewModel by viewModels()
     private var currentSearchHotCategoryName: String? = null
     private var currentSearchHotCategoryTag: String? = null
+    private var shouldLoadSaveData: Boolean = false
     private var binding: SearchInfoBottomFragmentLayoutBinding? = null
 
     override fun onCreateView(
@@ -50,11 +51,32 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         val location = (activity!! as MapActivity).lastKnownLocation
         activity?.getUIExecutor()?.let { executor ->
             currentSearchHotCategoryTag?.let {
-                (activity!! as MapActivity).setLastSearch(it)
-                if (it.isNotEmpty()) {
-                    viewModel.search(null, it, location, executor, currentSearchHotCategoryTag, true)
+                if (shouldLoadSaveData &&
+                    viewModel.getRecentSearchData(requireContext()).isNotEmpty() &&
+                    viewModel.getRecentCategoryData(requireContext()).isNotEmpty()) {
+                    viewModel.setRecentSearchData(requireContext())
+                    viewModel.setRecentCategoryData(requireContext())
                 } else {
-                    viewModel.search(currentSearchHotCategoryName, null, location, executor, currentSearchHotCategoryTag, true)
+                    (activity!! as MapActivity).setLastSearch(it)
+                    if (it.isNotEmpty()) {
+                        viewModel.search(
+                            null,
+                            it,
+                            location,
+                            executor,
+                            currentSearchHotCategoryTag,
+                            true
+                        )
+                    } else {
+                        viewModel.search(
+                            currentSearchHotCategoryName,
+                            null,
+                            location,
+                            executor,
+                            currentSearchHotCategoryTag,
+                            true
+                        )
+                    }
                 }
             }
         }
@@ -137,6 +159,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         })
 
         viewModel.categories.observe(viewLifecycleOwner, {
+            viewModel.saveRecentCategoryData(requireContext())
             displayHotCategories(it)
         })
 
@@ -190,10 +213,11 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
 
     companion object {
         @JvmStatic
-        fun newInstance(categoryName: String?, categoryTag: String?) =
+        fun newInstance(categoryName: String?, categoryTag: String?, shouldLoadSaveData: Boolean) =
             SearchInfoBottomFragment().apply {
                 this.currentSearchHotCategoryName = categoryName
                 this.currentSearchHotCategoryTag = categoryTag
+                this.shouldLoadSaveData = shouldLoadSaveData
             }
     }
 }

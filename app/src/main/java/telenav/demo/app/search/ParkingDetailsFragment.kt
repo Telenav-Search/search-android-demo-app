@@ -39,13 +39,24 @@ class ParkingDetailsFragment : Fragment() {
             binding?.entityAddress?.text = searchResult?.address
         }
 
-        if (searchResult?.permanentlyClosed != null) {
-            binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
-            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
-        } else {
+        if (entity?.facets?.openHours?.isOpenNow == true) {
             binding?.entityAlwaysClosed?.text = getString(R.string.open)
             binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_c1))
+        } else {
+            binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
+            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
         }
+
+        val regularOpenHours = entity?.facets?.openHours?.regularOpenHours
+        var openHours = ""
+        if (!regularOpenHours.isNullOrEmpty()) {
+            val openTime = regularOpenHours[0].openTime
+            if (!openTime.isNullOrEmpty()) {
+                openHours = openTime[0].from + " - " +  openTime[0].to;
+            }
+        }
+        binding?.entityOpenHours?.text = openHours
+
 
         val prices = searchResult?.parking?.pricing?.prices
         val uniquePrices = ArrayList<ParkingPriceItem>()

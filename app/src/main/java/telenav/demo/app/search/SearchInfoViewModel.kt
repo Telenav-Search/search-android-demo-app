@@ -387,22 +387,19 @@ class SearchInfoViewModel : ViewModel() {
         return ""
     }
 
-    fun getRecentSearchData(context: Context) {
+    fun getRecentSearchData(context: Context): List<Entity> {
         val prefs =
             context.getSharedPreferences(
                 context.getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE)
 
         val listType: Type = object : TypeToken<List<Entity>>() {}.type
-        val searchResultEntities = Gson().fromJson<List<Entity>>(
+        return Gson().fromJson(
             prefs?.getString(
                 context.getString(R.string.saved_recent_search_key),
                 ""
             ), listType
         )
-        searchResultEntities?.let {
-            searchResults.value = it
-        }
     }
 
     fun saveRecentSearchData(context: Context) {
@@ -418,6 +415,44 @@ class SearchInfoViewModel : ViewModel() {
             )
             apply()
         }
+    }
+
+    fun setRecentSearchData(context: Context) {
+        searchResults.value = getRecentSearchData(context)
+    }
+
+    fun getRecentCategoryData(context: Context): List<Category> {
+        val prefs =
+            context.getSharedPreferences(
+                context.getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE)
+
+        val listType: Type = object : TypeToken<List<Category>>() {}.type
+        return Gson().fromJson(
+            prefs?.getString(
+                context.getString(R.string.saved_recent_category_key),
+                ""
+            ), listType
+        )
+    }
+
+    fun saveRecentCategoryData(context: Context) {
+        val prefs =
+            context.getSharedPreferences(
+                context.getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE)
+
+        with(prefs.edit()) {
+            putString(
+                context.getString(R.string.saved_recent_category_key),
+                Gson().toJson(categories.value)
+            )
+            apply()
+        }
+    }
+
+    fun setRecentCategoryData(context: Context) {
+        categories.value = getRecentCategoryData(context)
     }
 
     fun getHome(context: Context) : Entity? {

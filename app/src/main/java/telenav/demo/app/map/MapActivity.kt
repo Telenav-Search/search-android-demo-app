@@ -114,7 +114,7 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun onBackFromFilterFragment() {
-        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
+        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag, false)
     }
 
     private fun onBackSearchInfoFragment() {
@@ -123,7 +123,7 @@ class MapActivity : AppCompatActivity() {
         view_bottom.visibility = View.VISIBLE
         when {
             navigationFromSearchInfo -> {
-                showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag)
+                showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag, true)
                 navigationFromSearchInfo = false
             }
             navigationFromPersonalInfo -> {
@@ -217,7 +217,7 @@ class MapActivity : AppCompatActivity() {
             hotCategoryTag = hotCategory.tag
             collapseBottomSheet()
             if (hotCategoryTag.isNotEmpty()) {
-                showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag)
+                showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag, false)
             } else {
                 showMoreCategoriesFragment()
             }
@@ -302,9 +302,9 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
-    fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?) {
+    fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?, shouldLoadSaveData: Boolean) {
         categoryName?.let { this.hotCategoryName = it }
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag)
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, shouldLoadSaveData)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 

@@ -15,6 +15,11 @@ import telenav.demo.app.utils.entityCachedClick
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.view.marginStart
+import telenav.demo.app.utils.Converter
 
 class SearchResultsListRecyclerAdapter(
     val entities: List<Entity>,
@@ -33,7 +38,7 @@ class SearchResultsListRecyclerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EntityFavoriteHolder {
         val view = LayoutInflater.from((parent.context))
-            .inflate(R.layout.favorite_list_item_new, parent, false)
+            .inflate(R.layout.favorite_list_item, parent, false)
 
         return EntityFavoriteHolder(view)
     }
@@ -44,6 +49,14 @@ class SearchResultsListRecyclerAdapter(
             if (entity.type == EntityType.ADDRESS) entity.address.formattedAddress else entity.place.name
 
         holder.vName.text = getSpannableNameText(name)
+
+        holder.vName.post {
+            val totalWidth = holder.vName.width + holder.vName.marginStart + 20
+            val params = holder.vAddress.layoutParams as ConstraintLayout.LayoutParams
+
+            params.setMargins(totalWidth, 0, Converter.convertDpToPixel(context, 20f), 0)
+            holder.vAddress.layoutParams = params
+        }
 
         if (entity.type == EntityType.ADDRESS) {
             holder.vAddress.visibility = View.GONE

@@ -86,7 +86,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
         }
 
         if (shouldRequestRecentData) {
-            viewModel.getRecentSearchData(requireContext())
+            viewModel.setRecentSearchData(requireContext())
         }
 
         binding?.search?.requestFocus()
@@ -136,7 +136,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                                     } else {
                                         binding?.clearText?.visibility = View.GONE
                                         binding?.recentHeader?.visibility = View.VISIBLE
-                                        viewModel.getRecentSearchData(requireContext())
+                                        viewModel.setRecentSearchData(requireContext())
                                     }
                                 }
                             }
@@ -151,7 +151,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
             hidePredictions()
             binding?.search?.setText("")
             binding?.recentHeader?.visibility = View.VISIBLE
-            viewModel.getRecentSearchData(requireContext())
+            viewModel.setRecentSearchData(requireContext())
         }
 
         binding?.searchList?.layoutManager = LinearLayoutManager(activity)

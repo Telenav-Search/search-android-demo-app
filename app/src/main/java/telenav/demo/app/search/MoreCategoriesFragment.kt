@@ -106,7 +106,7 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
         chip.textStartPadding = margin.toFloat()
         chip.textEndPadding = margin.toFloat()
         chip.setOnClickListener {
-            (activity!! as MapActivity).showSearchInfoBottomFragment(chip.text.toString(), "")
+            (activity!! as MapActivity).showSearchInfoBottomFragment(chip.text.toString(), "", false)
             dismiss()
         }
         return chip
