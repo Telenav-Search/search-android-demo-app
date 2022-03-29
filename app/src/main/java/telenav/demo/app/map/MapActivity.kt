@@ -199,7 +199,10 @@ class MapActivity : AppCompatActivity() {
 
     fun collapseBottomSheet() {
         if (this::behavior.isInitialized) {
-            bottomSheetState = behavior.state
+            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED ||
+                behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetState = behavior.state
+            }
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }

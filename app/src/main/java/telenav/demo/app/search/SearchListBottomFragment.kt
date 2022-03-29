@@ -22,16 +22,13 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.widget.doOnTextChanged
 import telenav.demo.app.utils.*
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.model.prediction.WordPrediction
 import telenav.demo.app.databinding.SearchListBottomFragmentLayoutBinding
 import telenav.demo.app.dip
 import java.util.*
-import androidx.core.content.ContextCompat.getSystemService
 import telenav.demo.app.map.getUIExecutor
-
 
 private const val TAG = "SearchListBottomFragment"
 
@@ -240,8 +237,8 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                     (activity!! as MapActivity).showPersonalInfoFragment()
                 }
             } else {
-                (activity!! as MapActivity).updateBottomView()
                 (activity!! as MapActivity).updateBottomSheetState()
+                (activity!! as MapActivity).updateBottomView()
             }
             dismiss()
         }

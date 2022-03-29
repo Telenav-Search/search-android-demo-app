@@ -87,6 +87,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
 
         binding?.clearText?.setOnClickListener {
             binding?.search?.setText("")
+            (activity as MapActivity).updateBottomView()
             (activity as MapActivity).updateBottomSheetState()
             dismiss()
         }
@@ -98,6 +99,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
             if (it.isNotEmpty()) {
                 binding?.searchList?.visibility = View.VISIBLE
                 binding?.searchError?.visibility = View.GONE
+                viewModel.saveRecentSearchData(requireContext())
             } else {
                 binding?.searchList?.visibility = View.GONE
                 binding?.searchError?.visibility = View.GONE
@@ -109,6 +111,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
             binding?.searchList?.adapter = SearchListInfoRecyclerAdapter(it,
                 object : SearchListInfoRecyclerAdapter.OnEntityClickListener {
                     override fun onEntityClick(entity: Entity) {
+                        (activity as MapActivity).hideKeyboard(binding?.search!!)
                         (activity as MapActivity).displayEntityClicked(entity,
                             currentSearchHotCategoryTag, true)
                     }

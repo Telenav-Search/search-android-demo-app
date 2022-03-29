@@ -37,8 +37,11 @@
               android:id="@+id/entity_details_back"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_centerVertical="true"
+              android:minWidth="46dp"
+              android:minHeight="46dp"
               android:paddingStart="20dp"
+              android:paddingEnd="20dp"
+              android:scaleType="center"
               android:src="@drawable/ic_back"
               app:tint="@color/blue_c1" />
 
@@ -46,9 +49,13 @@
               android:id="@+id/entity_header_clear"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="10dp"
-              android:layout_marginEnd="10dp"
               android:layout_alignParentEnd="true"
+              android:layout_marginEnd="10dp"
+              android:minWidth="46dp"
+              android:minHeight="46dp"
+              android:paddingStart="20dp"
+              android:paddingEnd="20dp"
+              android:scaleType="center"
               android:src="@drawable/ic_clear" />
 
           <TextView
