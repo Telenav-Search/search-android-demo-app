@@ -39,7 +39,7 @@ object CategoryAndFiltersUtil {
         HotCategory("Fuel", FUEL_TAG, R.drawable.ic_gas_color),
         HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_grocery_color),
         HotCategory("Hotels", HOTELS_TAG, R.drawable.ic_hotel_color),
-        HotCategory("ATM", ATM_TAG, R.drawable.ic_atm_color),
+        HotCategory("Bank and ATM", ATM_TAG, R.drawable.ic_atm_color),
         HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
         HotCategory("EV Charger", EV_CHARGER_TAG, R.drawable.ic_ev_color),
         HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
@@ -270,6 +270,61 @@ object CategoryAndFiltersUtil {
                 thirdStar.visibility = View.INVISIBLE
                 fourthStar.visibility = View.INVISIBLE
                 fifthStar.visibility = View.INVISIBLE
+            }
+        }
+    }
+
+    fun setYelpStarsViewBasedOnRating(view: View, ratingLevel: Double, context: Context) {
+        val star = view.findViewById<ImageView>(R.id.star)
+
+        when (ratingLevel) {
+
+            -1.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_0))
+            }
+
+            0.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_0))
+            }
+
+            1.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_1))
+            }
+
+            1.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_1_half))
+            }
+
+            2.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_2))
+            }
+
+            2.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_2_half))
+            }
+
+            3.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_3))
+            }
+
+            3.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_3_half))
+            }
+
+            4.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_4))
+            }
+
+            4.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_4_half))
+            }
+
+            5.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_5))
+            }
+
+            else -> {
+                star.visibility = View.INVISIBLE
             }
         }
     }

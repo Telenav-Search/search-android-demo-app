@@ -21,50 +21,13 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/star_0"
-                android:layout_width="@dimen/padding_18"
-                android:layout_height="@dimen/padding_18"
+                android:id="@+id/star"
+                android:layout_width="84dp"
+                android:layout_height="15dp"
                 android:layout_marginStart="@dimen/star_margin"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_star_full"
-                app:tint="@color/red_c1" />
+                android:src="@drawable/stars_regular_0" />
 
-            <ImageView
-                android:id="@+id/star_1"
-                android:layout_width="@dimen/padding_18"
-                android:layout_height="@dimen/padding_18"
-                android:layout_marginStart="@dimen/star_margin"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_star_full"
-                app:tint="@color/red_c1" />
-
-            <ImageView
-                android:id="@+id/star_2"
-                android:layout_width="@dimen/padding_18"
-                android:layout_height="@dimen/padding_18"
-                android:layout_marginStart="@dimen/star_margin"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_star_full"
-                app:tint="@color/red_c1" />
-
-            <ImageView
-                android:id="@+id/star_3"
-                android:layout_width="@dimen/padding_18"
-                android:layout_height="@dimen/padding_18"
-                android:layout_marginStart="@dimen/star_margin"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_star_full"
-                app:tint="@color/red_c1" />
-
-            <ImageView
-                android:id="@+id/star_4"
-                android:layout_width="@dimen/padding_18"
-                android:layout_height="@dimen/padding_18"
-                android:layout_marginStart="@dimen/star_margin"
-                android:layout_marginEnd="@dimen/star_margin"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_star_full"
-                app:tint="@color/red_c1" />
         </LinearLayout>
 
         <TextView

@@ -68,7 +68,7 @@ class FoodDetailsFragment : Fragment() {
             binding?.entityRoot?.visibility = View.VISIBLE
             binding?.entityReviewCount?.visibility = View.VISIBLE
             binding?.entityReviewCount?.text = getString(R.string.reviews, rating[0].totalCount)
-            CategoryAndFiltersUtil.setStarsViewBasedOnRating( binding?.entityRoot!!, rating[0].averageRating, requireContext())
+            CategoryAndFiltersUtil.setYelpStarsViewBasedOnRating( binding?.entityRoot!!, rating[0].averageRating, requireContext())
         } else {
             binding?.entityRoot?.visibility = View.GONE
             binding?.entityReviewCount?.visibility = View.GONE
