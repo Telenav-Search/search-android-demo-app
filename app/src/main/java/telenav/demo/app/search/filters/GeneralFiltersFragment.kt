@@ -1,17 +1,21 @@
 package telenav.demo.app.search.filters
 
+import android.app.Dialog
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.GeneralFiltersFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.utils.CategoryAndFiltersUtil
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
-class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
+class GeneralFiltersFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
     private val starsFilter = StarsFilter()
     private var priceLevelFilter = PriceLevel()
@@ -33,6 +37,19 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         setUpCLickListeners()
     }
 
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
     private fun setUpCLickListeners() {
         binding?.priceLevelOneDollar?.setOnClickListener(this)
         binding?.priceLevelTwoDollars?.setOnClickListener(this)
@@ -46,9 +63,13 @@ class GeneralFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.ratingReset?.setOnClickListener(this)
         binding?.priceReset?.setOnClickListener(this)
         binding?.parkingFiltersAreaBack?.setOnClickListener {
-            dismiss()
-            (activity!! as MapActivity).onBackFromFilterFragment()
+            onBack()
         }
+    }
+
+    private fun onBack() {
+        dismiss()
+        (activity!! as MapActivity).onBackFromFilterFragment()
     }
 
     override fun onClick(v: View) {

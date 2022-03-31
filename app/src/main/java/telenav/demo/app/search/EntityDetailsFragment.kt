@@ -124,15 +124,12 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
     private fun attachAdditionalDetails() {
         var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult, entity)
+        val categoryName = searchResult?.categoryName?.lowercase().toString()
         when {
-            searchResult?.categoryName.equals(PARKING_TAG) -> {
+            "park" in categoryName -> {
                 fragment = ParkingDetailsFragment.newInstance(searchResult, entity)
             }
-            searchResult?.categoryName.equals(FAST_FOOD_TAG) -> {
-                fragment = FoodDetailsFragment.newInstance(searchResult, entity)
-            }
-            searchResult?.categoryName.equals(CHARGER_TAG1) ||
-                    searchResult?.categoryName.equals(CHARGER_TAG2) -> {
+            "charge" in categoryName -> {
                 fragment = EvChargerDetailsFragment.newInstance(searchResult, entity)
             }
         }
@@ -143,10 +140,6 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
     companion object {
         private const val FRAGMENT_TAG = "EntityDetailsFragment"
-        private const val PARKING_TAG = "Parking lot"
-        private const val FAST_FOOD_TAG = "Fast Food"
-        private const val CHARGER_TAG1 = "Charging"
-        private const val CHARGER_TAG2 = "Electric Charge"
 
         @JvmStatic
         fun newInstance(searchResult: SearchResult, entity: Entity) =

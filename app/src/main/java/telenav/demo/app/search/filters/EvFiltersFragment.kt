@@ -1,5 +1,7 @@
 package telenav.demo.app.search.filters
 
+import android.app.Dialog
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -9,16 +11,18 @@ import android.widget.CheckBox
 import androidx.constraintlayout.widget.ConstraintSet
 import telenav.demo.app.databinding.EvFiltersFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.util.ArrayList
 import androidx.core.content.ContextCompat
 import androidx.core.view.forEach
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.StringUtil
 
-class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
+class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
 
     private var binding: EvFiltersFragmentLayoutBinding? = null
 
@@ -153,15 +157,32 @@ class EvFiltersFragment : RoundedBottomSheetLayout() , View.OnClickListener {
         }
     }
 
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
     private fun setUpCLickListeners() {
         binding?.evFiltersAreaBack?.setOnClickListener {
-            saveFilters()
-            (activity!! as MapActivity).onBackFromFilterFragment()
-            dismiss()
+            onBack()
         }
         binding?.evConnectorTypesReset?.setOnClickListener(this)
         binding?.evPowerFeedLevelsReset?.setOnClickListener(this)
         binding?.evChargerBrandsReset?.setOnClickListener(this)
+    }
+
+    private fun onBack() {
+        saveFilters()
+        (activity!! as MapActivity).onBackFromFilterFragment()
+        dismiss()
     }
 
     private fun saveFilters() {

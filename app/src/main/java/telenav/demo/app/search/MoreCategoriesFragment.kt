@@ -1,6 +1,8 @@
 package telenav.demo.app.search
 
+import android.app.Dialog
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,14 +14,16 @@ import com.google.android.material.chip.ChipGroup
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMoreCategoriesBinding
 import telenav.demo.app.utils.Converter
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.widget.TextView
 import androidx.fragment.app.viewModels
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.telenav.sdk.entity.model.base.Category
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.map.getUIExecutor
 
-class MoreCategoriesFragment : RoundedBottomSheetLayout() {
+class MoreCategoriesFragment : BottomSheetDialogFragment() {
 
     private var binding: FragmentMoreCategoriesBinding? = null
     private val viewModel: SearchInfoViewModel by viewModels()
@@ -64,9 +68,26 @@ class MoreCategoriesFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.moreCategoriesAreaBack?.setOnClickListener {
-            (activity!! as MapActivity).updateBottomSheetState()
-            dismiss()
+            onBack()
         }
+    }
+
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
+    private fun onBack() {
+        (activity!! as MapActivity).updateBottomSheetState()
+        dismiss()
     }
 
     private fun setupChipGroupDynamically(header: String, list: List<Category>) {

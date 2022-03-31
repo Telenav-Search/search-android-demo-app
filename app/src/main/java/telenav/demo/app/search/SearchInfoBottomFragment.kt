@@ -1,5 +1,7 @@
 package telenav.demo.app.search
 
+import android.app.Dialog
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,16 +18,18 @@ import telenav.demo.app.databinding.SearchInfoBottomFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.searchlist.SearchListInfoRecyclerAdapter
 import telenav.demo.app.widgets.CategoryView
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import java.util.ArrayList
 import android.text.Editable
 import android.text.TextWatcher
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.map.getUIExecutor
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 
 private const val TAG = "SearchInfoBottomFragment"
 
-class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
+class SearchInfoBottomFragment : BottomSheetDialogFragment() {
 
     private val viewModel: SearchInfoViewModel by viewModels()
     private var currentSearchHotCategoryName: String? = null
@@ -47,13 +51,27 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         init()
     }
 
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
     private fun init() {
         val location = (activity!! as MapActivity).lastKnownLocation
         activity?.getUIExecutor()?.let { executor ->
             currentSearchHotCategoryTag?.let {
                 if (shouldLoadSaveData &&
-                    viewModel.getRecentSearchData(requireContext()).isNotEmpty() &&
-                    viewModel.getRecentCategoryData(requireContext()).isNotEmpty()) {
+                    (viewModel.getRecentSearchData(requireContext()).isNotEmpty() ||
+                    viewModel.getRecentCategoryData(requireContext()).isNotEmpty())) {
+
                     viewModel.setRecentSearchData(requireContext())
                     viewModel.setRecentCategoryData(requireContext())
                 } else {
@@ -108,10 +126,7 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.clearText?.setOnClickListener {
-            binding?.search?.setText("")
-            (activity as MapActivity).updateBottomView()
-            (activity as MapActivity).updateBottomSheetState()
-            dismiss()
+            onBack()
         }
 
         binding?.searchList?.layoutManager = LinearLayoutManager(activity)
@@ -191,6 +206,20 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         val hotCategoryIdArray = ArrayList<Int>()
         for (hotCategory in categories) {
             val categoryView = getCategoryView(hotCategory)
+            categoryView.setOnClickListener {
+                binding?.search?.setText(hotCategory.name)
+                val location = (activity!! as MapActivity).lastKnownLocation
+                activity?.getUIExecutor()?.let { executor ->
+                    viewModel.search(
+                        hotCategory.name,
+                        null,
+                        location,
+                        executor,
+                        currentSearchHotCategoryTag,
+                        true
+                    )
+                }
+            }
             bottomSheetLayout?.addView(categoryView)
             hotCategoryIdArray.add(categoryView.id)
         }
@@ -209,6 +238,13 @@ class SearchInfoBottomFragment : RoundedBottomSheetLayout() {
         categoryView.id = View.generateViewId()
 
         return categoryView
+    }
+
+    private fun onBack() {
+        binding?.search?.setText("")
+        (activity as MapActivity).updateBottomView()
+        (activity as MapActivity).updateBottomSheetState()
+        dismiss()
     }
 
     companion object {

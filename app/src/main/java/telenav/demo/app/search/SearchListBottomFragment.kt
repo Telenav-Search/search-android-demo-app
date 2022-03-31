@@ -1,6 +1,8 @@
 package telenav.demo.app.search
 
+import android.app.Dialog
 import android.content.Context
+import android.content.res.Resources
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
@@ -13,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.R
 import telenav.demo.app.map.MapActivity
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.TypedValue
@@ -22,6 +23,9 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.utils.*
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.model.prediction.WordPrediction
@@ -32,7 +36,7 @@ import telenav.demo.app.map.getUIExecutor
 
 private const val TAG = "SearchListBottomFragment"
 
-class SearchListBottomFragment : RoundedBottomSheetLayout() {
+class SearchListBottomFragment : BottomSheetDialogFragment() {
 
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     private val viewModel: SearchInfoViewModel by viewModels()
@@ -56,6 +60,19 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
+    }
+
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
     }
 
     private fun init() {
@@ -231,16 +248,7 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
         })
 
         binding?.searchListAreaBack?.setOnClickListener {
-            (activity!! as MapActivity).hideKeyboard(binding?.search!!)
-            if (shouldUpdateHomeAddress || shouldUpdateWorkAddress) {
-                if (!openedFromMainScreen) {
-                    (activity!! as MapActivity).showPersonalInfoFragment()
-                }
-            } else {
-                (activity!! as MapActivity).updateBottomSheetState()
-                (activity!! as MapActivity).updateBottomView()
-            }
-            dismiss()
+            onBack()
         }
         if (binding?.search?.text?.isEmpty() == true) {
             binding?.clearText?.visibility = View.GONE
@@ -255,6 +263,19 @@ class SearchListBottomFragment : RoundedBottomSheetLayout() {
                 inputMethodManager.showSoftInput(it, 0)
             }
         }, 500)
+    }
+
+    private fun onBack() {
+        (activity!! as MapActivity).hideKeyboard(binding?.search!!)
+        if (shouldUpdateHomeAddress || shouldUpdateWorkAddress) {
+            if (!openedFromMainScreen) {
+                (activity!! as MapActivity).showPersonalInfoFragment()
+            }
+        } else {
+            (activity!! as MapActivity).updateBottomSheetState()
+            (activity!! as MapActivity).updateBottomView()
+        }
+        dismiss()
     }
 
     private fun searchText() {

@@ -1,16 +1,20 @@
 package telenav.demo.app.search.filters
 
+import android.app.Dialog
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.ParkingFiltersFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 
-class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener {
+class ParkingFiltersFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
     private var priceLevelFilter = PriceLevel()
     private var binding: ParkingFiltersFragmentLayoutBinding? = null
@@ -39,10 +43,7 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
         binding?.priceLevelThreeDollars?.setOnClickListener(this)
         binding?.priceLevelFourDollars?.setOnClickListener(this)
         binding?.parkingFiltersAreaBack?.setOnClickListener {
-            App.writeToSharedPreferences(App.PARKING_DURATION, parkingDuration)
-            App.writeToSharedPreferences(App.PARKING_START_FROM, parkingStartDuration)
-            (activity as MapActivity).onBackFromFilterFragment()
-            dismiss()
+            onBack()
         }
         binding?.priceReset?.setOnClickListener(this)
         binding?.parkingDurationAdd?.setOnClickListener(this)
@@ -101,6 +102,26 @@ class ParkingFiltersFragment : RoundedBottomSheetLayout(), View.OnClickListener 
                 initStartDuration()
             }
         }
+    }
+
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
+    private fun onBack() {
+        App.writeToSharedPreferences(App.PARKING_DURATION, parkingDuration)
+        App.writeToSharedPreferences(App.PARKING_START_FROM, parkingStartDuration)
+        (activity as MapActivity).onBackFromFilterFragment()
+        dismiss()
     }
 
     private fun initDefaultValues() {

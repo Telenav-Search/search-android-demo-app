@@ -277,6 +277,9 @@ class MapActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             searchListBottomFragment?.popUpLogicCLose()
+            if (top_navigation_panel.visibility == View.VISIBLE) {
+                onBackSearchInfoFragment()
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)

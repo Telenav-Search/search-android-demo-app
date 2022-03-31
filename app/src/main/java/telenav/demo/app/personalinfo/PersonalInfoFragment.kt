@@ -1,8 +1,10 @@
 package telenav.demo.app.personalinfo
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -20,15 +22,17 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.search.SearchResultsListRecyclerAdapter
 import telenav.demo.app.utils.SwipeToDeleteCallback
-import telenav.demo.app.widgets.RoundedBottomSheetLayout
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.utils.Converter.convertDpToPixel
 
 private const val TAG = "PersonalInfoFragment"
 private const val USER_INFO_TAG = "UserAddressFragment"
 
-class PersonalInfoFragment : RoundedBottomSheetLayout() {
+class PersonalInfoFragment : BottomSheetDialogFragment() {
 
     private var binding : FragmentPersonalInfoBottomBinding? = null
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
@@ -51,8 +55,7 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
         super.onViewCreated(view, savedInstanceState)
 
         binding?.personalInfoAreaBack?.setOnClickListener {
-            dismiss()
-            (activity!! as MapActivity).updateBottomSheetState()
+            onBack()
         }
 
         binding?.settings?.setOnClickListener {
@@ -70,6 +73,24 @@ class PersonalInfoFragment : RoundedBottomSheetLayout() {
             UserAddressFragment.newInstance(), USER_INFO_TAG).commit()
 
         getFavoriteData()
+    }
+
+    override fun getTheme(): Int = R.style.BottomSheetDialogTheme
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return object : BottomSheetDialog(requireContext(), theme) {
+            override fun onBackPressed() {
+                onBack()
+            }
+        }.apply {
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = Resources.getSystem().displayMetrics.heightPixels
+        }
+    }
+
+    private fun onBack() {
+        dismiss()
+        (activity!! as MapActivity).updateBottomSheetState()
     }
 
     private fun getFavoriteData() {
