@@ -81,10 +81,9 @@
                 android:id="@+id/work_address_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:paddingRight="8dp"
+                android:layout_marginStart="14dp"
+                android:paddingRight="12dp"
                 android:src="@drawable/ic_work"
-                app:tint="@color/blue_c1"
                 android:layout_marginTop="3dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/work_address_header"/>
