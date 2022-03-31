@@ -197,6 +197,11 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
+    fun clearTextAndFocus() {
+        search.setText("")
+        search.clearFocus()
+    }
+
     fun collapseBottomSheet() {
         if (this::behavior.isInitialized) {
             if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED ||

@@ -274,6 +274,7 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
         } else {
             (activity!! as MapActivity).updateBottomSheetState()
             (activity!! as MapActivity).updateBottomView()
+            (activity!! as MapActivity).clearTextAndFocus()
         }
         dismiss()
     }

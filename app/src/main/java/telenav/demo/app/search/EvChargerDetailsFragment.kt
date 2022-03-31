@@ -93,7 +93,6 @@ class EvChargerDetailsFragment : Fragment() {
         binding?.entityConnectorsType?.text = entityConnectorsType
         binding?.entityPowerFeed?.text = entityPowerFeed
         binding?.entityChargerBrand?.text = entityChargerBrand
-
     }
 
     companion object {

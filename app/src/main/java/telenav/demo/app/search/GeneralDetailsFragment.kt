@@ -7,15 +7,14 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.telenav.sdk.entity.model.base.Entity
-import kotlinx.android.synthetic.main.view_entity_details_bottom.*
 import telenav.demo.app.R
-import telenav.demo.app.databinding.FragmentFoodDetailsBinding
+import telenav.demo.app.databinding.FragmentGeneralDetailsBinding
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 
-class FoodDetailsFragment : Fragment() {
+class GeneralDetailsFragment : Fragment() {
 
-    private var binding: FragmentFoodDetailsBinding? = null
+    private var binding: FragmentGeneralDetailsBinding? = null
     private var searchResult: SearchResult? = null
     private var entity: Entity? = null
 
@@ -24,7 +23,7 @@ class FoodDetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentFoodDetailsBinding.inflate(inflater, container, false)
+        binding = FragmentGeneralDetailsBinding.inflate(inflater, container, false)
         return binding?.root
     }
 
@@ -38,14 +37,20 @@ class FoodDetailsFragment : Fragment() {
         }
 
         val regularOpenHours = entity?.facets?.openHours?.regularOpenHours
-        var openHours = ""
         if (!regularOpenHours.isNullOrEmpty()) {
             val openTime = regularOpenHours[0].openTime
             if (!openTime.isNullOrEmpty()) {
-                openHours = openTime[0].from + " - " +  openTime[0].to;
+                val startTime = openTime[0].from.split(":")
+                val from = startTime[0] + ":" + startTime[1]
+                val endTime = openTime[0].to.split(":")
+                val to = endTime[0] + ":" + endTime[1]
+                val openHours = "$from - $to"
+
+                binding?.entityOpenHours?.text = openHours
+                binding?.entityOpenHours?.visibility = View.VISIBLE
+                binding?.entityOpenHoursHeader?.visibility = View.VISIBLE
             }
         }
-        binding?.entityOpenHours?.text = openHours
 
         if (searchResult?.phoneNo.isNullOrEmpty()) {
             binding?.entityPhoneNumber?.text = ""
@@ -87,7 +92,7 @@ class FoodDetailsFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance(searchResult: SearchResult?, entity: Entity?) =
-            FoodDetailsFragment().apply {
+            GeneralDetailsFragment().apply {
                 this.searchResult = searchResult
                 this.entity = entity
             }

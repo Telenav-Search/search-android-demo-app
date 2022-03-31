@@ -366,7 +366,22 @@ object CategoryAndFiltersUtil {
         background!!.setBounds(0, 0, background.intrinsicWidth, background.intrinsicHeight)
         val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId)
         vectorDrawable?.setTint(context.getColor(android.R.color.white))
-        vectorDrawable!!.setBounds(25, 15, vectorDrawable.intrinsicWidth + 15, vectorDrawable.intrinsicHeight + 5)
+
+        if (vectorDrawableResourceId == R.drawable.ic_parking_color) {
+            vectorDrawable!!.setBounds(
+                40,
+                15,
+                vectorDrawable.intrinsicWidth + 25,
+                vectorDrawable.intrinsicHeight + 5
+            )
+        } else {
+            vectorDrawable!!.setBounds(
+                35,
+                15,
+                vectorDrawable.intrinsicWidth + 15,
+                vectorDrawable.intrinsicHeight + 5
+            )
+        }
         val bitmap = Bitmap.createBitmap(background.intrinsicWidth, background.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         background.draw(canvas)

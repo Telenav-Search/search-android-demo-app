@@ -117,19 +117,18 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
     fun updateItemVisibility(slideOffset: Float) {
         val fragment: Fragment? = childFragmentManager.findFragmentByTag(FRAGMENT_TAG)
-        if (fragment != null && fragment is FoodDetailsFragment) {
+        if (fragment != null && fragment is GeneralDetailsFragment) {
             fragment.updateStartsVisibility(slideOffset)
         }
     }
 
     private fun attachAdditionalDetails() {
-        var fragment: Fragment = FoodDetailsFragment.newInstance(searchResult, entity)
-        val categoryName = searchResult?.categoryName?.lowercase().toString()
+        var fragment: Fragment = GeneralDetailsFragment.newInstance(searchResult, entity)
         when {
-            "park" in categoryName -> {
+            entity?.facets?.parking != null  -> {
                 fragment = ParkingDetailsFragment.newInstance(searchResult, entity)
             }
-            "charge" in categoryName -> {
+            (entity?.facets?.evConnectors != null && entity?.facets?.chargeStations != null) -> {
                 fragment = EvChargerDetailsFragment.newInstance(searchResult, entity)
             }
         }

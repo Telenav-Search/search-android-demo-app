@@ -11,12 +11,13 @@
 
         <TextView
             android:id="@+id/entity_name"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textColor="@color/black_c1"
             android:textStyle="bold"
             android:layout_marginStart="20dp"
+            android:layout_marginEnd="60dp"
             android:layout_marginTop="6dp"
             android:ellipsize="end"
             android:maxLines="1"

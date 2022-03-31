@@ -74,6 +74,52 @@
             android:src="@drawable/ic_filter"
             app:tint="@color/blue_c1" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/error_view"
+            android:layout_width="match_parent"
+            android:layout_height="270dp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/flow_category">
+
+            <ImageView
+                android:id="@+id/searchErrorImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="59dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:src="@drawable/ic_error_image" />
+
+            <TextView
+                android:id="@+id/searchErrorHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_result"
+                android:layout_marginTop="26dp"
+                android:textSize="14sp"
+                android:textColor="@color/blue_c1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/searchErrorImage" />
+
+            <TextView
+                android:id="@+id/searchError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="14sp"
+                android:textColor="@color/blue_c1"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/searchErrorHeader" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <androidx.constraintlayout.helper.widget.Flow
             android:id="@+id/flow_category"
             android:layout_width="0dp"
@@ -98,17 +144,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:indeterminateTint="@color/colorAccent" />
-
-        <TextView
-            android:id="@+id/searchError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="21dp"
-            android:layout_marginEnd="21dp"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/flow_category"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchList"

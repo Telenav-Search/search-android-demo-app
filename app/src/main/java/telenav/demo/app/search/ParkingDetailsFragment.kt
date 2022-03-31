@@ -48,14 +48,21 @@ class ParkingDetailsFragment : Fragment() {
         }
 
         val regularOpenHours = entity?.facets?.openHours?.regularOpenHours
-        var openHours = ""
         if (!regularOpenHours.isNullOrEmpty()) {
             val openTime = regularOpenHours[0].openTime
             if (!openTime.isNullOrEmpty()) {
-                openHours = openTime[0].from + " - " +  openTime[0].to;
+                val startTime = openTime[0].from.split(":")
+                val from = startTime[0] + ":" + startTime[1]
+                val endTime = openTime[0].to.split(":")
+                val to = endTime[0] + ":" + endTime[1]
+                val openHours = "$from - $to"
+
+                binding?.entityOpenHours?.text = openHours
+                binding?.entityOpenHours?.visibility = View.VISIBLE
+                binding?.entityOpenHoursHeader?.visibility = View.VISIBLE
             }
         }
-        binding?.entityOpenHours?.text = openHours
+
 
 
         val prices = searchResult?.parking?.pricing?.prices

@@ -7,7 +7,7 @@
     android:id="@+id/bottom_sheet"
     android:paddingTop="8dp"
     app:behavior_hideable="false"
-    app:behavior_peekHeight="87dp"
+    app:behavior_peekHeight="230dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <include

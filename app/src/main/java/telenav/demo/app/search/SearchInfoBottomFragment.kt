@@ -135,12 +135,12 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
             Log.d(TAG, "result count ->  ${it.size} ")
             if (it.isNotEmpty()) {
                 binding?.searchList?.visibility = View.VISIBLE
-                binding?.searchError?.visibility = View.GONE
+                binding?.errorView?.visibility = View.GONE
                 viewModel.saveRecentSearchData(requireContext())
             } else {
                 binding?.searchList?.visibility = View.GONE
-                binding?.searchError?.visibility = View.GONE
-                binding?.searchError?.text = getString(R.string.no_result)
+                binding?.searchError?.text = ""
+                binding?.errorView?.visibility = View.VISIBLE
             }
 
             (activity as MapActivity).displaySearchResults(it, currentSearchHotCategoryTag)
@@ -158,10 +158,10 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
 
         viewModel.searchError.observe(viewLifecycleOwner, {
             if (!it.isNullOrBlank()) {
-                binding?.searchError?.visibility = View.VISIBLE
                 binding?.searchError?.text = it
+                binding?.errorView?.visibility = View.VISIBLE
             } else {
-                binding?.searchError?.visibility = View.GONE
+                binding?.errorView?.visibility = View.GONE
             }
         })
 
