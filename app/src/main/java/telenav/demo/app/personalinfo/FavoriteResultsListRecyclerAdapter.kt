@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
+import com.telenav.sdk.dataconnector.api.DataConnectorService
+import com.telenav.sdk.dataconnector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import com.telenav.sdk.entity.model.base.Rating
@@ -23,7 +23,7 @@ class FavoriteResultsListRecyclerAdapter(
     onDeleteListener: OnDeleteFavoriteResultListener
 ) :
     RecyclerView.Adapter<EntityHolder>() {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     var list: List<Entity> = entities
     var deleteListener: OnDeleteFavoriteResultListener = onDeleteListener
@@ -43,7 +43,7 @@ class FavoriteResultsListRecyclerAdapter(
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entityCachedClick(
+            dataConnectorClient.entityCachedClick(
                 entity.id,
                 EntityCacheActionEvent.SourceType.FAVORITE
             )

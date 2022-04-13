@@ -5,6 +5,7 @@ import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import telenav.demo.app.BuildConfig
+import telenav.demo.app.R
 import telenav.demo.app.utils.SharedPreferencesRepository
 import java.util.*
 

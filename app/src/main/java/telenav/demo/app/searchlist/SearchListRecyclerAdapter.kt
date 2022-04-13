@@ -9,8 +9,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityActionEvent
+import com.telenav.sdk.dataconnector.api.DataConnectorService
+import com.telenav.sdk.dataconnector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import com.telenav.sdk.entity.model.base.EntityType
 import com.telenav.sdk.entity.model.base.Rating
@@ -25,7 +25,7 @@ class SearchListRecyclerAdapter(
     private val referenceId: String
 ) :
     RecyclerView.Adapter<EntityHolder>() {
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     var list: List<Entity> = entities
 
@@ -44,7 +44,7 @@ class SearchListRecyclerAdapter(
 
         holder.vName.text = name
         holder.itemView.setOnClickListener {
-            dataCollectorClient.entityClick(
+            dataConnectorClient.entityClick(
                 referenceId,
                 entity.id,
                 EntityActionEvent.DisplayMode.LIST_VIEW

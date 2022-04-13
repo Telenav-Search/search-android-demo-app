@@ -29,9 +29,9 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.datacollector.model.event.EntityActionEvent
-import com.telenav.sdk.datacollector.model.event.EntityCacheActionEvent
+import com.telenav.sdk.dataconnector.api.DataConnectorService
+import com.telenav.sdk.dataconnector.model.event.EntityActionEvent
+import com.telenav.sdk.dataconnector.model.event.EntityCacheActionEvent
 import com.telenav.sdk.entity.android.client.api.AndroidEntityService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
@@ -47,7 +47,7 @@ import kotlin.collections.ArrayList
 
 class EntityDetailsActivity : AppCompatActivity() {
     private val telenavService: EntityClient by lazy { AndroidEntityService.getClient() }
-    private val dataCollectorClient by lazy { DataCollectorService.getClient() }
+    private val dataConnectorClient by lazy { DataConnectorService.getClient() }
 
     private lateinit var vLoading: ContentLoadingProgressBar
     private lateinit var vEntityFavorite: ImageView
@@ -149,20 +149,20 @@ class EntityDetailsActivity : AppCompatActivity() {
 
     private fun setAsHomeAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setHome(entity)
+        dataConnectorClient.setHome(entity)
     }
 
     private fun setAsWorkAddress(entity: Entity?) {
         entity ?: return
-        dataCollectorClient.setWork(entity)
+        dataConnectorClient.setWork(entity)
     }
 
     private fun toggleFavorite(entity: Entity?) {
         entity ?: return
         if (isFavorite) {
-            dataCollectorClient.deleteFavorite(entity)
+            dataConnectorClient.deleteFavorite(entity)
         } else {
-            dataCollectorClient.addFavorite(entity)
+            dataConnectorClient.addFavorite(entity)
         }
         checkFavorite(entity)
     }
@@ -279,12 +279,12 @@ class EntityDetailsActivity : AppCompatActivity() {
                 vEntityCall.text = "${entity.place.phoneNumbers[0]}"
                 vEntityCall.setOnClickListener {
                     if (source.isNotEmpty()) {
-                        dataCollectorClient.entityCachedCall(
+                        dataConnectorClient.entityCachedCall(
                             entity.id,
                             EntityCacheActionEvent.SourceType.valueOf(source)
                         )
                     } else {
-                        dataCollectorClient.entityCall(
+                        dataConnectorClient.entityCall(
                             referenceId,
                             entity.id,
                             EntityActionEvent.DisplayMode.valueOf(displayMode)
