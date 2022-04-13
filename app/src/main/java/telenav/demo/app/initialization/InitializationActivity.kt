@@ -8,22 +8,28 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.gson.Gson
+import com.telenav.entity.bindings.android.EntityOTAService
+import com.telenav.sdk.common.logging.TaLog
+import com.telenav.sdk.common.model.NavLogLevelType
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.android.client.api.AndroidEntityService
+import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
+import com.telenav.sdk.service.ServiceRegistry
 import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import telenav.demo.app.AppLifecycleCallbacks
-import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.application.TelenavApplication
 import telenav.demo.app.homepage.HomePageActivity
@@ -87,9 +93,11 @@ class InitializationActivity : AppCompatActivity() {
                 val sdkOptions = TelenavApplication.instance.getSDKOptions(indexDataPath)
                 AndroidEntityService.initialize(applicationContext, sdkOptions)
 
+                TaLog.enableLogs(true);
+                TaLog.setLogLevel(NavLogLevelType.VERBOSE);
+                DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
+                OtaService.initialize(this@InitializationActivity, sdkOptions)
                 getUIExecutor().execute {
-                    DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
-                    OtaService.initialize(this@InitializationActivity, sdkOptions)
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
                     SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)

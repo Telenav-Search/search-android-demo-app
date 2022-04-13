@@ -1,6 +1,7 @@
 package telenav.demo.app.application
 
 import android.app.Application
+import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import telenav.demo.app.BuildConfig
@@ -51,7 +52,9 @@ class TelenavApplication : Application() {
         }
 
         val userId = BuildConfig.telenav_user_id
-
+         var applicationName = BuildConfig.telenav_data_collector_applicationName
+         var applicationVersion = BuildConfig.telenav_data_cpllector_applicationVersion
+         var applicationInfo = ApplicationInfo.builder(applicationName,applicationVersion).build()
         return SDKOptions.builder()
             .setDeviceGuid(deviceId)
             .setUserId(userId)
@@ -59,8 +62,9 @@ class TelenavApplication : Application() {
             .setApiSecret(apiSecret)
             .setCloudEndPoint(apiEndpoint)
             .setSdkDataDir(dataPath)
-            .setSdkCacheDataDir(cachePath)
+            .setSdkCacheDataDir(dataPath)
             .setLocale(Locale.EN_US)
+            .setApplicationInfo(applicationInfo)
             .build()
     }
 
