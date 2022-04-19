@@ -397,7 +397,7 @@ class SearchInfoViewModel : ViewModel() {
         return Gson().fromJson(
             prefs?.getString(
                 context.getString(R.string.saved_recent_search_key),
-                ""
+                "[]"
             ), listType
         )
     }

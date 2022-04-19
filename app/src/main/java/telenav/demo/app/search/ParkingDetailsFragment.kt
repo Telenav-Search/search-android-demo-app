@@ -12,6 +12,7 @@ import telenav.demo.app.databinding.FragmentParkingDetailsBinding
 import telenav.demo.app.model.SearchResult
 import android.widget.ImageView
 import android.widget.LinearLayout.LayoutParams
+import com.telenav.sdk.entity.model.base.DataField
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.utils.Converter.convertDpToPixel
 
@@ -41,10 +42,20 @@ class ParkingDetailsFragment : Fragment() {
 
         if (entity?.facets?.openHours?.isOpenNow == true) {
             binding?.entityAlwaysClosed?.text = getString(R.string.open)
-            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.green_c1))
+            binding?.entityAlwaysClosed?.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.green_c1
+                )
+            )
         } else {
             binding?.entityAlwaysClosed?.text = getString(R.string.perm_closed)
-            binding?.entityAlwaysClosed?.setTextColor(ContextCompat.getColor(requireContext(), R.color.red_c1))
+            binding?.entityAlwaysClosed?.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(),
+                    R.color.red_c1
+                )
+            )
         }
 
         val regularOpenHours = entity?.facets?.openHours?.regularOpenHours
@@ -62,7 +73,6 @@ class ParkingDetailsFragment : Fragment() {
                 binding?.entityOpenHoursHeader?.visibility = View.VISIBLE
             }
         }
-
 
 
         val prices = searchResult?.parking?.pricing?.prices
@@ -92,7 +102,7 @@ class ParkingDetailsFragment : Fragment() {
         val imagesId = arrayListOf<Int>()
 
         entity?.let {
-            val amenities = it.facets.amenities
+            val amenities = it.facets?.amenities ?: java.util.ArrayList()
             for (value in amenities) {
                 when (value.id.toInt()) {
                     1 -> {
@@ -116,7 +126,8 @@ class ParkingDetailsFragment : Fragment() {
             imageView.setImageResource(id)
             val params = LayoutParams(
                 LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT)
+                LayoutParams.WRAP_CONTENT
+            )
             params.setMargins(convertDpToPixel(requireContext(), 10f), 0, 0, 0)
             imageView.layoutParams = params
             binding?.entityAvailableServiceLinerLayout?.addView(imageView)
