@@ -26,7 +26,7 @@ object CategoryAndFiltersUtil {
     const val FUEL_TAG = "FUEL_STATION"
     const val SHOPPING_TAG = "SHOPPING"
     const val HOTELS_TAG = "HOTEL_MOTEL"
-    const val ATM_TAG = "BANK AND ATM"
+    const val BANKS_TAG = "BANKS"
     const val ATTRACTIONS_TAG = "TOURIST_ATTRACTION"
     const val EV_CHARGER_TAG = "ELECTRIC_CHARGE_STATION"
     const val ENTERTAINMENT_ARTS_TAG = "ENTERTAINMENT_ARTS"
@@ -36,10 +36,10 @@ object CategoryAndFiltersUtil {
         HotCategory("Food", FOOD_TAG, R.drawable.ic_food_color),
         HotCategory("Parking", PARKING_TAG, R.drawable.ic_parking_color),
         HotCategory("Coffee", COFFEE_TAG, R.drawable.ic_coffee_color),
-        HotCategory("Fuel", FUEL_TAG, R.drawable.ic_gas_color),
-        HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_grocery_color),
+        HotCategory("Fuel", FUEL_TAG, R.drawable.ic_fuel_color),
+        HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_shopping_color),
         HotCategory("Hotels", HOTELS_TAG, R.drawable.ic_hotel_color),
-        HotCategory("Bank and ATM", ATM_TAG, R.drawable.ic_atm_color),
+        HotCategory("Banks", BANKS_TAG, R.drawable.ic_banks_color),
         HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
         HotCategory("EV Charger", EV_CHARGER_TAG, R.drawable.ic_ev_color),
         HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
@@ -131,7 +131,7 @@ object CategoryAndFiltersUtil {
                 return R.drawable.ic_coffee_color
             }
             categoryTag.equals(FUEL_TAG) -> {
-                return R.drawable.ic_gas_color
+                return R.drawable.ic_fuel_color
             }
             categoryTag.equals(SHOPPING_TAG) -> {
                 return R.drawable.ic_shopping_color
@@ -139,7 +139,7 @@ object CategoryAndFiltersUtil {
             categoryTag.equals(HOTELS_TAG) -> {
                 return R.drawable.ic_hotel_color
             }
-            categoryTag.equals(ATM_TAG) -> {
+            categoryTag.equals(BANKS_TAG) -> {
                 return R.drawable.ic_atm_color
             }
             categoryTag.equals(ATTRACTIONS_TAG) -> {
