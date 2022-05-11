@@ -14,19 +14,13 @@
         android:id="@+id/view_header_search"
         layout="@layout/view_header_search"/>
 
-    <androidx.constraintlayout.helper.widget.Flow
-        android:id="@+id/flow_main_root"
-        android:layout_width="0dp"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/category_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
         android:layout_marginTop="21dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        app:flow_wrapMode="aligned"
-        app:flow_horizontalGap="10dp"
-        app:flow_verticalGap="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view_header_search" />
+        app:layout_constraintTop_toBottomOf="@id/view_header_search"/>
 
     <FrameLayout
         android:id="@+id/user_address"
@@ -38,7 +32,7 @@
         android:paddingBottom="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/flow_main_root" />
+        app:layout_constraintTop_toBottomOf="@id/category_container" />
 
     <TextView
         android:id="@+id/search_recent_data_header"

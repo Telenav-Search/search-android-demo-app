@@ -6,15 +6,19 @@ import android.graphics.Canvas
 import android.location.Location
 import android.view.View
 import android.widget.ImageView
+
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+
 import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.R
 import telenav.demo.app.model.SearchResult
 
@@ -31,6 +35,9 @@ object CategoryAndFiltersUtil {
     const val EV_CHARGER_TAG = "ELECTRIC_CHARGE_STATION"
     const val ENTERTAINMENT_ARTS_TAG = "ENTERTAINMENT_ARTS"
     const val HOSPITAL_TAG = "HEALTH_MEDICINE"
+
+    // category views limit 6 in a row
+    const val DISPLAY_LIMIT = 6
 
     val hotCategoriesList = arrayListOf(
         HotCategory("Food", FOOD_TAG, R.drawable.ic_food_color),
@@ -494,5 +501,19 @@ object CategoryAndFiltersUtil {
         return websitesArray[position]
     }
 
+    /**
+     * Convert HotCategory data into CategoryAdapter needed format
+     *
+     * @return CategoryViewData
+     */
+    fun HotCategory.toViewData(): CategoryViewData = CategoryViewData(StringUtil.formatName(name), iconPurple)
+
     class HotCategory(val name: String, val tag: String, val iconPurple: Int)
+
+    /**
+     * Data class to storage the items view needed to show
+     *
+     * @since 2022-05-11
+     */
+    data class CategoryViewData(val name: String, val icon: Int)
 }

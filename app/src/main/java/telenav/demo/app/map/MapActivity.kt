@@ -8,22 +8,30 @@ import android.location.Location
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.InputMethodManager
+
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.telenav.sdk.entity.model.base.Entity
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
 import kotlinx.android.synthetic.main.view_bottom.*
+import kotlinx.android.synthetic.main.view_header_search.*
+
+import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.R
-import kotlinx.android.synthetic.main.info_window.view.*
-import kotlinx.android.synthetic.main.view_entity_details_bottom.*
 import telenav.demo.app.*
 import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.model.SearchResult
@@ -33,17 +41,12 @@ import telenav.demo.app.search.*
 import telenav.demo.app.search.filters.*
 import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
-import telenav.demo.app.widgets.CategoryView
-import java.util.*
-import java.util.concurrent.Executor
-import android.view.View.OnFocusChangeListener
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.*
-import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
-import kotlinx.android.synthetic.main.view_header_search.*
 import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
+import telenav.demo.app.widgets.CategoryAdapter
+
 import java.lang.reflect.Type
+import java.util.concurrent.Executor
 
 class MapActivity : AppCompatActivity() {
 
@@ -212,39 +215,29 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    private fun getCategoryView(hotCategory: CategoryAndFiltersUtil.HotCategory): CategoryView {
-        val categoryView = CategoryView(this)
-        categoryView.init(hotCategory)
-        categoryView.id = View.generateViewId()
+    private fun displayHotCategories() {
+        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
 
-        categoryView.setOnClickListener {
-            hotCategoryName = hotCategory.name
-            hotCategoryTag = hotCategory.tag
+        // setup recyclerView
+        val recyclerView = findViewById<RecyclerView>(R.id.category_container)
+        recyclerView.layoutManager = GridLayoutManager(this, CategoryAndFiltersUtil.DISPLAY_LIMIT,
+            GridLayoutManager.VERTICAL, false)
+        recyclerView.adapter = CategoryAdapter { position, _ ->
+            // onClick call back, get name and tag from position, then start search fragment
+            val category = hotCategoriesList[position]
+            hotCategoryName = category.name
+            hotCategoryTag = category.tag
             collapseBottomSheet()
             if (hotCategoryTag.isNotEmpty()) {
-                showSearchInfoBottomFragment(hotCategory.name, hotCategory.tag, false)
+                showSearchInfoBottomFragment(category.name, category.tag, false)
             } else {
                 showMoreCategoriesFragment()
             }
+        }.apply {
+            // feed data into adapter
+            setData(hotCategoriesList.map { it.toViewData() })
         }
 
-        return categoryView
-    }
-
-    private fun displayHotCategories() {
-        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
-        val flowLayout = findViewById<Flow>(R.id.flow_main_root)
-        val set = ConstraintSet()
-        set.clone(bottomSheetLayout)
-
-        val hotCategoryIdArray = ArrayList<Int>()
-        for (hotCategory in hotCategoriesList) {
-            val categoryView = getCategoryView(hotCategory)
-            bottomSheetLayout.addView(categoryView)
-            hotCategoryIdArray.add(categoryView.id)
-        }
-
-        flowLayout.referencedIds = hotCategoryIdArray.toIntArray()
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
