@@ -3,29 +3,33 @@ package telenav.demo.app.search
 import android.app.Dialog
 import android.content.res.Resources
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import androidx.constraintlayout.widget.ConstraintSet
+
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+
 import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.R
 import telenav.demo.app.databinding.SearchInfoBottomFragmentLayoutBinding
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.searchlist.SearchListInfoRecyclerAdapter
-import telenav.demo.app.widgets.CategoryView
-import java.util.ArrayList
-import android.text.Editable
-import android.text.TextWatcher
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import telenav.demo.app.map.getUIExecutor
 import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
+import telenav.demo.app.widgets.CategoryAdapter
 
 private const val TAG = "SearchInfoBottomFragment"
 
@@ -36,6 +40,24 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
     private var currentSearchHotCategoryTag: String? = null
     private var shouldLoadSaveData: Boolean = false
     private var binding: SearchInfoBottomFragmentLayoutBinding? = null
+
+    // adapter for recyclerView to show sub category items
+    private val mCategoryAdapter = CategoryAdapter { _, data ->
+        // call back from onClick
+        binding?.search?.setText(data.name)
+        val location = (activity!! as MapActivity).lastKnownLocation
+        activity?.getUIExecutor()?.let { executor ->
+            // start search
+            viewModel.search(
+                data.name,
+                null,
+                location,
+                executor,
+                currentSearchHotCategoryTag,
+                true
+            )
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -198,46 +220,20 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
     }
 
     private fun displayHotCategories(categories: List<Category>) {
-        val bottomSheetLayout = binding?.bottomSheet
-        val flowLayout = binding?.flowCategory
-        val set = ConstraintSet()
-        set.clone(bottomSheetLayout)
+        binding ?: throw IllegalStateException("viewBinding is null")
 
-        val hotCategoryIdArray = ArrayList<Int>()
-        for (hotCategory in categories) {
-            val categoryView = getCategoryView(hotCategory)
-            categoryView.setOnClickListener {
-                binding?.search?.setText(hotCategory.name)
-                val location = (activity!! as MapActivity).lastKnownLocation
-                activity?.getUIExecutor()?.let { executor ->
-                    viewModel.search(
-                        hotCategory.name,
-                        null,
-                        location,
-                        executor,
-                        currentSearchHotCategoryTag,
-                        true
-                    )
-                }
-            }
-            bottomSheetLayout?.addView(categoryView)
-            hotCategoryIdArray.add(categoryView.id)
+        // setup recyclerView
+        val recyclerView = binding!!.categoryContainer
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), CategoryAndFiltersUtil.DISPLAY_LIMIT,
+            GridLayoutManager.VERTICAL, false)
+        recyclerView.adapter = mCategoryAdapter.apply {
+            // feed data from input
+            setData(categories.map { it.toViewData(currentSearchHotCategoryTag ?: "") })
+            setRowLimit(1) // limit to single row
+            type = CategoryAdapter.TYPE_SUB_CATEGORY
         }
 
-        if (hotCategoryIdArray.isEmpty()) {
-            flowLayout?.visibility = View.GONE
-        } else {
-            flowLayout?.visibility = View.VISIBLE
-        }
-        flowLayout?.referencedIds = hotCategoryIdArray.toIntArray()
-    }
-
-    private fun getCategoryView(hotCategory: Category): CategoryView {
-        val categoryView = CategoryView(requireContext())
-        categoryView.init(hotCategory, currentSearchHotCategoryTag)
-        categoryView.id = View.generateViewId()
-
-        return categoryView
+        recyclerView.visibility = if (mCategoryAdapter.itemCount == 0) View.GONE else View.VISIBLE
     }
 
     private fun onBack() {

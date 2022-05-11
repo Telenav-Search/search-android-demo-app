@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 
+import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
 
 import telenav.demo.app.R
@@ -502,11 +503,19 @@ object CategoryAndFiltersUtil {
     }
 
     /**
+     * Convert Category data into CategoryAdapter needed format
+     *
+     * @param tag categoryTag
+     * @return CategoryViewData
+     */
+    fun Category.toViewData(tag: String): CategoryViewData = CategoryViewData(name, getCategoryIcon(tag, name))
+
+    /**
      * Convert HotCategory data into CategoryAdapter needed format
      *
      * @return CategoryViewData
      */
-    fun HotCategory.toViewData(): CategoryViewData = CategoryViewData(StringUtil.formatName(name), iconPurple)
+    fun HotCategory.toViewData(): CategoryViewData = CategoryViewData(name, iconPurple)
 
     class HotCategory(val name: String, val tag: String, val iconPurple: Int)
 

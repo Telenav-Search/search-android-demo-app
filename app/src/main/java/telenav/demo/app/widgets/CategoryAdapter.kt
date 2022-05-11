@@ -26,7 +26,12 @@ class CategoryAdapter(private val listener: (Int, CategoryAndFiltersUtil.Categor
     : RecyclerView.Adapter<CategoryAdapter.CategoryVH>() {
     companion object {
         private const val TAG = "CategoryAdapter"
+        const val TYPE_HOT_CATEGORY = 0
+        const val TYPE_SUB_CATEGORY = 1
     }
+
+    // default value is for HotCategory, set to 1 for sub category scene
+    var type = TYPE_HOT_CATEGORY
 
     // we have two situations: 1 - HotCategory, 2 rows to show, 2 - SubCategory, 1 row to show
     // when it comes to limited row mode, use mLimit to limit the data size, otherwise use -1 for no limit
@@ -58,7 +63,14 @@ class CategoryAdapter(private val listener: (Int, CategoryAndFiltersUtil.Categor
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryVH {
-        return CategoryVH(LayoutInflater.from(parent.context).inflate(R.layout.category_holder, parent, false)).apply {
+        // get layoutId with viewType
+        val layout = when (viewType) {
+            TYPE_HOT_CATEGORY -> R.layout.hot_category_holder
+            TYPE_SUB_CATEGORY -> R.layout.sub_category_holder
+            else -> throw IllegalArgumentException("unknown type = $viewType") }
+
+        // inflate layout and create holder
+        return CategoryVH(LayoutInflater.from(parent.context).inflate(layout, parent, false)).apply {
             itemView.setOnClickListener {
                 Log.i(TAG, "item $adapterPosition clicked")
                 listener.invoke(adapterPosition, mData[adapterPosition])
@@ -73,6 +85,8 @@ class CategoryAdapter(private val listener: (Int, CategoryAndFiltersUtil.Categor
     }
 
     override fun getItemCount(): Int = if (mLimit < 0) mData.size else min(mLimit, mData.size)
+
+    override fun getItemViewType(position: Int): Int = type
 
     /**
      * ViewHolder for CategoryAdapter

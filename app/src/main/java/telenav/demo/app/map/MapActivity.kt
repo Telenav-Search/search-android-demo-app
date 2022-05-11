@@ -219,7 +219,7 @@ class MapActivity : AppCompatActivity() {
         val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
 
         // setup recyclerView
-        val recyclerView = findViewById<RecyclerView>(R.id.category_container)
+        val recyclerView = bottomSheetLayout.findViewById<RecyclerView>(R.id.category_container)
         recyclerView.layoutManager = GridLayoutManager(this, CategoryAndFiltersUtil.DISPLAY_LIMIT,
             GridLayoutManager.VERTICAL, false)
         recyclerView.adapter = CategoryAdapter { position, _ ->
