@@ -373,26 +373,30 @@ object CategoryAndFiltersUtil {
         val background = ContextCompat.getDrawable(context, R.drawable.ic_map_pin)
         background!!.setBounds(0, 0, background.intrinsicWidth, background.intrinsicHeight)
         val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId)
-        vectorDrawable?.setTint(context.getColor(android.R.color.white))
+        vectorDrawable!!.setTint(context.getColor(android.R.color.white))
 
-        if (vectorDrawableResourceId == R.drawable.ic_parking_color) {
-            vectorDrawable!!.setBounds(
-                40,
-                15,
-                vectorDrawable.intrinsicWidth + 25,
-                vectorDrawable.intrinsicHeight + 5
-            )
-        } else {
-            vectorDrawable!!.setBounds(
-                35,
-                15,
-                vectorDrawable.intrinsicWidth + 15,
-                vectorDrawable.intrinsicHeight + 5
-            )
-        }
+        // calculate position of icon, to place it on the correct position on the Pin
+        val centerW = background.intrinsicWidth / 2
+        val centerH = background.intrinsicHeight / 2
+        val iconHalfW = vectorDrawable.intrinsicWidth / 2
+        val iconHalfH = vectorDrawable.intrinsicHeight / 2
+
+        // put icon in the center
+        vectorDrawable.setBounds(
+            centerW - iconHalfW,
+            centerH - iconHalfH,
+            centerW + iconHalfW,
+            centerH + iconHalfH
+        )
+
+        // draw background on a bitmap with same size of background drawable
         val bitmap = Bitmap.createBitmap(background.intrinsicWidth, background.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         background.draw(canvas)
+
+        // scale the icon to fit Pin, 20% smaller, and place a little higher. use experience value
+        canvas.scale(0.8f, 0.8f, centerW.toFloat(), centerH.toFloat())
+        canvas.translate(0f, -background.intrinsicHeight.toFloat() / 7)
         vectorDrawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
