@@ -27,7 +27,7 @@
         android:layout_height="46dp"
         android:background="@drawable/rounded_corners_background"
         android:backgroundTint="@android:color/white"
-        android:layout_marginTop="42dp"
+        android:layout_marginTop="7.5dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="60dp"
         android:visibility="gone"
