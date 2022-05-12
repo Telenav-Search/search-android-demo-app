@@ -9,12 +9,17 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.convertNumberToDistance
@@ -23,9 +28,9 @@ import telenav.demo.app.model.SearchResult
 import telenav.demo.app.utils.addFavorite
 import telenav.demo.app.utils.deleteFavorite
 import telenav.demo.app.utils.entityCall
-import java.lang.reflect.Type
-import telenav.demo.app.utils.Converter.convertDpToPixel
 import telenav.demo.app.widgets.RoundedBottomSheetLayout
+
+import java.lang.reflect.Type
 
 class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
@@ -52,15 +57,7 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
         binding?.entityName?.text = searchResult?.name
 
-        if (searchResult?.phoneNo.isNullOrEmpty()) {
-            binding?.entityCall?.visibility = View.GONE
-            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(requireContext(),-130f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(requireContext(),140f), 0 ,0 ,0)
-        } else {
-            binding?.entityCall?.visibility = View.VISIBLE
-            binding?.entityFavorite?.compoundDrawablePadding = convertDpToPixel(requireContext(),-30f)
-            binding?.entityFavorite?.setPadding(convertDpToPixel(requireContext(),40f), 0 ,0 ,0)
-        }
+        binding?.entityCall?.visibility = if (searchResult?.phoneNo.isNullOrEmpty()) View.GONE else View.VISIBLE
 
         binding?.entityDistance?.text = binding?.entityDistance?.context?.convertNumberToDistance(searchResult?.distance!!)
 
@@ -107,10 +104,10 @@ class EntityDetailsFragment : RoundedBottomSheetLayout() {
 
         isFavorite =
             if (favoriteEntities != null && favoriteEntities.any { e -> e.id == entity.id }) {
-                binding?.entityFavorite?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite,0,0,0)
+                binding?.entityFavorite?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite)
                 true
             } else {
-                binding?.entityFavorite?.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_favorite_border,0,0,0)
+                binding?.entityFavorite?.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite_border)
                 false
             }
     }
