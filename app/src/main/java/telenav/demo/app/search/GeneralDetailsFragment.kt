@@ -84,8 +84,10 @@ class GeneralDetailsFragment : Fragment() {
     fun updateStartsVisibility(slideOffset: Float) {
         if (slideOffset == 0f) {
             binding?.entityStars?.visibility = View.GONE
+            binding?.entityReviewCount?.visibility = View.GONE
         } else {
             binding?.entityStars?.visibility = View.VISIBLE
+            binding?.entityReviewCount?.visibility = View.VISIBLE
         }
     }
 
