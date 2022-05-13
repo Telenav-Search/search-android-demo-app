@@ -48,6 +48,10 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
     private var popupWindow: PopupWindow? = null
     private var searchByPrediction = false
 
+    private val mInputMethodManager: InputMethodManager by lazy {
+        requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -60,6 +64,19 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
+        val behavior = (dialog as BottomSheetDialog).behavior
+        behavior.addBottomSheetCallback(object: BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (mInputMethodManager.isActive && newState == BottomSheetBehavior.STATE_DRAGGING) {
+                    binding?.search?.clearFocus()
+                    mInputMethodManager.hideSoftInputFromWindow(binding?.search?.windowToken, 0)
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+
+        })
     }
 
     override fun getTheme(): Int = R.style.BottomSheetDialogTheme
@@ -256,11 +273,10 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
             binding?.clearText?.visibility = View.VISIBLE
         }
 
-        val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         binding?.search?.postDelayed({
             binding?.search?.requestFocus()
             binding?.search?.let {
-                inputMethodManager.showSoftInput(it, 0)
+                mInputMethodManager.showSoftInput(it, 0)
             }
         }, 500)
     }
