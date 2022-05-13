@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#E3E3E3</color>
     <color name="colorAccent">@color/blue_c1</color>
     <color name="blue">#9DC4F3</color>
+    <color name="initBackground">#111111</color>
+    <color name="initTextColor">#FFFFFF</color>
 
     <color name="search_edit_text_translucent_bck">#50ccaa99</color>
     <color name="translucent_white">#D3FFFFFF</color>
