@@ -116,4 +116,8 @@
     <string name="environment">Environment</string>
     <string name="predictions_limit">Predictions limit</string>
     <string name="suggestions_limit">Suggestions limit</string>
+    <string name="engine">Engine</string>
+    <string name="cvp_location">CVP Location</string>
+    <string name="search_area_location">Search Area Location</string>
+    <string name="quick_link">QuickLinks</string>
 </resources>
