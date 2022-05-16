@@ -3,24 +3,23 @@ package telenav.demo.app.search.filters
 import android.app.Dialog
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import androidx.constraintlayout.widget.ConstraintSet
-import telenav.demo.app.databinding.EvFiltersFragmentLayoutBinding
-import telenav.demo.app.map.MapActivity
-import java.util.ArrayList
-import androidx.core.content.ContextCompat
+
+import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.view.forEach
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+
+import telenav.demo.app.databinding.EvFiltersFragmentLayoutBinding
+import telenav.demo.app.map.MapActivity
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.utils.CategoryAndFiltersUtil
-import telenav.demo.app.utils.StringUtil
 
 class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
 
@@ -35,82 +34,47 @@ class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
         return binding?.root
     }
 
+    private fun fillFlowContent(sharedPreferencesKey: String, contentList: List<String>, parent: ViewGroup, flow: Flow) {
+        val types = App.readStringFromSharedPreferences(sharedPreferencesKey, "")
+        val lstValues = types?.split(",")?.map { it -> it.trim() }
+        lstValues ?: return
+
+        val ids = mutableListOf<Int>()
+
+        for (item in contentList) {
+            val checkBox = LayoutInflater.from(requireContext()).inflate(R.layout.ev_filter_checkbox,
+                parent, false) as CheckBox
+            checkBox.text = item
+            checkBox.tag = item
+            checkBox.id = View.generateViewId()
+
+            lstValues.forEach  {
+                if (item == it) {
+                    checkBox.isChecked = true
+                }
+            }
+
+            parent.addView(checkBox)
+            ids.add(checkBox.id)
+        }
+        flow.referencedIds = ids.toIntArray()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setUpCLickListeners()
 
-        val set = ConstraintSet()
-        set.clone(binding?.evConstraintLayout)
+        binding ?: return
+        val localBinding = binding!!
 
-        val connectionTypes: String? = App.readStringFromSharedPreferences(App.CONNECTION_TYPES, "")
-        val connectionTypesLstValues: List<String>? = connectionTypes?.split(",")?.map { it -> it.trim() }
-        val evConnectionTypesIdArray = ArrayList<Int>()
-
-        for (item in CategoryAndFiltersUtil.connectionTypesArrayList) {
-            val checkBox = CheckBox(requireContext())
-            checkBox.text = StringUtil.formatName(item)
-            checkBox.tag = item
-            checkBox.id = View.generateViewId()
-            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
-            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-
-            connectionTypesLstValues?.forEach  {
-                if (item.equals(it)) {
-                    checkBox.isChecked = true
-                }
-            }
-
-            binding?.evConstraintLayout?.addView(checkBox)
-            evConnectionTypesIdArray.add(checkBox.id)
-        }
-        binding?.flowConnectorTypes?.referencedIds = evConnectionTypesIdArray.toIntArray()
-
-        val powerFeedLevels: String? = App.readStringFromSharedPreferences(App.POWER_FEED, "")
-        val lstPowerFeedLevelsValues: List<String>? = powerFeedLevels?.split(",")?.map { it -> it.trim() }
-        val powerFeedLevelsIdArray = ArrayList<Int>()
-
-        for (item in CategoryAndFiltersUtil.powerFeedLevelsArrayList) {
-            val checkBox = CheckBox(requireContext())
-            checkBox.text = StringUtil.formatName(item)
-            checkBox.tag = item
-            checkBox.id = View.generateViewId()
-            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
-            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-
-            lstPowerFeedLevelsValues?.forEach  {
-                if (item.equals(it)) {
-                    checkBox.isChecked = true
-                }
-            }
-
-            binding?.evConstraintLayout?.addView(checkBox)
-            powerFeedLevelsIdArray.add(checkBox.id)
-        }
-        binding?.flowPowerFeedLevels?.referencedIds = powerFeedLevelsIdArray.toIntArray()
-
-        val chargerBrandsLevels: String? = App.readStringFromSharedPreferences(App.CHARGER_BRAND, "")
-        val lstChargerBrandsValues: List<String>? = chargerBrandsLevels?.split(",")?.map { it -> it.trim() }
-        val chargerBrandsIdArray = ArrayList<Int>()
-
-        for (item in CategoryAndFiltersUtil.chargerBrandsArrayList) {
-            val checkBox = CheckBox(requireContext())
-            checkBox.text = StringUtil.formatName(item)
-            checkBox.tag = item
-            checkBox.id = View.generateViewId()
-            checkBox.setTextColor(ContextCompat.getColor(requireContext(), R.color.black_c1))
-            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-
-            lstChargerBrandsValues?.forEach  {
-                if (item.equals(it)) {
-                    checkBox.isChecked = true
-                }
-            }
-
-            binding?.evConstraintLayout?.addView(checkBox)
-            chargerBrandsIdArray.add(checkBox.id)
-        }
-        binding?.flowChargerBrands?.referencedIds = chargerBrandsIdArray.toIntArray()
+        // fill Flow layouts with contents
+        fillFlowContent(App.CONNECTION_TYPES, CategoryAndFiltersUtil.connectionTypesArrayList,
+            localBinding.evConstraintLayout, localBinding.flowConnectorTypes)
+        fillFlowContent(App.POWER_FEED, CategoryAndFiltersUtil.powerFeedLevelsArrayList,
+            localBinding.evConstraintLayout, localBinding.flowPowerFeedLevels)
+        fillFlowContent(App.CHARGER_BRAND, CategoryAndFiltersUtil.chargerBrandsArrayList,
+            localBinding.evConstraintLayout, localBinding.flowChargerBrands)
 
         binding?.freeCharger?.isChecked = App.readBooleanFromSharedPreferences(App.FREE_CHARGER, false)
         binding?.freeCharger?.setOnCheckedChangeListener { _, isChecked ->
