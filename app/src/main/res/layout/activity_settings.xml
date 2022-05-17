@@ -83,7 +83,10 @@
                     android:backgroundTint="@color/grey_c2"
                     android:text="@string/browse"
                     android:textColor="@color/black_c1"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:fontFamily="sans-serif"
+                    android:letterSpacing="0"/>
 
             </LinearLayout>
 
@@ -166,11 +169,40 @@
                     android:id="@+id/engine_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:entries="@array/entity_more_actions"
                     android:spinnerMode="dialog"
                     android:background="@drawable/setting_spinner_bg"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="8dp"
                     android:layout_marginVertical="10dp" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/colorAccent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/select_environment"
+                    android:textColor="@color/blue_c1"
+                    android:textSize="14sp" />
+
+                <Spinner
+                    android:id="@+id/spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/setting_spinner_bg"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="8dp"
+                    android:layout_marginTop="10dp" />
             </LinearLayout>
 
             <View
@@ -197,7 +229,7 @@
                     android:id="@+id/cvp_text"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
+                    android:paddingHorizontal="20dp"
                     android:paddingVertical="8dp"
                     android:text="test"
                     android:textSize="14sp"
@@ -216,6 +248,8 @@
                     android:textAllCaps="false"
                     android:textSize="12sp"
                     android:textColor="@color/black_c1"
+                    android:fontFamily="sans-serif"
+                    android:letterSpacing="0"
                     android:backgroundTint="@color/grey_c2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBaseline_toBaselineOf="@id/cvp_text"
@@ -231,17 +265,25 @@
                     app:layout_constraintTop_toTopOf="@id/cvp_text"
                     app:layout_constraintBottom_toBottomOf="@id/cvp_text"/>
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <CheckBox
+                    android:id="@+id/cvp_same_checkbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                    android:textSize="14sp"
+                    android:textColor="@color/blue_c1"
+                    android:text="@string/cvp_same"
+                    android:layout_marginEnd="-7dp"
+                    app:layout_constraintTop_toBottomOf="@id/cvp_text" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/colorAccent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:visibility="gone"
                 android:paddingVertical="10dp">
 
                 <TextView
@@ -294,15 +336,11 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/colorAccent" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:visibility="gone"
                 android:paddingVertical="10dp">
 
                 <TextView
@@ -344,16 +382,11 @@
                     android:progress="20" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/colorAccent" />
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:visibility="gone"
                 android:paddingVertical="10dp">
 
                 <TextView
@@ -394,16 +427,11 @@
                     android:max="15" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/colorAccent" />
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:visibility="gone"
                 android:paddingVertical="10dp">
 
                 <TextView
@@ -443,40 +471,6 @@
                     android:layout_marginTop="10dp"
                     android:max="5" />
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/colorAccent" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingVertical="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/select_environment"
-                    android:textColor="@color/blue_c1"
-                    android:textSize="14sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:text="@string/environment"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp" />
-
-                <Spinner
-                    android:id="@+id/spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp" />
-            </LinearLayout>
-
 
         </LinearLayout>
     </ScrollView>
