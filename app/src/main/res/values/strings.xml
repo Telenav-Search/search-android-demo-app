@@ -120,5 +120,5 @@
     <string name="cvp_location">CVP Location</string>
     <string name="search_area_location">Search Area Location</string>
     <string name="quick_link">Quick Links</string>
-    <string name="cvp_same">Search Area Location same with CVP</string>
+    <string name="cvp_same">Same with CVP</string>
 </resources>
