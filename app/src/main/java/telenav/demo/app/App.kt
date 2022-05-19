@@ -33,6 +33,14 @@ class App : Application() {
         const val PARKING_DURATION = "parking_duration"
         const val PARKING_START_FROM = "parking_start_from"
 
+        const val KEY_CVP_LAT = "key_cvp_lat"
+        const val KEY_CVP_LONG = "key_cvp_long"
+        const val KEY_CVP_GPS = "key_cvp_gps"
+        const val KEY_SAL_LAT = "key_sal_lat"
+        const val KEY_SAL_LONG = "key_sal_long"
+        const val KEY_SAL_GPS = "key_sal_gps"
+        const val KEY_SAL_CVP = "key_sal_cvp"
+
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
