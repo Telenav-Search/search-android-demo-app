@@ -5,10 +5,7 @@ import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 
 import androidx.appcompat.app.AppCompatActivity
@@ -143,12 +140,20 @@ class SettingsActivity : AppCompatActivity() {
             // focus on edittext when dialog shown to start input
             val editText = dialog.findViewById<EditText>(R.id.input_text)!!
             editText.requestFocus()
+            editText.setOnEditorActionListener { _, _, keyEvent ->
+                if (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    dialog.dismiss()
+                }
+                true
+            }
 
             // when dismissed, check lat long validation to choose save it or not
             dialog.setOnDismissListener {
                 LocationUtil.parseGeoCoordinate(editText.text.toString())?.let {
                     successJob.invoke(it)
+                    return@setOnDismissListener
                 }
+                Toast.makeText(this, R.string.invalid_latlong_toast, Toast.LENGTH_SHORT).show()
             }
         }
     }

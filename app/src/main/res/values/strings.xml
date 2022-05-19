@@ -122,4 +122,5 @@
     <string name="quick_link">Quick Links</string>
     <string name="cvp_same">Same with CVP</string>
     <string name="same_gps">Same with GPS</string>
+    <string name="invalid_latlong_toast">Invalid latitude or longitude format</string>
 </resources>
