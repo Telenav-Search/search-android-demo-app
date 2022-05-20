@@ -45,16 +45,17 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
     private val mCategoryAdapter = CategoryAdapter { _, data ->
         // call back from onClick
         binding?.search?.setText(data.name)
-        val location = (activity!! as MapActivity).lastKnownLocation
-        activity?.getUIExecutor()?.let { executor ->
+        val mapActivity = activity as MapActivity
+        mapActivity.getUIExecutor().let { executor ->
             // start search
             viewModel.search(
                 data.name,
                 null,
-                location,
+                mapActivity.getCVPLocation(),
                 executor,
-                currentSearchHotCategoryTag,
-                true
+                mapActivity.getSearchAreaLocation(),
+                filterCategory = currentSearchHotCategoryTag,
+                filtersAvailable = true
             )
         }
     }
@@ -87,8 +88,8 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
     }
 
     private fun init() {
-        val location = (activity!! as MapActivity).lastKnownLocation
-        activity?.getUIExecutor()?.let { executor ->
+        val mapActivity = activity as MapActivity
+        mapActivity.getUIExecutor()?.let { executor ->
             currentSearchHotCategoryTag?.let {
                 if (shouldLoadSaveData &&
                     (viewModel.getRecentSearchData(requireContext()).isNotEmpty() ||
@@ -102,8 +103,9 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
                         viewModel.search(
                             null,
                             it,
-                            location,
+                            mapActivity.getCVPLocation(),
                             executor,
+                            mapActivity.getSearchAreaLocation(),
                             currentSearchHotCategoryTag,
                             true
                         )
@@ -111,8 +113,9 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
                         viewModel.search(
                             currentSearchHotCategoryName,
                             null,
-                            location,
+                            mapActivity.getCVPLocation(),
                             executor,
+                            mapActivity.getSearchAreaLocation(),
                             currentSearchHotCategoryTag,
                             true
                         )
@@ -124,12 +127,17 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
         binding?.search?.setText(currentSearchHotCategoryName)
         binding?.search?.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
-                val loc = (activity!! as MapActivity).lastKnownLocation
-                (activity!! as MapActivity).setLastSearch(binding?.search?.text.toString())
-                (activity!! as MapActivity).hideKeyboard(binding?.search!!)
+                mapActivity.setLastSearch(binding?.search?.text.toString())
+                mapActivity.hideKeyboard(binding?.search!!)
                 binding?.searchList?.removeAllViewsInLayout()
                 activity?.getUIExecutor()?.let {
-                    viewModel.search(binding?.search?.text.toString(), null, loc, it, currentSearchHotCategoryTag, true)
+                    viewModel.search(binding?.search?.text.toString(),
+                        null,
+                        mapActivity.getCVPLocation(),
+                        it,
+                        mapActivity.getSearchAreaLocation(),
+                        currentSearchHotCategoryTag,
+                        true)
                 }
             }
             false

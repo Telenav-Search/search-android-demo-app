@@ -28,10 +28,6 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "SettingsActivity"
 
-        // default latLong for cvp locations (Beijing)
-        private const val DEFAULT_LAT = 39.92f
-        private const val DEFAULT_LONG = 116.46f
-
         private fun latLong2Location(lat: Double, long: Double): Location {
             return Location("").apply {
                 latitude = lat
@@ -192,10 +188,10 @@ class SettingsActivity : AppCompatActivity() {
         environment = App.readStringFromSharedPreferences(App.ENVIRONMENT, "0")!!.toInt()
 
         // CVP and Search Area Location
-        val cvpLat = sp.getFloat(App.KEY_CVP_LAT, DEFAULT_LAT).toDouble()
-        val cvpLong = sp.getFloat(App.KEY_CVP_LONG, DEFAULT_LONG).toDouble()
-        val salLat = sp.getFloat(App.KEY_SAL_LAT, DEFAULT_LAT).toDouble()
-        val salLong = sp.getFloat(App.KEY_SAL_LONG, DEFAULT_LONG).toDouble()
+        val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
+        val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
+        val salLat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT).toDouble()
+        val salLong = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG).toDouble()
         vSearchLocations = SearchLocations(cvpLocation = latLong2Location(cvpLat, cvpLong),
             cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true),
             searchAreaLocation = latLong2Location(salLat, salLong),

@@ -18,6 +18,10 @@ object LocationUtil {
     private const val LONG_MIN = -180
     private const val LONG_MAX = 180
 
+    // default latLong for cvp locations (NYC)
+    const val DEFAULT_LAT = 40.730610f
+    const val DEFAULT_LONG = -73.935242f
+
     fun parseGeoCoordinate(text: String): Location? {
         if (text.isEmpty()) return null
 
@@ -44,7 +48,7 @@ object LocationUtil {
     }
 
     fun latLongValidate(lat: Double, long: Double) {
-        if (lat < -90 || lat > 90 || long < -180 || long > 180) {
+        if (lat < LAT_MIN || lat > LAT_MAX || long < LONG_MIN || long > LONG_MAX) {
             throw InvalidLatLongException("lat = $lat, long = $long")
         }
     }

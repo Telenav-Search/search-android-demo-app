@@ -154,7 +154,7 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
                                                 searchText()
                                             } else {
                                                 val location =
-                                                    (activity!! as MapActivity).lastKnownLocation
+                                                    (activity!! as MapActivity).getSearchAreaLocation()
                                                 viewModel.requestPrediction(
                                                     text.toString(),
                                                     location,
@@ -296,7 +296,7 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
     }
 
     private fun searchText() {
-        val loc = (activity!! as MapActivity).lastKnownLocation
+        val loc = (activity!! as MapActivity).getSearchAreaLocation()
         (activity!! as MapActivity).setLastSearch(binding?.search?.text.toString())
         (activity!! as MapActivity).hideKeyboard(binding?.search!!)
         binding?.searchList?.removeAllViewsInLayout()

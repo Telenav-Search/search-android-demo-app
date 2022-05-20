@@ -6,9 +6,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -16,9 +17,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.VisibleRegion
+
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
@@ -203,7 +206,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             }
             it.isTrafficEnabled = true
 
-            val location = (activity!! as MapActivity).lastKnownLocation;
+            val location = (activity!! as MapActivity).getCVPLocation()
             positionMap(location.latitude, location.longitude)
 
             googleMap?.setOnMarkerClickListener(this)

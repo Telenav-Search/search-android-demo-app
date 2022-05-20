@@ -3,12 +3,14 @@ package telenav.demo.app.search
 import android.content.Context
 import android.location.Location
 import android.util.Log
-import android.view.View
+
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.Callback
 import com.telenav.sdk.entity.api.EntityClient
@@ -17,21 +19,24 @@ import com.telenav.sdk.entity.model.base.*
 import com.telenav.sdk.entity.model.discover.EntityDiscoverCategoryResponse
 import com.telenav.sdk.entity.model.search.*
 import com.telenav.sdk.entity.utils.EntityJsonConverter
-import telenav.demo.app.App
-import java.util.concurrent.Executor
-import telenav.demo.app.R
-import telenav.demo.app.search.filters.*
-import java.lang.reflect.Type
-import telenav.demo.app.utils.*
 import com.telenav.sdk.entity.model.base.ParkingParameters
 import com.telenav.sdk.entity.model.base.FacetParameters
 import com.telenav.sdk.entity.model.discover.EntityGetCategoriesResponse
 import com.telenav.sdk.entity.model.prediction.EntitySuggestionPredictionResponse
 import com.telenav.sdk.entity.model.prediction.EntityWordPredictionResponse
 import com.telenav.sdk.entity.model.prediction.WordPrediction
+
+import telenav.demo.app.App
+import telenav.demo.app.R
+import telenav.demo.app.search.filters.*
+import telenav.demo.app.utils.*
+
+import kotlin.collections.ArrayList
+
+import java.lang.reflect.Type
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+import java.util.concurrent.Executor
 
 private const val TAG = "SearchInfoViewModel"
 
@@ -54,8 +59,9 @@ class SearchInfoViewModel : ViewModel() {
     fun search(
         query: String?,
         categoryTag: String?,
-        location: Location,
+        cvpLocation: Location,
         executor: Executor,
+        searchAreaLocation: Location? = null,
         filterCategory: String? = null,
         filtersAvailable: Boolean = false,
         nearLeft: LatLng? = null,
@@ -172,8 +178,11 @@ class SearchInfoViewModel : ViewModel() {
                         }
                     }
                 }
+            }.apply {
+                // setAnchor when search area location is specified
+                searchAreaLocation?.let { setAnchor(it.latitude, it.longitude) }
             }
-            .setLocation(location.latitude, location.longitude)
+            .setLocation(cvpLocation.latitude, cvpLocation.longitude)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                 SEARCH_INFO_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(
@@ -187,7 +196,7 @@ class SearchInfoViewModel : ViewModel() {
                         )
                         if (categories.value.isNullOrEmpty()) {
                             requestSubcategories(categoryTag,
-                                location, executor, filtersAvailable, filterCategory, response.results)
+                                searchAreaLocation ?: cvpLocation, executor, filtersAvailable, filterCategory, response.results)
                         } else {
                             handleSearchResponse(filtersAvailable, filterCategory, response.results)
                         }

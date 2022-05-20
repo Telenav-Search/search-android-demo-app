@@ -43,6 +43,7 @@ import telenav.demo.app.settings.SettingsActivity
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
+import telenav.demo.app.utils.LocationUtil
 import telenav.demo.app.widgets.CategoryAdapter
 
 import java.lang.reflect.Type
@@ -64,18 +65,20 @@ class MapActivity : AppCompatActivity() {
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
-            lastKnownLocation = locationResult.lastLocation
+            gpsLocation = locationResult.lastLocation
             mapFragment?.animateCameraToCurrentLocation(
                 LatLng(
-                    lastKnownLocation.latitude,
-                    lastKnownLocation.longitude
+                    gpsLocation.latitude,
+                    gpsLocation.longitude
                 )
             )
         }
     }
     lateinit var behavior: BottomSheetBehavior<*>
     lateinit var entityDetailsBehavior: BottomSheetBehavior<*>
-    var lastKnownLocation: Location = Location("")
+    private var gpsLocation: Location = Location("")
+    private var cvpLocation: Location? = Location("") // null means use gpsLocation
+    private var saLocation: Location? = Location("") // null means use gpsLocation
     private var mapFragment: MapFragment? = null
     private var hotCategoryName = ""
     private var hotCategoryTag = ""
@@ -146,6 +149,8 @@ class MapActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === CODE_SETTINGS) {
+            // update CVP Locations when back from settings
+            updateLocationsFromSP()
             if (resultCode === Activity.RESULT_OK) {
                 if (data != null) {
                     val isChanged = data.getBooleanExtra(IS_ENV_CHANGED, false)
@@ -163,6 +168,7 @@ class MapActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         setGPSListener(locationCallback)
+        updateLocationsFromSP()
     }
 
     override fun onPause() {
@@ -191,7 +197,7 @@ class MapActivity : AppCompatActivity() {
      * -------- !!!!!!! this methods are called by fragments ---------
      */
     fun displaySearchResults(it: List<Entity>?, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
+        mapFragment?.addSearchResultsOnMap(it, getSearchAreaLocation(), currentSearchHotCategory)
     }
 
     fun updateBottomSheetState() {
@@ -288,7 +294,7 @@ class MapActivity : AppCompatActivity() {
                              navigationFromPersonalInfo: Boolean = false) {
         mapFragment?.addEntityResultOnMap(
             entity,
-            lastKnownLocation,
+            getSearchAreaLocation(),
             currentSearchHotCategory
         )
         searchInfoBottomFragment?.dismiss()
@@ -439,6 +445,42 @@ class MapActivity : AppCompatActivity() {
         App.writeToSharedPreferences(App.PARKING_DURATION, 0)
         App.writeToSharedPreferences(App.PARKING_START_FROM, 0)
     }
+
+    private fun updateLocationsFromSP() {
+        val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        // read settings from sp
+        val cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true)
+        if (cvpFollowGPS) {
+            cvpLocation = null
+        } else {
+            val lat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT)
+            val long = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG)
+            cvpLocation = Location("").apply {
+                latitude = lat.toDouble()
+                longitude = long.toDouble()
+            }
+        }
+
+        val salFollowCVP = sp.getBoolean(App.KEY_SAL_CVP, true)
+        val salFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true)
+        saLocation = when {
+            salFollowCVP -> cvpLocation
+            salFollowGPS -> null
+            else -> {
+                val lat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT)
+                val long = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG)
+                Location("").apply {
+                    latitude = lat.toDouble()
+                    longitude = long.toDouble()
+                }
+            }
+        }
+    }
+
+    fun getCVPLocation(): Location = cvpLocation ?: gpsLocation
+
+    fun getSearchAreaLocation(): Location = saLocation ?: gpsLocation
 }
 
 fun View.hideKeyboard() {
