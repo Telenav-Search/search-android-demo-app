@@ -79,7 +79,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     override fun onMarkerClick(marker: Marker?): Boolean {
         marker?.zIndex?.let {
             val index = it.toInt() - 1
-            if (index < searchResultList.size) {
+            if (index in searchResultList.indices) {
                 val searchResult = searchResultList[index]
                 if (index < entitiesList.size) {
                     val entity = entitiesList[index]
