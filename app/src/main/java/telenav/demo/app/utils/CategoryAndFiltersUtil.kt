@@ -47,9 +47,9 @@ object CategoryAndFiltersUtil {
         HotCategory("Fuel", FUEL_TAG, R.drawable.ic_fuel_color),
         HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_shopping_color),
         HotCategory("Hotels", HOTELS_TAG, R.drawable.ic_hotel_color),
-        HotCategory("Banks", BANKS_TAG, R.drawable.ic_banks_color),
-        HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
         HotCategory("EV Charger", EV_CHARGER_TAG, R.drawable.ic_ev_color),
+        HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
+        HotCategory("Banks", BANKS_TAG, R.drawable.ic_banks_color),
         HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
         HotCategory("Hospital", HOSPITAL_TAG, R.drawable.ic_hospital_color),
         HotCategory("More", "",  R.drawable.ic_more_color)
