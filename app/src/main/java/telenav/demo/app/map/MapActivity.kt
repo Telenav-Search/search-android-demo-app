@@ -66,10 +66,11 @@ class MapActivity : AppCompatActivity() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
             gpsLocation = locationResult.lastLocation
+            val cameraLocation = cvpLocation ?: gpsLocation
             mapFragment?.animateCameraToCurrentLocation(
                 LatLng(
-                    gpsLocation.latitude,
-                    gpsLocation.longitude
+                    cameraLocation.latitude,
+                    cameraLocation.longitude
                 )
             )
         }
