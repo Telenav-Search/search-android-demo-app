@@ -16,6 +16,10 @@
         <item>Test</item>
         <item>Release</item>
     </string-array>
+    <string-array name="test_server_list">
+        <item>Sync4 Cloud</item>
+        <item>Denali Cloud</item>
+    </string-array>
     <string name="permission_note">For Hybrid SDK to work with index files access must be provided.</string>
     <string name="initialization_note">In order to Hybrid SDK works, download an index file from Telenav and extract it to Telenav folder on internal storage. Or if you already have one you could select it as index data folder</string>
     <string name="home_title">This is your home</string>
