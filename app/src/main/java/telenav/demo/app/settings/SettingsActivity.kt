@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 
 import androidx.appcompat.app.AppCompatActivity
+
+import com.google.gson.Gson
 
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -20,6 +23,7 @@ import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
+import telenav.demo.app.model.*
 import telenav.demo.app.utils.LocationUtil
 
 import java.io.File
@@ -36,6 +40,12 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+//    private val viewModel: SettingsViewModel by viewModels()
+    private lateinit var serverData: Map<String, List<ServerInfo>>
+
+    // current selected server info (will be null for the first time getting in settings)
+    var currentServer: ServerInfo? = null
+
     private lateinit var vIndexDataPath: TextView
     private lateinit var vModeHybrid: RadioButton
     private lateinit var vModeOnBoard: RadioButton
@@ -49,6 +59,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         getSettingsFromSP()
+        fetchServerData() // TODO: move it to viewModel
         initUI()
 
         updateUI()
@@ -60,6 +71,7 @@ class SettingsActivity : AppCompatActivity() {
         vModeOnBoard = findViewById(R.id.settings_mode_onboard)
 
         // listeners
+        initSpinners()
         vModeHybrid.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) searchMode = SearchMode.HYBRID
         }
@@ -114,11 +126,74 @@ class SettingsActivity : AppCompatActivity() {
         // cvp locations
         updateLocations()
 
-        // TODO: this spinner is modified, need some work here
-        val adapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this, R.array.env, android.R.layout.simple_spinner_item)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        env_spinner.adapter = adapter
-        env_spinner.setSelection(environment)
+        // update server list info
+        updateServers(true)
+    }
+
+    private fun initSpinners() {
+        engine_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            var isFirst = true
+            override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                if (isFirst) {
+                    isFirst = false
+                    return
+                }
+                adapterView ?: return
+                val serverName = adapterView.adapter.getItem(position) as String
+                val serverInfo = serverData["NA"]?.find { it.productName == serverName }
+                currentServer = serverInfo
+                updateServers(false)
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+        }
+
+        env_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                adapterView ?: return
+                currentServer ?: return
+                val envName = (adapterView.adapter.getItem(position) as String)
+                currentServer = serverData["NA"]?.find { it.productName == currentServer!!.productName && it.envName == envName }
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
+
+        }
+    }
+
+    private fun updateServers(isInit: Boolean) {
+        // TODO: "NA" is mock data, real data need to be calc from CVP
+        val region = "NA"
+
+        // TODO: currently using full server list without cvp filter to make demo
+        if (isInit) {
+            val serverAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
+                serverData[region]?.getProductNames() ?: emptyList())
+            serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            engine_spinner.adapter = serverAdapter
+            currentServer?.let { engine_spinner.setSelection(serverAdapter.getPosition(it.productName)) }
+        }
+
+//        val envAdapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this, R.array.env, android.R.layout.simple_spinner_item)
+        Log.i(TAG, "updateServers: server name =" +
+                " ${engine_spinner.getItemAtPosition(engine_spinner.selectedItemPosition)}," +
+                " position = ${engine_spinner.selectedItemPosition}")
+        val envNames = serverData[region]?.getEnvNames(
+            engine_spinner.getItemAtPosition(engine_spinner.selectedItemPosition) as String) ?: emptyList()
+        val envAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, envNames)
+        envAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        env_spinner.adapter = envAdapter
+
+        if (isInit) currentServer?.let {
+            Log.i(TAG, "updateServers: env position = ${envAdapter.getPosition(it.envName)}")
+            env_spinner.setSelection(envAdapter.getPosition(it.envName)) }
+    }
+
+    private fun fetchServerData() {
+        // TODO: mock data here, real data need to be fetched from remote server
+        assets.open("test.json").bufferedReader().use {
+            serverData =  Gson().fromJson(it, JsonDataList::class.java).toServerMap()
+        }
     }
 
     private fun setLocationListener(view: View, successJob: (location: Location) -> Unit) {
@@ -197,6 +272,9 @@ class SettingsActivity : AppCompatActivity() {
             searchAreaLocation = latLong2Location(salLat, salLong),
             saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
             saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
+
+        // selected server information
+        currentServer = ServerDataUtil.getInfo(sp)
     }
 
     private fun openDirectoryForIndex() {
@@ -227,6 +305,8 @@ class SettingsActivity : AppCompatActivity() {
     private fun save() {
         val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
+        val serverChanged = ServerDataUtil.getInfo(sp) != currentServer
+
         //save settings to sp
         with(sp.edit()) {
             // search mode
@@ -242,8 +322,8 @@ class SettingsActivity : AppCompatActivity() {
             putBoolean(App.KEY_SAL_GPS, vSearchLocations.saFollowGPS)
             putBoolean(App.KEY_SAL_CVP, vSearchLocations.saFollowCvp)
 
-            // Env TODO: need to change
-            putString(App.ENVIRONMENT, env_spinner.selectedItemPosition.toString())
+            // serverInfo
+            currentServer?.let { ServerDataUtil.saveInfo(it, this) }
 
             // write batch
             apply()
@@ -251,12 +331,24 @@ class SettingsActivity : AppCompatActivity() {
 
         // consider to kill the app to re-init sdk
         SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
-        if (env_spinner.selectedItemPosition != environment) {
+        if (serverChanged) {
             val data = Intent()
             data.putExtra(IS_ENV_CHANGED, true)
             setResult(RESULT_OK, data)
+            AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_NoActionBar)
+                .setTitle(R.string.alert_title)
+                .setMessage(R.string.alert_text)
+                .setCancelable(false)
+                .setPositiveButton(R.string.ok) { _, _ -> finish() }
+                .create()
+                .show()
+        } else {
+            finish()
         }
-        finish()
+    }
+
+    private fun getFullServerList(serverMap: Map<String, List<ServerInfo>>): List<ServerInfo> {
+        return serverMap.flatMap { it.value }
     }
 }
 

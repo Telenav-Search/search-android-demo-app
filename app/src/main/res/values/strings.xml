@@ -127,4 +127,7 @@
     <string name="cvp_same">Same with CVP</string>
     <string name="same_gps">Same with GPS</string>
     <string name="invalid_latlong_toast">Invalid latitude or longitude format</string>
+    <string name="alert_title">Attention!</string>
+    <string name="alert_text">App need restart due to environment changed.</string>
+    <string name="ok">OK</string>
 </resources>

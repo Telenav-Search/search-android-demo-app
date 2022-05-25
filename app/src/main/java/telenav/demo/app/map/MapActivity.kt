@@ -156,14 +156,16 @@ class MapActivity : AppCompatActivity() {
                 if (data != null) {
                     val isChanged = data.getBooleanExtra(IS_ENV_CHANGED, false)
                     if (isChanged) {
-                        val toInit = Intent(this@MapActivity, InitializationActivity::class.java)
-                        toInit.putExtra(IS_ENV_CHANGED, true)
-                        startActivity(toInit)
                         finish()
                     }
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
     override fun onResume() {

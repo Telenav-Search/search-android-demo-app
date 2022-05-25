@@ -168,8 +168,6 @@
                     android:id="@+id/engine_spinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/entity_more_actions"
-                    android:spinnerMode="dialog"
                     android:background="@drawable/setting_spinner_bg"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="8dp"

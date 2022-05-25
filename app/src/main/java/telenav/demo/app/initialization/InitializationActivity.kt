@@ -11,8 +11,14 @@ import android.os.Environment
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
@@ -20,15 +26,16 @@ import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
-import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+
 import telenav.demo.app.App
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.model.ServerDataUtil
+
+import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+
 import java.io.File
 import java.util.*
 import java.util.concurrent.Executor
@@ -207,10 +214,13 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
 
     saveIndexDataPath(dataPath)
 
-    var apiKey = BuildConfig.telenav_api_key
-    var apiSecret = BuildConfig.telenav_api_secret
-    var apiEndpoint = BuildConfig.telenav_cloud_endpoint
-    var userId = BuildConfig.telenav_user_id
+    // read server settings from sp
+    val serverData = ServerDataUtil.getInfo(this)
+
+    val apiKey = serverData?.apiKey ?: BuildConfig.telenav_api_key
+    val apiSecret = serverData?.apiSecret ?: BuildConfig.telenav_api_secret
+    val apiEndpoint = serverData?.endpoint ?: BuildConfig.telenav_cloud_endpoint
+    val userId = BuildConfig.telenav_user_id
     val application = ApplicationInfo.builder(
         BuildConfig.telenav_data_collector_applicationName,
         BuildConfig.telenav_data_cpllector_applicationVersion
