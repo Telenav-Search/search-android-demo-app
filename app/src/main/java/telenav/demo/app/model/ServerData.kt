@@ -2,41 +2,16 @@ package telenav.demo.app.model
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 import telenav.demo.app.R
+import telenav.demo.app.utils.RSAEncipherDecipher
 
-data class JsonDataList(val products: List<ProductJsonData>) {
-    /**
-     * convert json data to a map, with region as key to lookup.
-     * All information of a server is stored as ServerInfo, value will be a list of it.
-     *
-     * @return map, key - region, value - list of ServerInfo
-     */
-    fun toServerMap(): Map<String, List<ServerInfo>> {
-        val map = mutableMapOf<String, MutableList<ServerInfo>>()
-        products.forEach { product ->
-            product.environments.forEach { env ->
-                env.regions.forEach { server ->
-                    val list = map.getOrPut(server.region) { mutableListOf() }
-                    list.add(
-                        ServerInfo(
-                            productName = product.productName,
-                            envName = env.envName,
-                            region = server.region,
-                            endpoint = server.endpoint,
-                            apiKey = server.apiKey,
-                            apiSecret = server.apiSecret
-                        )
-                    )
-                }
-            }
-        }
-        return map
-    }
-}
+import java.io.File
+import java.net.URL
 
 data class ProductJsonData(
     @SerializedName("product_name") val productName: String,
@@ -60,11 +35,15 @@ data class ServerInfo(
     val envName: String,
     val region: String,
     val endpoint: String,
-    val apiKey: String,
-    val apiSecret: String
+    var apiKey: String, // apiKey & Secret can be encrypted, might need replacement after decipher
+    var apiSecret: String
 )
 
 object ServerDataUtil {
+    // server list file will be saved to files dir(internal).
+    const val SERVER_LIST_FILE = "server_list.json"
+    private const val DOWNLOAD_URL = "https://resourcedev.telenav.com/resources/services/entity/server_list.json"
+    private const val TAG = "ServerDataUtil"
     private const val KEY_SERVER_INFO = "key_server_info"
 
     /**
@@ -110,6 +89,34 @@ object ServerDataUtil {
         return null
     }
 
+    /**
+     * Fetch server list from webserver
+     *
+     * @param context Context
+     */
+    fun fetchServerList(context: Context) {
+        val dir = context.filesDir.absolutePath
+        val oldFile = File("$dir/$SERVER_LIST_FILE")
+        if (oldFile.exists()) {
+            // old list exist, download new one and replace it.
+            val newFile = File("$dir/${SERVER_LIST_FILE}_temp")
+            newFile.delete()
+            downloadFromUrl(newFile)
+            oldFile.delete()
+            newFile.renameTo(oldFile)
+        } else {
+            downloadFromUrl(oldFile)
+        }
+    }
+
+    private fun downloadFromUrl(output: File) {
+        output.outputStream().use { outputStream ->
+            URL(DOWNLOAD_URL).openConnection().getInputStream().use {
+                it.copyTo(outputStream)
+            }
+        }
+        Log.i(TAG, "downloadFromUrl: download finish")
+    }
 }
 
 /**
@@ -128,4 +135,47 @@ fun List<ServerInfo>.getProductNames(): List<String> {
  */
 fun List<ServerInfo>.getEnvNames(name: String): List<String> {
     return filter { it.productName == name }.map { it.envName }
+}
+
+/**
+ * convert json data to a map, with region as key to lookup.
+ * All information of a server is stored as ServerInfo, value will be a list of it.
+ *
+ * @return map, key - region, value - list of ServerInfo
+ */
+fun List<ProductJsonData>.toServerMap(): Map<String, List<ServerInfo>> {
+    val map = mutableMapOf<String, MutableList<ServerInfo>>()
+    forEach { product ->
+        product.environments.forEach { env ->
+            env.regions.forEach { server ->
+                val list = map.getOrPut(server.region) { mutableListOf() }
+                list.add(
+                    ServerInfo(
+                        productName = product.productName,
+                        envName = env.envName,
+                        region = server.region,
+                        endpoint = server.endpoint,
+                        apiKey = server.apiKey,
+                        apiSecret = server.apiSecret
+                    )
+                )
+            }
+        }
+    }
+    return map
+}
+
+/**
+ * ServerInfo come from webservers will be encrypted, need to decipher before use.
+ * Decipher apiKeys and apiSecrets
+ *
+ * @param rsaEncipherDecipher Decipher
+ */
+fun Map<String, List<ServerInfo>>.decipher(rsaEncipherDecipher: RSAEncipherDecipher) {
+    forEach { (_, serverInfoList) ->
+        serverInfoList.forEach {
+            it.apiKey = rsaEncipherDecipher.decrypt(it.apiKey)
+            it.apiSecret = rsaEncipherDecipher.decrypt(it.apiSecret)
+        }
+    }
 }

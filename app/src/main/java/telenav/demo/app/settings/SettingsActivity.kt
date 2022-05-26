@@ -20,11 +20,13 @@ import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import com.telenav.sdk.core.SDKRuntime
 
 import telenav.demo.app.App
+import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
 import telenav.demo.app.model.*
 import telenav.demo.app.utils.LocationUtil
+import telenav.demo.app.utils.RSAEncipherDecipher
 
 import java.io.File
 
@@ -190,9 +192,18 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun fetchServerData() {
-        // TODO: mock data here, real data need to be fetched from remote server
-        assets.open("test.json").bufferedReader().use {
-            serverData =  Gson().fromJson(it, JsonDataList::class.java).toServerMap()
+        // Server list json file should be downloaded in external files dir, read it to generate serverMap
+        val dir = filesDir.absolutePath
+        val file = File("$dir/${ServerDataUtil.SERVER_LIST_FILE}")
+
+        // Decipher it before use
+        val decipher = RSAEncipherDecipher(BuildConfig.rsa_public_key, BuildConfig.rsa_private_key)
+        file.bufferedReader().use {
+            serverData = Gson()
+                .fromJson(it, Array<ProductJsonData>::class.java)
+                .toList()
+                .toServerMap()
+                .apply { decipher(decipher) }
         }
     }
 

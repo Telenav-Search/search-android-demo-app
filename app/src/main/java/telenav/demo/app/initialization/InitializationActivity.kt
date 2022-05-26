@@ -128,6 +128,8 @@ class InitializationActivity : AppCompatActivity() {
 
                 EntityService.initialize(sdkOptions)
 
+                ServerDataUtil.fetchServerList(this@InitializationActivity)
+
                 getUIExecutor().execute {
                     if (!isChanged) {
                         DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
