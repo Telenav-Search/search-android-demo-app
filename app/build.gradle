@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "telenav.demo.app"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 6
         versionName "0.5"
@@ -20,7 +20,8 @@ android {
         buildConfigField  "String", "telenav_cloud_endpoint", "\"${telenav_cloud_endpoint}\""
         buildConfigField  "String", "telenav_data_collector_applicationName", "\"${telenav_data_collector_applicationName}\""
         buildConfigField  "String", "telenav_data_cpllector_applicationVersion", "\"${telenav_data_cpllector_applicationVersion}\""
-
+        buildConfigField  "String", "rsa_private_key", "\"${rsa_private_key}\""
+        buildConfigField  "String", "rsa_public_key", "\"${rsa_public_key}\""
     }
 
     buildFeatures {
