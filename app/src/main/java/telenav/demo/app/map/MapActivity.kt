@@ -454,15 +454,12 @@ class MapActivity : AppCompatActivity() {
 
         // read settings from sp
         val cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true)
-        if (cvpFollowGPS) {
-            cvpLocation = null
+        cvpLocation = if (cvpFollowGPS) {
+            null
         } else {
             val lat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT)
             val long = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG)
-            cvpLocation = Location("").apply {
-                latitude = lat.toDouble()
-                longitude = long.toDouble()
-            }
+            LocationUtil.createLocation(lat.toDouble(), long.toDouble())
         }
 
         val salFollowCVP = sp.getBoolean(App.KEY_SAL_CVP, true)
@@ -473,10 +470,7 @@ class MapActivity : AppCompatActivity() {
             else -> {
                 val lat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT)
                 val long = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG)
-                Location("").apply {
-                    latitude = lat.toDouble()
-                    longitude = long.toDouble()
-                }
+                LocationUtil.createLocation(lat.toDouble(), long.toDouble())
             }
         }
     }

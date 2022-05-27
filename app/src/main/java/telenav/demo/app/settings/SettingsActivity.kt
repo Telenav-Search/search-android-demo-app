@@ -72,6 +72,8 @@ class SettingsActivity : AppCompatActivity() {
         sal_reset.setOnClickListener { viewModel.onLocationChange(SalFollowGPS(true)) }
         setLocationListener(cvp_text) { viewModel.onLocationChange(CvpChange(it)) }
         setLocationListener(sal_text) { viewModel.onLocationChange(SalChange(it)) }
+        cvp_quick_link.setOnClickListener { showQuickLinkDialog { viewModel.onLocationChange(CvpChange(it)) } }
+        sal_quick_link.setOnClickListener { showQuickLinkDialog { viewModel.onLocationChange(SalChange(it)) } }
 
         // follow cvp checkbox
         cvp_same_checkbox.setOnCheckedChangeListener { _, isChecked ->
@@ -171,6 +173,16 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.invalid_latlong_toast, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showQuickLinkDialog(callback: (Location) -> Unit) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.quick_link)
+            .setItems(LocationUtil.QUICK_LINKS.map { it.first }.toTypedArray()) { _, position ->
+                callback(LocationUtil.QUICK_LINKS[position].second)
+            }.setCancelable(true)
+            .create()
+            .show()
     }
 
     private fun getSettingsFromSP() {

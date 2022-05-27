@@ -26,13 +26,6 @@ import java.io.File
 class SettingsViewModel: ViewModel() {
     companion object {
         private const val TAG = "SettingsViewModel"
-
-        private fun latLong2Location(lat: Double, long: Double): Location {
-            return Location("").apply {
-                latitude = lat
-                longitude = long
-            }
-        }
     }
 
     // current selected server info (will be null for the first time getting in settings)
@@ -68,9 +61,9 @@ class SettingsViewModel: ViewModel() {
         val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
         val salLat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT).toDouble()
         val salLong = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG).toDouble()
-        _locations.value = SearchLocations(cvpLocation = latLong2Location(cvpLat, cvpLong),
+        _locations.value = SearchLocations(cvpLocation = LocationUtil.createLocation(cvpLat, cvpLong),
             cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true),
-            searchAreaLocation = latLong2Location(salLat, salLong),
+            searchAreaLocation = LocationUtil.createLocation(salLat, salLong),
             saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
             saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
     }
