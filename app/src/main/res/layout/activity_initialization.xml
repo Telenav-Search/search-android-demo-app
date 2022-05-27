@@ -81,6 +81,7 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:visibility="gone"
             android:backgroundTint="@color/blue_c1"
             android:layout_marginBottom="20dp"
             android:textSize="12sp"

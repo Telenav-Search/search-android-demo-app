@@ -63,6 +63,10 @@ class InitializationActivity : AppCompatActivity() {
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
         }
+
+        val indexPath = File(filesDir.absolutePath + "/indexData")
+        if (!indexPath.exists()) indexPath.mkdir()
+        indexDataPath = indexPath.absolutePath
     }
 
     override fun onResume() {
@@ -166,8 +170,7 @@ class InitializationActivity : AppCompatActivity() {
                     this,
                     arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            Manifest.permission.READ_EXTERNAL_STORAGE
                     ),
                     1
             )
@@ -281,8 +284,7 @@ fun Context.checkLocationPermission(): Boolean =
     checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
 
 fun Context.checkExternalStoragePermissions(): Boolean =
-    checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&
-            checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
+    checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
 
 fun Activity.getUIExecutor(): Executor {
     return Executor { r -> runOnUiThread(r) }

@@ -2,12 +2,14 @@ package telenav.demo.app
 
 import android.app.Application
 import android.content.Context
-import android.os.Environment
 import android.os.Looper
-import android.preference.PreferenceManager
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+
+import com.instabug.library.Instabug
+import com.instabug.library.invocation.InstabugInvocationEvent
 
 class App : Application() {
 
@@ -110,6 +112,15 @@ class App : Application() {
 
     init {
         application = this
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // init Instabug
+        Instabug.Builder(this, "db94621802370e5ba6429e1a504e821d")
+            .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.FLOATING_BUTTON)
+            .build()
     }
 }
 
