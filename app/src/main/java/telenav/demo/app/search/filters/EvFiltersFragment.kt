@@ -34,7 +34,7 @@ class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
         return binding?.root
     }
 
-    private fun fillFlowContent(sharedPreferencesKey: String, contentList: List<String>, parent: ViewGroup, flow: Flow) {
+    private fun fillFlowContent(sharedPreferencesKey: String, contentList: Set<String>, parent: ViewGroup, flow: Flow) {
         val types = App.readStringFromSharedPreferences(sharedPreferencesKey, "")
         val lstValues = types?.split(",")?.map { it -> it.trim() }
         lstValues ?: return
@@ -69,11 +69,11 @@ class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
         val localBinding = binding!!
 
         // fill Flow layouts with contents
-        fillFlowContent(App.CONNECTION_TYPES, CategoryAndFiltersUtil.connectionTypesArrayList,
+        fillFlowContent(App.CONNECTION_TYPES, CategoryAndFiltersUtil.connectorTypesMap.keys,
             localBinding.evConstraintLayout, localBinding.flowConnectorTypes)
-        fillFlowContent(App.POWER_FEED, CategoryAndFiltersUtil.powerFeedLevelsArrayList,
+        fillFlowContent(App.POWER_FEED, CategoryAndFiltersUtil.powerFeedLevelsMap.keys,
             localBinding.evConstraintLayout, localBinding.flowPowerFeedLevels)
-        fillFlowContent(App.CHARGER_BRAND, CategoryAndFiltersUtil.chargerBrandsArrayList,
+        fillFlowContent(App.CHARGER_BRAND, CategoryAndFiltersUtil.chargerBrandsMap.keys,
             localBinding.evConstraintLayout, localBinding.flowChargerBrands)
 
         binding?.freeCharger?.isChecked = App.readBooleanFromSharedPreferences(App.FREE_CHARGER, false)

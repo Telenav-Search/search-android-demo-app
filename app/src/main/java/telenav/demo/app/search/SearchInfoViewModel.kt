@@ -108,9 +108,9 @@ class SearchInfoViewModel : ViewModel() {
                 }
                 filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG) -> {
                     val builder: EvFilter.Builder = EvFilter.builder()
-                    val connectionTypes = getConnectionTypes()
+                    val connectionTypes = getConnectorTypes()
                     val chargeBrands = getChargerBrands()
-                    val powerFeed = getPowerFeed()
+                    val powerFeed = getPowerFeedLevels()
 
                     if (!connectionTypes.isNullOrEmpty()) {
                         builder.setConnectorTypes(connectionTypes.split(","))
@@ -501,15 +501,28 @@ class SearchInfoViewModel : ViewModel() {
         return App.readBooleanFromSharedPreferences(App.FREE_CHARGER, false)
     }
 
-    private fun getConnectionTypes(): String? {
-        return App.readStringFromSharedPreferences(App.CONNECTION_TYPES, "")
+    private fun getConnectorTypes(): String? {
+        val strConnectorTypes = App.readStringFromSharedPreferences(App.CONNECTION_TYPES, "")
+
+        if (strConnectorTypes == null || strConnectorTypes.isEmpty()) {
+            return null;
+        }
+        return strConnectorTypes.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.connectorTypesMap.getOrDefault(it, "") }
     }
 
     private fun getChargerBrands(): String? {
-        return App.readStringFromSharedPreferences(App.CHARGER_BRAND, "")
+        val strChargeBrands = App.readStringFromSharedPreferences(App.CHARGER_BRAND, "")
+        if (strChargeBrands == null || strChargeBrands.isEmpty()) {
+            return null;
+        }
+        return strChargeBrands.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.chargerBrandsMap.getOrDefault(it, "") }
     }
 
-    private fun getPowerFeed(): String? {
-        return App.readStringFromSharedPreferences(App.POWER_FEED, "")
+    private fun getPowerFeedLevels(): String? {
+        val strPowerFeedLevels = App.readStringFromSharedPreferences(App.POWER_FEED, "")
+        if (strPowerFeedLevels == null || strPowerFeedLevels.isEmpty()) {
+            return null;
+        }
+        return strPowerFeedLevels.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.powerFeedLevelsMap.getOrDefault(it, "") }
     }
 }

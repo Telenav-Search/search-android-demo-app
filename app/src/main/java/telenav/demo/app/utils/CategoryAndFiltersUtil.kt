@@ -67,55 +67,52 @@ object CategoryAndFiltersUtil {
         R.color.c9
     )
 
-    val chargerBrandsArrayList = arrayListOf(
-        "Circuit Electrique",
-        "Tesla Destination",
-        "ElectrifyAmerica",
-        "Lastestasjoner",
-        "GE WattStation",
-        "Aerovironment",
-        "Supercharger",
-        "ChargePoint",
-        "Oplaadpalen",
-        "SemaConnect",
-        "CarCharging",
-        "Sun Country",
-        "Greenlots",
-        "OpConnect",
-        "Shorepower",
-        "EV Connect",
-        "ChargeNet",
-        "EnelDrive",
-        "Recargo",
-        "Endesa",
-        "Innogy",
-        "Volta",
-        "Blink",
-        "POLAR",
-        "FLO",
-        "eVgo",
-        "JNSH",
-        "RWE",
-        "KSI"
+    val chargerBrandsMap = mapOf<String, String>(
+        "Circuit Electrique" to "99100014",
+        "Tesla Destination" to "99100006",
+        "ElectrifyAmerica" to "99100010",
+        "Lastestasjoner" to "99100022",
+        "GE WattStation" to "99100012",
+        "Aerovironment" to "99100017",
+        "Supercharger" to "99100007",
+        "ChargePoint" to "99100001",
+        "Oplaadpalen" to "99100020",
+        "SemaConnect" to "99100004",
+        "CarCharging" to "99100024",
+        "Sun Country" to "99100011",
+        "Greenlots" to "99100005",
+        "OpConnect" to "99100008",
+        "Shorepower" to "99100018",
+        "EV Connect" to "99100009",
+        "ChargeNet" to "99100026",
+        "EnelDrive" to "99100023",
+        "Recargo" to "99100027",
+        "Endesa" to "99100021",
+        "Innogy" to "99100016",
+        "Volta" to "99100013",
+        "Blink" to "99100002",
+        "POLAR" to "99100029",
+        "FLO" to "99100248",
+        "eVgo" to "99100003",
+        "JNSH" to "99100025",
+        "RWE" to "99100019",
+        "KSI" to "99100028"
     )
 
-    val connectionTypesArrayList = arrayListOf(
-        "J1772",
-        "Sae Combo",
-        "CHAdeMo",
-        "NEMA",
-        "NEMA 14-50",
-        "Plug Type F",
-        "Type 2",
-        "Type 3",
-        "Teala"
+    val connectorTypesMap = mapOf<String, String>(
+        "J1772" to "30001",
+        "Sae Combo" to "30002",
+        "CHAdeMo" to "30003",
+        "NEMA 515/520" to "30007",
+        "NEMA 14-50" to "30008",
+        "Plug Type F" to "30009",
+        "Type 2" to "30005",
+        "Type 3" to "30006",
+        "Tesla" to "30006"
     )
 
-    val powerFeedLevelsArrayList = arrayListOf(
-        "Level 1",
-        "Level 2",
-        "DC Fast"
-    )
+    val powerFeedLevelsMap = mapOf<String, String>(
+        "Level 1" to "1", "Level 2" to "2", "DC Fast" to "5", "Ultra Fast" to "6")
 
     fun getCategoryIcon(categoryTag: String, name: String): Int {
         when {
