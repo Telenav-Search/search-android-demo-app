@@ -29,13 +29,6 @@ import java.io.File
 class SettingsActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "SettingsActivity"
-
-        private fun latLong2Location(lat: Double, long: Double): Location {
-            return Location("").apply {
-                latitude = lat
-                longitude = long
-            }
-        }
     }
 
     private val viewModel: SettingsViewModel by viewModels()
@@ -43,7 +36,6 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var vIndexDataPath: TextView
     private lateinit var vModeHybrid: RadioButton
     private lateinit var vModeOnBoard: RadioButton
-    private lateinit var vSearchLocations: SearchLocations
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
@@ -52,10 +44,9 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         getSettingsFromSP()
-        viewModel.init(this)
         initUI()
-
         updateUI()
+        viewModel.init(this)
     }
 
     private fun initUI() {
@@ -64,7 +55,8 @@ class SettingsActivity : AppCompatActivity() {
         vModeOnBoard = findViewById(R.id.settings_mode_onboard)
 
         // listeners
-        initSpinners()
+        initServers()
+        initLocations()
         vModeHybrid.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) searchMode = SearchMode.HYBRID
         }
@@ -73,54 +65,41 @@ class SettingsActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.settings_back).setOnClickListener { save() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
+    }
 
-        // gps button
-        cvp_reset.setOnClickListener {
-            vSearchLocations.cvpFollowGPS = true
-            updateLocations()
-        }
-        sal_reset.setOnClickListener {
-            vSearchLocations.saFollowGPS = true
-            updateLocations()
-        }
-
-        setLocationListener(cvp_text) {
-            vSearchLocations.cvpFollowGPS = false
-            vSearchLocations.cvpLocation = it
-            if (vSearchLocations.saFollowCvp) {
-                vSearchLocations.saFollowGPS = false
-                vSearchLocations.searchAreaLocation = it
-            }
-            updateLocations()
-        }
-
-        setLocationListener(sal_text) {
-            vSearchLocations.saFollowCvp = false
-            vSearchLocations.saFollowGPS = false
-            vSearchLocations.searchAreaLocation = it
-            updateLocations()
-        }
+    private fun initLocations() {
+        cvp_reset.setOnClickListener { viewModel.onLocationChange(CvpFollowGPS(true)) }
+        sal_reset.setOnClickListener { viewModel.onLocationChange(SalFollowGPS(true)) }
+        setLocationListener(cvp_text) { viewModel.onLocationChange(CvpChange(it)) }
+        setLocationListener(sal_text) { viewModel.onLocationChange(SalChange(it)) }
 
         // follow cvp checkbox
         cvp_same_checkbox.setOnCheckedChangeListener { _, isChecked ->
-            vSearchLocations.saFollowCvp = isChecked
-
-            // copy cvp location status if follow: 1. follow gps / 2. specified latLong
-            if (isChecked) {
-                vSearchLocations.saFollowGPS = vSearchLocations.cvpFollowGPS
-                if (!vSearchLocations.cvpFollowGPS) {
-                    vSearchLocations.searchAreaLocation.latitude = vSearchLocations.cvpLocation.latitude
-                    vSearchLocations.searchAreaLocation.longitude = vSearchLocations.cvpLocation.longitude
-                }
-            }
-            updateLocations()
+            viewModel.onLocationChange(SalFollowCVP(isChecked))
         }
 
-        // cvp locations
-        updateLocations()
+        // observe liveData and refresh views
+        viewModel.locations.observe(this) {
+            if (it.cvpFollowGPS) {
+                // clear text to show hint
+                cvp_text.text = ""
+            } else {
+                cvp_text.text = it.cvpLocation.toLatLongString()
+            }
+
+            // sal
+            cvp_same_checkbox.isChecked = it.saFollowCvp
+            when {
+                it.saFollowCvp -> {
+                    sal_text.text = cvp_text.text
+                }
+                it.saFollowGPS -> sal_text.text = ""
+                else -> sal_text.text = it.searchAreaLocation.toLatLongString()
+            }
+        }
     }
 
-    private fun initSpinners() {
+    private fun initServers() {
         engine_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             var isFirst = true
             override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
@@ -194,27 +173,6 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateLocations() {
-        // priority: 1. follow cvp 2. follow gps 3. specified latLong
-        // cvp
-        if (vSearchLocations.cvpFollowGPS) {
-            // clear text to show hint
-            cvp_text.text = ""
-        } else {
-            cvp_text.text = vSearchLocations.cvpLocation.toLatLongString()
-        }
-
-        // sal
-        cvp_same_checkbox.isChecked = vSearchLocations.saFollowCvp
-        when {
-            vSearchLocations.saFollowCvp -> {
-                sal_text.text = cvp_text.text
-            }
-            vSearchLocations.saFollowGPS -> sal_text.text = ""
-            else -> sal_text.text = vSearchLocations.searchAreaLocation.toLatLongString()
-        }
-    }
-
     private fun getSettingsFromSP() {
         val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
@@ -223,17 +181,6 @@ class SettingsActivity : AppCompatActivity() {
 
         // saved index path
         indexDataPath = sp.getString(getString(R.string.saved_index_data_path_key), "")!!
-
-        // CVP and Search Area Location
-        val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
-        val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
-        val salLat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT).toDouble()
-        val salLong = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG).toDouble()
-        vSearchLocations = SearchLocations(cvpLocation = latLong2Location(cvpLat, cvpLong),
-            cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true),
-            searchAreaLocation = latLong2Location(salLat, salLong),
-            saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
-            saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
     }
 
     private fun openDirectoryForIndex() {
@@ -273,13 +220,14 @@ class SettingsActivity : AppCompatActivity() {
             // index data path
             if (indexDataPath.isNotEmpty()) putString(getString(R.string.saved_index_data_path_key), indexDataPath)
             // cvp locations
-            putFloat(App.KEY_CVP_LAT, vSearchLocations.cvpLocation.latitude.toFloat())
-            putFloat(App.KEY_CVP_LONG, vSearchLocations.cvpLocation.longitude.toFloat())
-            putFloat(App.KEY_SAL_LAT, vSearchLocations.searchAreaLocation.latitude.toFloat())
-            putFloat(App.KEY_SAL_LONG, vSearchLocations.searchAreaLocation.longitude.toFloat())
-            putBoolean(App.KEY_CVP_GPS, vSearchLocations.cvpFollowGPS)
-            putBoolean(App.KEY_SAL_GPS, vSearchLocations.saFollowGPS)
-            putBoolean(App.KEY_SAL_CVP, vSearchLocations.saFollowCvp)
+            val searchLocations = viewModel.locations.value!!
+            putFloat(App.KEY_CVP_LAT, searchLocations.cvpLocation.latitude.toFloat())
+            putFloat(App.KEY_CVP_LONG, searchLocations.cvpLocation.longitude.toFloat())
+            putFloat(App.KEY_SAL_LAT, searchLocations.searchAreaLocation.latitude.toFloat())
+            putFloat(App.KEY_SAL_LONG, searchLocations.searchAreaLocation.longitude.toFloat())
+            putBoolean(App.KEY_CVP_GPS, searchLocations.cvpFollowGPS)
+            putBoolean(App.KEY_SAL_GPS, searchLocations.saFollowGPS)
+            putBoolean(App.KEY_SAL_CVP, searchLocations.saFollowCvp)
 
             // serverInfo
             viewModel.mCurrentServer?.let { ServerDataUtil.saveInfo(it, this) }

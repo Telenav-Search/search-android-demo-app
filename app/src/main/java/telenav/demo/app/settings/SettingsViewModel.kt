@@ -1,6 +1,7 @@
 package telenav.demo.app.settings
 
 import android.content.Context
+import android.location.Location
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,8 +9,11 @@ import androidx.lifecycle.ViewModel
 
 import com.google.gson.Gson
 
+import telenav.demo.app.App
 import telenav.demo.app.BuildConfig
+import telenav.demo.app.R
 import telenav.demo.app.model.*
+import telenav.demo.app.utils.LocationUtil
 import telenav.demo.app.utils.RSAEncipherDecipher
 
 import java.io.File
@@ -22,6 +26,13 @@ import java.io.File
 class SettingsViewModel: ViewModel() {
     companion object {
         private const val TAG = "SettingsViewModel"
+
+        private fun latLong2Location(lat: Double, long: Double): Location {
+            return Location("").apply {
+                latitude = lat
+                longitude = long
+            }
+        }
     }
 
     // current selected server info (will be null for the first time getting in settings)
@@ -35,6 +46,10 @@ class SettingsViewModel: ViewModel() {
 
     private var mCurrentRegion = "NA"
 
+    private val _locations = MutableLiveData<SearchLocations>()
+
+    val locations: LiveData<SearchLocations> = _locations
+
 
     /**
      * init components which need context
@@ -43,6 +58,24 @@ class SettingsViewModel: ViewModel() {
      */
     fun init(context: Context) {
         Log.i(TAG, "init")
+        initServerData(context)
+        initLocations(context)
+    }
+
+    private fun initLocations(context: Context) {
+        val sp = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
+        val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
+        val salLat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT).toDouble()
+        val salLong = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG).toDouble()
+        _locations.value = SearchLocations(cvpLocation = latLong2Location(cvpLat, cvpLong),
+            cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true),
+            searchAreaLocation = latLong2Location(salLat, salLong),
+            saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
+            saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
+    }
+
+    private fun initServerData(context: Context) {
         mServerData = fetchServerData(context)
         mCurrentServer = ServerDataUtil.getInfo(context)
 
@@ -55,7 +88,7 @@ class SettingsViewModel: ViewModel() {
         // no current server or current server not in current region, assign a default current server
         val serverList = mServerData[mCurrentRegion]!!
         if (mCurrentServer == null || mCurrentServer?.region != mCurrentRegion) {
-            Log.i(TAG, "init: set default currentServer")
+            Log.i(TAG, "initServerData: set default currentServer")
             mCurrentServer = serverList[0]
         }
 
@@ -67,7 +100,7 @@ class SettingsViewModel: ViewModel() {
         val envName = mCurrentServer!!.envName
         val envIndex = envNames.indexOf(envName)
         _serverState.value = ServerState(serverNames, envNames, serverIndex, envIndex)
-        Log.i(TAG, "init: current serverName = $serverName, envName = $envName")
+        Log.i(TAG, "initServerData: current serverName = $serverName, envName = $envName")
     }
 
     /**
@@ -110,6 +143,47 @@ class SettingsViewModel: ViewModel() {
         val serverName = state.serverNames[state.serverSelected]
         mCurrentServer = mServerData[mCurrentRegion]?.find {
             it.productName == serverName && it.envName == state.envNames[position]
+        }
+    }
+
+    /**
+     * User location intent
+     *
+     * @param intent user action
+     */
+    fun onLocationChange(intent: LocationIntent) {
+        // location must be initialized before interaction
+        val location = _locations.value ?: return
+        _locations.value = when(intent) {
+            is CvpFollowGPS -> {
+                if (location.saFollowCvp) {
+                    location.copy(cvpFollowGPS = intent.status, saFollowGPS = intent.status)
+                } else {
+                    location.copy(cvpFollowGPS = intent.status)
+                }
+            }
+            is SalFollowGPS -> { location.copy(saFollowGPS = intent.status) }
+            is SalFollowCVP -> {
+                if (intent.status) {
+                    location.copy(saFollowGPS = location.cvpFollowGPS,
+                        searchAreaLocation = location.cvpLocation,
+                        saFollowCvp = true)
+                }
+                else { location.copy(saFollowCvp = false) }
+            }
+            is CvpChange -> {
+                if (location.saFollowCvp) {
+                    location.copy(cvpLocation = intent.location,
+                        searchAreaLocation = intent.location,
+                        cvpFollowGPS = false,
+                        saFollowGPS = false)
+                } else {
+                    location.copy(cvpLocation = intent.location, cvpFollowGPS = false)
+                }
+            }
+            is SalChange -> {
+                location.copy(searchAreaLocation = intent.location, saFollowGPS = false, saFollowCvp = false)
+            }
         }
     }
 
