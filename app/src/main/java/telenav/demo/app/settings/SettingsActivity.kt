@@ -4,14 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 
 import androidx.appcompat.app.AppCompatActivity
-
-import com.google.gson.Gson
 
 import kotlinx.android.synthetic.main.activity_settings.*
 
@@ -20,13 +18,11 @@ import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import com.telenav.sdk.core.SDKRuntime
 
 import telenav.demo.app.App
-import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
 import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
 import telenav.demo.app.model.*
 import telenav.demo.app.utils.LocationUtil
-import telenav.demo.app.utils.RSAEncipherDecipher
 
 import java.io.File
 
@@ -42,11 +38,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-//    private val viewModel: SettingsViewModel by viewModels()
-    private lateinit var serverData: Map<String, List<ServerInfo>>
-
-    // current selected server info (will be null for the first time getting in settings)
-    var currentServer: ServerInfo? = null
+    private val viewModel: SettingsViewModel by viewModels()
 
     private lateinit var vIndexDataPath: TextView
     private lateinit var vModeHybrid: RadioButton
@@ -55,13 +47,12 @@ class SettingsActivity : AppCompatActivity() {
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
-    private var environment = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
         getSettingsFromSP()
-        fetchServerData() // TODO: move it to viewModel
+        viewModel.init(this)
         initUI()
 
         updateUI()
@@ -127,9 +118,6 @@ class SettingsActivity : AppCompatActivity() {
 
         // cvp locations
         updateLocations()
-
-        // update server list info
-        updateServers(true)
     }
 
     private fun initSpinners() {
@@ -140,11 +128,7 @@ class SettingsActivity : AppCompatActivity() {
                     isFirst = false
                     return
                 }
-                adapterView ?: return
-                val serverName = adapterView.adapter.getItem(position) as String
-                val serverInfo = serverData["NA"]?.find { it.productName == serverName }
-                currentServer = serverInfo
-                updateServers(false)
+                viewModel.onEngineChange(position)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
@@ -152,58 +136,28 @@ class SettingsActivity : AppCompatActivity() {
 
         env_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                adapterView ?: return
-                currentServer ?: return
-                val envName = (adapterView.adapter.getItem(position) as String)
-                currentServer = serverData["NA"]?.find { it.productName == currentServer!!.productName && it.envName == envName }
+                viewModel.onEnvChange(position)
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}
-
-        }
-    }
-
-    private fun updateServers(isInit: Boolean) {
-        // TODO: "NA" is mock data, real data need to be calc from CVP
-        val region = "NA"
-
-        // TODO: currently using full server list without cvp filter to make demo
-        if (isInit) {
-            val serverAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item,
-                serverData[region]?.getProductNames() ?: emptyList())
-            serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            engine_spinner.adapter = serverAdapter
-            currentServer?.let { engine_spinner.setSelection(serverAdapter.getPosition(it.productName)) }
         }
 
-//        val envAdapter: ArrayAdapter<*> = ArrayAdapter.createFromResource(this, R.array.env, android.R.layout.simple_spinner_item)
-        Log.i(TAG, "updateServers: server name =" +
-                " ${engine_spinner.getItemAtPosition(engine_spinner.selectedItemPosition)}," +
-                " position = ${engine_spinner.selectedItemPosition}")
-        val envNames = serverData[region]?.getEnvNames(
-            engine_spinner.getItemAtPosition(engine_spinner.selectedItemPosition) as String) ?: emptyList()
-        val envAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, envNames)
+        val serverAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf<String>())
+        serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        engine_spinner.adapter = serverAdapter
+
+        val envAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf<String>())
         envAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         env_spinner.adapter = envAdapter
 
-        if (isInit) currentServer?.let {
-            Log.i(TAG, "updateServers: env position = ${envAdapter.getPosition(it.envName)}")
-            env_spinner.setSelection(envAdapter.getPosition(it.envName)) }
-    }
+        viewModel.serverState.observe(this) {
+            serverAdapter.clear()
+            serverAdapter.addAll(it.serverNames)
+            engine_spinner.setSelection(it.serverSelected)
 
-    private fun fetchServerData() {
-        // Server list json file should be downloaded in external files dir, read it to generate serverMap
-        val dir = filesDir.absolutePath
-        val file = File("$dir/${ServerDataUtil.SERVER_LIST_FILE}")
-
-        // Decipher it before use
-        val decipher = RSAEncipherDecipher(BuildConfig.rsa_public_key, BuildConfig.rsa_private_key)
-        file.bufferedReader().use {
-            serverData = Gson()
-                .fromJson(it, Array<ProductJsonData>::class.java)
-                .toList()
-                .toServerMap()
-                .apply { decipher(decipher) }
+            envAdapter.clear()
+            envAdapter.addAll(it.envNames)
+            env_spinner.setSelection(it.envSelected)
         }
     }
 
@@ -270,9 +224,6 @@ class SettingsActivity : AppCompatActivity() {
         // saved index path
         indexDataPath = sp.getString(getString(R.string.saved_index_data_path_key), "")!!
 
-        // environment TODO: new server list should replace this item
-        environment = App.readStringFromSharedPreferences(App.ENVIRONMENT, "0")!!.toInt()
-
         // CVP and Search Area Location
         val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
         val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
@@ -283,9 +234,6 @@ class SettingsActivity : AppCompatActivity() {
             searchAreaLocation = latLong2Location(salLat, salLong),
             saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
             saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
-
-        // selected server information
-        currentServer = ServerDataUtil.getInfo(sp)
     }
 
     private fun openDirectoryForIndex() {
@@ -316,7 +264,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun save() {
         val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
 
-        val serverChanged = ServerDataUtil.getInfo(sp) != currentServer
+        val serverChanged = ServerDataUtil.getInfo(sp) != viewModel.mCurrentServer
 
         //save settings to sp
         with(sp.edit()) {
@@ -334,7 +282,7 @@ class SettingsActivity : AppCompatActivity() {
             putBoolean(App.KEY_SAL_CVP, vSearchLocations.saFollowCvp)
 
             // serverInfo
-            currentServer?.let { ServerDataUtil.saveInfo(it, this) }
+            viewModel.mCurrentServer?.let { ServerDataUtil.saveInfo(it, this) }
 
             // write batch
             apply()
@@ -356,10 +304,6 @@ class SettingsActivity : AppCompatActivity() {
         } else {
             finish()
         }
-    }
-
-    private fun getFullServerList(serverMap: Map<String, List<ServerInfo>>): List<ServerInfo> {
-        return serverMap.flatMap { it.value }
     }
 }
 
