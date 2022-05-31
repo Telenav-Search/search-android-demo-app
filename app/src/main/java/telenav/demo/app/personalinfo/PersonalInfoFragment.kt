@@ -7,30 +7,38 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import android.view.*
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import com.telenav.sdk.datacollector.api.DataCollectorService
-import com.telenav.sdk.entity.model.base.Entity
-import telenav.demo.app.R
-import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
-import telenav.demo.app.utils.deleteFavorite
-import java.lang.reflect.Type
-import androidx.recyclerview.widget.ItemTouchHelper
-import telenav.demo.app.map.MapActivity
-import telenav.demo.app.search.SearchResultsListRecyclerAdapter
-import telenav.demo.app.utils.SwipeToDeleteCallback
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+
+import com.telenav.sdk.datacollector.api.DataCollectorService
+import com.telenav.sdk.entity.model.base.Entity
+
+import telenav.demo.app.App
+import telenav.demo.app.databinding.FragmentPersonalInfoBottomBinding
+import telenav.demo.app.map.MapActivity
+import telenav.demo.app.R
+import telenav.demo.app.search.SearchResultsListRecyclerAdapter
+import telenav.demo.app.utils.deleteFavorite
+import telenav.demo.app.utils.SwipeToDeleteCallback
 import telenav.demo.app.utils.Converter.convertDpToPixel
+import telenav.demo.app.utils.LocationUtil
+
+import java.lang.reflect.Type
 
 private const val TAG = "PersonalInfoFragment"
 private const val USER_INFO_TAG = "UserAddressFragment"
+const val KEY_CVP_LOCATION = "key_cvp_location"
 
 class PersonalInfoFragment : BottomSheetDialogFragment() {
 
@@ -176,7 +184,21 @@ class PersonalInfoFragment : BottomSheetDialogFragment() {
     }
 
     private fun showHomeAreaActivity() {
-        startActivity(Intent(requireContext(), HomeAreaActivity::class.java))
+        val intent = Intent(requireContext(), HomeAreaActivity::class.java)
+        val sp = requireContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        // read cvp location from sp
+        val cvpLocation = if (sp.getBoolean(App.KEY_CVP_GPS, true)) {
+            null
+        } else {
+            val lat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT)
+            val long = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG)
+            LocationUtil.createLocation(lat.toDouble(), long.toDouble())
+        }
+        cvpLocation?.let {
+            intent.putExtra(KEY_CVP_LOCATION, it)
+        }
+        startActivity(intent)
     }
 
     companion object {
