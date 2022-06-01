@@ -113,15 +113,15 @@ class SearchInfoViewModel : ViewModel() {
                     val powerFeed = getPowerFeedLevels()
 
                     if (!connectionTypes.isNullOrEmpty()) {
-                        builder.setConnectorTypes(connectionTypes.split(","))
+                        builder.setConnectorTypes(connectionTypes.split(",").filter { it.isNotEmpty() })
                     }
 
                     if (!chargeBrands.isNullOrEmpty()) {
-                        builder.setChargerBrands(chargeBrands.split(","))
+                        builder.setChargerBrands(chargeBrands.split(",").filter { it.isNotEmpty() })
                     }
 
                     if (!powerFeed.isNullOrEmpty()) {
-                        builder.setChargerBrands(powerFeed.split(","))
+                        builder.setPowerFeedLevels(powerFeed.split(",").filter { it.isNotEmpty() }.map { it.toInt() })
                     }
 
                     builder.setFreeCharge(isFreeCharger())

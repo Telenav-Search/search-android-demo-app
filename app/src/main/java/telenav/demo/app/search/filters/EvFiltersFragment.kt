@@ -157,10 +157,10 @@ class EvFiltersFragment : BottomSheetDialogFragment() , View.OnClickListener {
             if (it is CheckBox && it.isChecked) {
                 when {
                     binding?.flowConnectorTypes?.referencedIds?.contains(it.id) == true -> {
-                        connectionTypes = connectionTypes + it.tag + ", "
+                        connectionTypes = connectionTypes + it.tag + ","
                     }
                     binding?.flowChargerBrands?.referencedIds?.contains(it.id) == true -> {
-                        chargerBrands = chargerBrands + it.tag + ", "
+                        chargerBrands = chargerBrands + it.tag + ","
                     }
                     binding?.flowPowerFeedLevels?.referencedIds?.contains(it.id) == true -> {
                         powerFeed = powerFeed + it.tag + ","
