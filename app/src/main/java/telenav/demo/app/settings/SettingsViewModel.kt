@@ -3,11 +3,14 @@ package telenav.demo.app.settings
 import android.content.Context
 import android.location.Location
 import android.util.Log
+
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 import com.google.gson.Gson
+import com.telenav.sdk.entity.model.base.Polygon
 
 import telenav.demo.app.App
 import telenav.demo.app.BuildConfig
@@ -15,6 +18,7 @@ import telenav.demo.app.R
 import telenav.demo.app.model.*
 import telenav.demo.app.utils.LocationUtil
 import telenav.demo.app.utils.RSAEncipherDecipher
+import telenav.demo.app.utils.toGeoPoint
 
 import java.io.File
 
@@ -43,6 +47,9 @@ class SettingsViewModel: ViewModel() {
 
     val locations: LiveData<SearchLocations> = _locations
 
+    // polygons to locate region
+    private lateinit var mRegionPolygons: Map<String, Polygon>
+
 
     /**
      * init components which need context
@@ -51,11 +58,12 @@ class SettingsViewModel: ViewModel() {
      */
     fun init(context: Context) {
         Log.i(TAG, "init")
-        initServerData(context)
         initLocations(context)
+        initServerData(context)
     }
 
     private fun initLocations(context: Context) {
+        // init locations using SharedPreferences
         val sp = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
         val cvpLong = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG).toDouble()
@@ -66,6 +74,10 @@ class SettingsViewModel: ViewModel() {
             searchAreaLocation = LocationUtil.createLocation(salLat, salLong),
             saFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true),
             saFollowCvp = sp.getBoolean(App.KEY_SAL_CVP, true))
+
+        // read polygons from assets
+        mRegionPolygons = LocationUtil.readPolygons(context)
+        mCurrentRegion = locateRegion(_locations.value!!.searchAreaLocation)
     }
 
     private fun initServerData(context: Context) {
@@ -94,6 +106,28 @@ class SettingsViewModel: ViewModel() {
         val envIndex = envNames.indexOf(envName)
         _serverState.value = ServerState(serverNames, envNames, serverIndex, envIndex)
         Log.i(TAG, "initServerData: current serverName = $serverName, envName = $envName")
+
+        // observe location changes
+        _locations.observe(context as LifecycleOwner) {
+            val newRegion = locateRegion(it.searchAreaLocation)
+            if (newRegion != mCurrentRegion) {
+                onRegionChange(newRegion)
+            }
+        }
+    }
+
+    private fun onRegionChange(newRegion: String) {
+        Log.i(TAG, "onRegionChange: newRegion = $newRegion")
+        val serverList = mServerData[newRegion] ?: emptyList()
+        mCurrentRegion = newRegion
+        if (serverList.isEmpty()) {
+            _serverState.value = ServerState(emptyList(), emptyList(), 0, 0)
+            return
+        }
+
+        val serverNames = serverList.getProductNames()
+        val envNames = serverList.getEnvNames(serverNames[0])
+        _serverState.value = ServerState(serverNames, envNames, 0, 0)
     }
 
     /**
@@ -198,6 +232,15 @@ class SettingsViewModel: ViewModel() {
                             " total server count = ${values.flatten().size}")
                 }
         }
+    }
+
+    private fun locateRegion(location: Location): String {
+        mRegionPolygons.forEach {
+            if (LocationUtil.isInPolygon(location.toGeoPoint(), it.value)) return it.key
+        }
+        Log.w(TAG, "locateRegion: location not in region, using default NA." +
+                " lat = ${location.latitude}, long = ${location.longitude}")
+        return "NA" // set "NA" as default, if location not in any polygon we have
     }
 
     data class ServerState(
