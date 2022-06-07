@@ -2,7 +2,7 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <telenav.demo.app.widgets.OutsideEventLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -86,39 +86,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/separate_line1" />
 
-        <ImageView
-            android:id="@+id/parking_time_start_subtract"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_remove_circle"
-            android:layout_marginEnd="20dp"
-            app:tint="@color/blue_c1"
-            app:layout_constraintEnd_toStartOf="@+id/parking_time_start_from"
-            app:layout_constraintTop_toTopOf="@id/parking_time_start_from"
-            app:layout_constraintBottom_toBottomOf="@id/parking_time_start_from"/>
-
-        <TextView
-            android:id="@+id/parking_time_start_from"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"
-            android:layout_marginTop="9dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <FrameLayout
+            android:id="@+id/date_time_container"
+            android:layout_width="200dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="5dp"
             app:layout_constraintTop_toBottomOf="@id/parking_time_start_from_header"
-            tools:text="00:00"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <ImageView
-            android:id="@+id/parking_time_start_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_add_circle"
-            android:layout_marginStart="20dp"
-            app:tint="@color/blue_c1"
-            app:layout_constraintStart_toEndOf="@+id/parking_time_start_from"
-            app:layout_constraintTop_toTopOf="@id/parking_time_start_from"
-            app:layout_constraintBottom_toBottomOf="@id/parking_time_start_from"/>
+            <com.github.gzuliyujiang.wheelpicker.widget.DatimeWheelLayout
+                android:id="@+id/date_time_picker"
+                android:layout_width="200dp"
+                android:layout_height="90dp"
+                android:layout_gravity="center"
+                app:wheel_indicatorEnabled="false"
+                app:wheel_visibleItemCount="3"
+                app:wheel_dateMode="month_day"
+                app:wheel_timeMode="hour_24_no_second"
+                app:wheel_hourLabel=":"
+                app:layout_constraintTop_toBottomOf="@id/parking_time_start_from_header"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <View
+                android:id="@+id/date_time_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </FrameLayout>
 
         <TextView
             android:id="@+id/parking_time_start_from_reset"
@@ -138,11 +133,11 @@
             android:layout_height="1dp"
             android:layout_marginStart="20dp"
             android:layout_marginEnd="20dp"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="18dp"
             android:background="@color/blue_c2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/parking_time_start_from" />
+            app:layout_constraintTop_toBottomOf="@+id/date_time_container" />
 
         <TextView
             android:id="@+id/parking_duration_header"
@@ -317,5 +312,5 @@
 
         </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </telenav.demo.app.widgets.OutsideEventLayout>
 </layout>

@@ -34,8 +34,6 @@ import telenav.demo.app.utils.*
 import kotlin.collections.ArrayList
 
 import java.lang.reflect.Type
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.Executor
 
 private const val TAG = "SearchInfoViewModel"
@@ -145,12 +143,12 @@ class SearchInfoViewModel : ViewModel() {
                 setFilters(filtersSearch.build())
             }.apply {
                 if (filtersAvailable && filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG)) {
-                    val parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0)
-                    val parkingStartDuration = App.readIntFromSharedPreferences(App.PARKING_START_FROM, 0)
-                    if (parkingDuration != 0 || parkingStartDuration != 0) {
-                        val entryTime = getParkingStartFromDate()
+                    val parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0) * 60 // convert hours to minutes
+                    val entryTime = App.readStringFromSharedPreferences(App.PARKING_START_FROM, "")
+                    Log.i(TAG, "search: parking params, entryTime = $entryTime, duration = $parkingDuration")
+                    if (parkingDuration != 0 || !entryTime.isNullOrEmpty()) {
                         when {
-                            parkingStartDuration == 0 -> {
+                            entryTime.isNullOrEmpty() -> {
                                 val facetParameters = FacetParameters.builder()
                                     .setParkingParameters(
                                         ParkingParameters.builder()
@@ -379,21 +377,6 @@ class SearchInfoViewModel : ViewModel() {
             )
         }
         return filteredResults
-    }
-
-    private fun getParkingStartFromDate(): String {
-        val parkingStartDuration = App.readIntFromSharedPreferences(App.PARKING_START_FROM, 0)
-        if (parkingStartDuration != 0) {
-            val min = parkingStartDuration / 60 % 60
-            val sec = parkingStartDuration % 60
-            val calendar = Calendar.getInstance()
-            calendar.set(Calendar.MINUTE, min)
-            calendar.set(Calendar.SECOND, sec)
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            sdf.timeZone = TimeZone.getTimeZone("GMT")
-            return (sdf.format(calendar.time))
-        }
-        return ""
     }
 
     fun getRecentSearchData(context: Context): List<Entity> {
