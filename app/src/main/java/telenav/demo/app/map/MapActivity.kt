@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.core.Callback
 
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
@@ -30,10 +32,11 @@ import kotlinx.android.synthetic.main.view_bottom.*
 import kotlinx.android.synthetic.main.view_header_search.*
 
 import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.prediction.api.PredictionService
+import com.telenav.sdk.prediction.api.model.destination.DestinationPredictionResponse
 
 import telenav.demo.app.R
 import telenav.demo.app.*
-import telenav.demo.app.initialization.InitializationActivity
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
@@ -84,6 +87,7 @@ class MapActivity : AppCompatActivity() {
     private var hotCategoryName = ""
     private var hotCategoryTag = ""
     private var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
+    private var predictLocation: List<Entity> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +99,7 @@ class MapActivity : AppCompatActivity() {
         displayUserInfo()
         displayRecentSearchInfo()
         resetFilters()
+        fetchPredictionLocation()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -431,10 +436,13 @@ class MapActivity : AppCompatActivity() {
             ), listType
         )
 
+        // put prediction at first place, then followed by recent searches
+        val result = mutableListOf<Entity>()
+        result.addAll(predictLocation)
         recentSearchEntities?.let {
-            return  it
+            result.addAll(it)
         }
-        return null
+        return result.ifEmpty { null }
     }
 
     private fun resetFilters() {
@@ -478,6 +486,26 @@ class MapActivity : AppCompatActivity() {
     fun getCVPLocation(): Location = cvpLocation ?: gpsLocation
 
     fun getSearchAreaLocation(): Location = saLocation ?: gpsLocation
+
+    private fun fetchPredictionLocation() {
+        Log.i(TAG, "fetchPredictionLocation: start to fetch")
+        val location = getCVPLocation()
+        PredictionService.getClient().destinationPredictionRequest()
+            .predictionTime(0)
+            .predictionLocation(location.latitude, location.longitude)
+            .asyncCall(getUIExecutor(), object : Callback<DestinationPredictionResponse> {
+                override fun onSuccess(response: DestinationPredictionResponse) {
+                    val gson = Gson()
+                    predictLocation = response.results.map { gson.fromJson(gson.toJson(it.entity), Entity::class.java) }
+                    Log.i(TAG, "fetchPredictionLocation: onSuccess, result count = ${predictLocation.size}")
+                    if (predictLocation.isNotEmpty()) displayRecentSearchInfo()
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    Log.w(TAG, "fetchPredictionLocation: onFailure, msg = ${t?.message} ")
+                }
+            })
+    }
 }
 
 fun View.hideKeyboard() {

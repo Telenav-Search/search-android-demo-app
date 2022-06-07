@@ -26,6 +26,7 @@ import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
+import com.telenav.sdk.prediction.api.PredictionService
 
 import telenav.demo.app.App
 import telenav.demo.app.AppLifecycleCallbacks
@@ -138,7 +139,7 @@ class InitializationActivity : AppCompatActivity() {
                     if (!isChanged) {
                         DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
                         OtaService.initialize(this@InitializationActivity, sdkOptions)
-
+                        PredictionService.initialize(sdkOptions)
                     }
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
