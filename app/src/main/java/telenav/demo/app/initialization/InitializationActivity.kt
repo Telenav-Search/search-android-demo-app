@@ -1,6 +1,8 @@
 package telenav.demo.app.initialization
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.view.View
+import android.view.animation.BounceInterpolator
 import android.widget.Toast
 
 import androidx.appcompat.app.AppCompatActivity
@@ -42,10 +45,33 @@ import java.util.*
 import java.util.concurrent.Executor
 
 class InitializationActivity : AppCompatActivity() {
+    companion object {
+        private const val BOUNCE_DISTANCE = -100f
+        private const val ANIMATION_DURATION = 2000L
+        private const val ANIMATION_DELAY = 1000L
+    }
 
     private lateinit var vLoading: View
     private lateinit var vAccess: View
     private lateinit var vInitialization: View
+
+    // animate bouncing icon
+    private lateinit var vIcon: View
+    private val mAnimator by lazy {
+        ObjectAnimator.ofFloat(vIcon, View.TRANSLATION_Y, 0f, BOUNCE_DISTANCE, 0f).apply {
+            interpolator = BounceInterpolator()
+            duration = ANIMATION_DURATION
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator?) {}
+                override fun onAnimationEnd(animation: Animator?) {
+                    startAnimation() // Loop animate
+                }
+                override fun onAnimationCancel(animation: Animator?) {}
+                override fun onAnimationRepeat(animation: Animator?) {}
+            })
+        }
+    }
+    private val mAnimate: Runnable = Runnable { mAnimator.start() }
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
@@ -58,6 +84,7 @@ class InitializationActivity : AppCompatActivity() {
         vAccess = findViewById(R.id.initialization_access)
         vInitialization = findViewById(R.id.initialization)
         vLoading = findViewById(R.id.initialization_loading)
+        vIcon = findViewById(R.id.initialization_icon)
 
         findViewById<View>(R.id.initialization_select_index).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
@@ -179,6 +206,7 @@ class InitializationActivity : AppCompatActivity() {
             vLoading.visibility = View.GONE
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
+            stopAnimation()
         } else {
             getSavedSearchMode()
             getSavedIndexPath()
@@ -203,11 +231,28 @@ class InitializationActivity : AppCompatActivity() {
     private fun showProgress() {
         vLoading.visibility = View.VISIBLE
         vInitialization.visibility = View.GONE
+        startAnimation()
     }
 
     private fun hideProgress() {
         vLoading.visibility = View.GONE
         vInitialization.visibility = View.VISIBLE
+        stopAnimation()
+    }
+
+    private fun startAnimation() {
+        vIcon.postDelayed(mAnimate, ANIMATION_DELAY)
+    }
+
+    private fun stopAnimation() {
+        mAnimator.cancel()
+        vIcon.translationY = 0f // move icon to original place
+        vIcon.removeCallbacks(mAnimate)
+    }
+
+    override fun onStop() {
+        stopAnimation()
+        super.onStop()
     }
 }
 
@@ -226,7 +271,7 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
     val apiKey = serverData?.apiKey ?: BuildConfig.telenav_api_key
     val apiSecret = serverData?.apiSecret ?: BuildConfig.telenav_api_secret
     val apiEndpoint = serverData?.endpoint ?: BuildConfig.telenav_cloud_endpoint
-    val userId = App.readStringFromSharedPreferences(App.KEY_USER_ID, "")
+    val userId = App.readStringFromSharedPreferences(App.KEY_USER_ID, "").ifEmpty { BuildConfig.telenav_user_id }
     val application = ApplicationInfo.builder(
         BuildConfig.telenav_data_collector_applicationName,
         BuildConfig.telenav_data_cpllector_applicationVersion

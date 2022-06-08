@@ -83,13 +83,13 @@ class App : Application() {
             prefs?.apply()
         }
 
-        fun readStringFromSharedPreferences(keyName: String, def: String): String? {
+        fun readStringFromSharedPreferences(keyName: String, def: String): String {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
                     application?.applicationContext?.getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE
                 )
-            return prefs?.getString(keyName, def)
+            return prefs?.getString(keyName, def) ?: def
         }
 
         fun readIntFromSharedPreferences(keyName: String, def: Int): Int {

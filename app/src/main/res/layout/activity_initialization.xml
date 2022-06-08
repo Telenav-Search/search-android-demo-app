@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/initBackground"
@@ -10,7 +11,7 @@
         android:layout_height="2px"
         android:background="@color/colorAccent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/initialization_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,10 +19,16 @@
         android:visibility="gone">
 
         <ImageView
+            android:id="@+id/initialization_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_splash_screen"/>
-    </LinearLayout>
+            android:src="@drawable/ic_logo"
+            app:layout_constraintVertical_bias="0.4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/initialization_access"
