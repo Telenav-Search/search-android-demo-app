@@ -230,6 +230,7 @@
                     android:paddingVertical="8dp"
                     android:hint="@string/same_gps"
                     android:textSize="14sp"
+                    android:textColor="@color/blue_c1"
                     android:lines="1"
                     android:layout_marginEnd="14dp"
                     android:layout_marginVertical="10dp"
@@ -265,6 +266,11 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/colorAccent" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -289,6 +295,7 @@
                     android:paddingVertical="8dp"
                     android:hint="@string/same_gps"
                     android:textSize="14sp"
+                    android:textColor="@color/blue_c1"
                     android:lines="1"
                     android:layout_marginEnd="14dp"
                     android:layout_marginVertical="10dp"
@@ -334,6 +341,42 @@
                     android:paddingRight="-7dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBaseline_toBaselineOf="@id/sal_label"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/colorAccent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingVertical="10dp">
+
+                <TextView
+                    android:id="@+id/user_id_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_id"
+                    android:textColor="@color/blue_c1"
+                    android:textSize="14sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/user_id_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="8dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/blue_c1"
+                    android:lines="1"
+                    android:layout_marginVertical="10dp"
+                    android:background="@drawable/setting_location_bg"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/user_id_label" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>

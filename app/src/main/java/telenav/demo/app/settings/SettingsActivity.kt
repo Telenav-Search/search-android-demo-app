@@ -65,6 +65,11 @@ class SettingsActivity : AppCompatActivity() {
         }
         findViewById<View>(R.id.settings_back).setOnClickListener { save() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
+
+        // user id
+        val userIdText = findViewById<TextView>(R.id.user_id_text)
+        userIdText.setOnClickListener { showEditTextDialog { viewModel.onUserIdChange(it) } }
+        viewModel.userId.observe(this) { userIdText.text = it }
     }
 
     private fun initLocations() {
@@ -146,32 +151,38 @@ class SettingsActivity : AppCompatActivity() {
         if (view !is TextView) return
 
         view.setOnClickListener {
-            val dialog = AlertDialog.Builder(this).setView(R.layout.input_dialog).create()
-
-            // set window attrs: 1. gravity bottom 2. show keyboard
-            dialog.window?.setGravity(Gravity.BOTTOM)
-            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-            dialog.setCanceledOnTouchOutside(true)
-            dialog.show()
-
-            // focus on edittext when dialog shown to start input
-            val editText = dialog.findViewById<EditText>(R.id.input_text)!!
-            editText.requestFocus()
-            editText.setOnEditorActionListener { _, _, keyEvent ->
-                if (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
-                    dialog.dismiss()
-                }
-                true
-            }
-
-            // when dismissed, check lat long validation to choose save it or not
-            dialog.setOnDismissListener {
-                LocationUtil.parseGeoCoordinate(editText.text.toString())?.let {
+            showEditTextDialog { text ->
+                LocationUtil.parseGeoCoordinate(text)?.let {
                     successJob.invoke(it)
-                    return@setOnDismissListener
+                    return@showEditTextDialog
                 }
                 Toast.makeText(this, R.string.invalid_latlong_toast, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun showEditTextDialog(callback: (String) -> Unit) {
+        val dialog = AlertDialog.Builder(this).setView(R.layout.input_dialog).create()
+
+        // set window attrs: 1. gravity bottom 2. show keyboard
+        dialog.window?.setGravity(Gravity.BOTTOM)
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.show()
+
+        // focus on edittext when dialog shown to start input
+        val editText = dialog.findViewById<EditText>(R.id.input_text)!!
+        editText.requestFocus()
+        editText.setOnEditorActionListener { _, _, keyEvent ->
+            if (keyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
+                dialog.dismiss()
+            }
+            true
+        }
+
+        // when dismissed, check lat long validation to choose save it or not
+        dialog.setOnDismissListener {
+            callback.invoke(editText.text.toString())
         }
     }
 
@@ -243,6 +254,9 @@ class SettingsActivity : AppCompatActivity() {
 
             // serverInfo
             viewModel.mCurrentServer?.let { ServerDataUtil.saveInfo(it, this) }
+
+            // User ID
+            viewModel.userId.value?.let { putString(App.KEY_USER_ID, it) }
 
             // write batch
             apply()

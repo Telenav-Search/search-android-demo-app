@@ -226,7 +226,7 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
     val apiKey = serverData?.apiKey ?: BuildConfig.telenav_api_key
     val apiSecret = serverData?.apiSecret ?: BuildConfig.telenav_api_secret
     val apiEndpoint = serverData?.endpoint ?: BuildConfig.telenav_cloud_endpoint
-    val userId = BuildConfig.telenav_user_id
+    val userId = App.readStringFromSharedPreferences(App.KEY_USER_ID, "")
     val application = ApplicationInfo.builder(
         BuildConfig.telenav_data_collector_applicationName,
         BuildConfig.telenav_data_cpllector_applicationVersion

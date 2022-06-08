@@ -10,6 +10,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 import com.google.gson.Gson
+
+import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.entity.model.base.Polygon
 
 import telenav.demo.app.App
@@ -50,6 +52,10 @@ class SettingsViewModel: ViewModel() {
     // polygons to locate region
     private lateinit var mRegionPolygons: Map<String, Polygon>
 
+    private val _userId = MutableLiveData<String>()
+
+    val userId: LiveData<String> = _userId
+
 
     /**
      * init components which need context
@@ -58,11 +64,11 @@ class SettingsViewModel: ViewModel() {
      */
     fun init(context: Context) {
         Log.i(TAG, "init")
-        initLocations(context)
+        initWithSP(context)
         initServerData(context)
     }
 
-    private fun initLocations(context: Context) {
+    private fun initWithSP(context: Context) {
         // init locations using SharedPreferences
         val sp = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
         val cvpLat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT).toDouble()
@@ -78,6 +84,9 @@ class SettingsViewModel: ViewModel() {
         // read polygons from assets
         mRegionPolygons = LocationUtil.readPolygons(context)
         mCurrentRegion = locateRegion(_locations.value!!.searchAreaLocation)
+
+        // read user id
+        _userId.value = sp.getString(App.KEY_USER_ID, "")
     }
 
     private fun initServerData(context: Context) {
@@ -181,7 +190,7 @@ class SettingsViewModel: ViewModel() {
     fun onLocationChange(intent: LocationIntent) {
         // location must be initialized before interaction
         val location = _locations.value ?: return
-        _locations.value = when(intent) {
+        _locations.value = when (intent) {
             is CvpFollowGPS -> {
                 if (location.saFollowCvp) {
                     location.copy(cvpFollowGPS = intent.status, saFollowGPS = intent.status)
@@ -212,6 +221,17 @@ class SettingsViewModel: ViewModel() {
                 location.copy(searchAreaLocation = intent.location, saFollowGPS = false, saFollowCvp = false)
             }
         }
+    }
+
+    /**
+     * User id change
+     *
+     * @param newId user id
+     */
+    fun onUserIdChange(newId: String) {
+        Log.i(TAG, "onUserIdChange: new id = $newId")
+        _userId.value = newId
+        SDKRuntime.updateUserId(newId)
     }
 
     private fun fetchServerData(context: Context): Map<String, List<ServerInfo>> {

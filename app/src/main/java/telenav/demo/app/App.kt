@@ -42,6 +42,7 @@ class App : Application() {
         const val KEY_SAL_LONG = "key_sal_long"
         const val KEY_SAL_GPS = "key_sal_gps"
         const val KEY_SAL_CVP = "key_sal_cvp"
+        const val KEY_USER_ID = "key_user_id"
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
