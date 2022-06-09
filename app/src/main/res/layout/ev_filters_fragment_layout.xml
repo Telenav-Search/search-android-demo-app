@@ -10,15 +10,9 @@
         android:backgroundTint="@color/translucent_white"
         android:paddingBottom="@dimen/general_padding_large">
 
-        <View
+        <include
             android:id="@+id/separate_line"
-            android:layout_width="26dp"
-            android:layout_height="3dp"
-            android:layout_marginTop="10dp"
-            android:background="@color/blue_c1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            layout="@layout/separate_line" />
 
         <ImageView
             android:id="@+id/ev_filters_area_back"

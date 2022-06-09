@@ -11,14 +11,9 @@
     app:behavior_peekHeight="73dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <View
+    <include
         android:id="@+id/separate_line"
-        android:layout_width="26dp"
-        android:layout_height="3dp"
-        android:background="@color/blue_c1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        layout="@layout/separate_line" />
 
     <FrameLayout
         android:id="@+id/frame_entity_details"
