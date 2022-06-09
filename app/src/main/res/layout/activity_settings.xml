@@ -81,6 +81,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:backgroundTint="@color/grey_c2"
+                    android:stateListAnimator="@null"
                     android:text="@string/browse"
                     android:textColor="@color/black_c1"
                     android:textSize="12sp"
@@ -250,6 +251,7 @@
                     android:fontFamily="sans-serif"
                     android:letterSpacing="0"
                     android:backgroundTint="@color/grey_c2"
+                    android:stateListAnimator="@null"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBaseline_toBaselineOf="@id/cvp_text"
                     app:layout_constraintStart_toEndOf="@id/cvp_text"/>
@@ -315,6 +317,7 @@
                     android:fontFamily="sans-serif"
                     android:letterSpacing="0"
                     android:backgroundTint="@color/grey_c2"
+                    android:stateListAnimator="@null"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBaseline_toBaselineOf="@id/sal_text"
                     app:layout_constraintStart_toEndOf="@id/sal_text"/>
