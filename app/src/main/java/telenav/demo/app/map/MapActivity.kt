@@ -99,7 +99,6 @@ class MapActivity : AppCompatActivity() {
         displayUserInfo()
         displayRecentSearchInfo()
         resetFilters()
-        fetchPredictionLocation()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -177,6 +176,7 @@ class MapActivity : AppCompatActivity() {
         super.onResume()
         setGPSListener(locationCallback)
         updateLocationsFromSP()
+        fetchPredictionLocation()
     }
 
     override fun onPause() {

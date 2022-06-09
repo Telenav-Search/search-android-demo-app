@@ -96,6 +96,7 @@ class SettingsActivity : AppCompatActivity() {
 
             // sal
             cvp_same_checkbox.isChecked = it.saFollowCvp
+            setSalEnable(!it.saFollowCvp)
             when {
                 it.saFollowCvp -> {
                     sal_text.text = cvp_text.text
@@ -104,6 +105,12 @@ class SettingsActivity : AppCompatActivity() {
                 else -> sal_text.text = it.searchAreaLocation.toLatLongString()
             }
         }
+    }
+
+    private fun setSalEnable(enable: Boolean) {
+        sal_text.isEnabled = enable
+        sal_quick_link.isEnabled = enable
+        sal_reset.isEnabled = enable
     }
 
     private fun initServers() {
@@ -128,11 +135,11 @@ class SettingsActivity : AppCompatActivity() {
             override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
 
-        val serverAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf<String>())
+        val serverAdapter = ArrayAdapter(this, R.layout.spinner_item, mutableListOf<String>())
         serverAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         engine_spinner.adapter = serverAdapter
 
-        val envAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, mutableListOf<String>())
+        val envAdapter = ArrayAdapter(this, R.layout.spinner_item, mutableListOf<String>())
         envAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         env_spinner.adapter = envAdapter
 
