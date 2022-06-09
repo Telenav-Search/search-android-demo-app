@@ -83,7 +83,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
                 val searchResult = searchResultList[index]
                 if (index < entitiesList.size) {
                     val entity = entitiesList[index]
-                    (activity!! as MapActivity).showEntityDetails(searchResult, entity)
+                    (requireActivity() as MapActivity).showEntityDetails(searchResult, entity)
                 }
             }
         }
@@ -131,40 +131,37 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         currentSearchHotTag: String?,
         shouldOpenEntityDetails: Boolean = false) {
 
-        if (entity.place == null) {
-            return
+        val geoPoint = when {
+            entity.place != null -> entity.place.address.navCoordinates
+            entity.address != null -> entity.address.geoCoordinates
+            else -> return
+        }
+        val title = when {
+            entity.place != null -> entity.place.name
+            entity.address != null -> entity.address.formattedAddress
+            else -> return
         }
         entitiesList.add(entity)
         val searchResult =
             CategoryAndFiltersUtil.generateSearchResult(entity, currentSearchHotTag)
         searchResultList.add(searchResult)
-        coordinatesList.add(
-            LatLng(
-                entity.place.address.navCoordinates.latitude,
-                entity.place.address.navCoordinates.longitude
-            )
-        )
+        coordinatesList.add(LatLng(geoPoint.latitude, geoPoint.longitude))
 
         googleMap?.addMarker(
             MarkerOptions()
-                .position(
-                    LatLng(
-                        entity.place.address.navCoordinates.latitude,
-                        entity.place.address.navCoordinates.longitude
-                    )
-                )
-                .title(entity.place.name)
+                .position(LatLng(geoPoint.latitude, geoPoint.longitude))
+                .title(title)
                 .zIndex(searchResultList.size.toFloat())
                 .icon(
                     CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                        activity!!,
-                        searchResult.iconId
+                        requireActivity(),
+                        if (searchResult.iconId <= 0) R.drawable.ic_more_color else searchResult.iconId
                     )
                 )
         )
 
         if (shouldOpenEntityDetails) {
-            (activity!! as MapActivity).showEntityDetails(searchResult, entity)
+            (requireActivity() as MapActivity).showEntityDetails(searchResult, entity)
         }
     }
 
@@ -181,7 +178,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
                 .position(latLng)
                 .icon(
                     CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                        activity!!,
+                        requireActivity(),
                         R.drawable.ic_star_full
                     )
                 )
@@ -206,7 +203,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
             }
             it.isTrafficEnabled = true
 
-            val location = (activity!! as MapActivity).getCVPLocation()
+            val location = (requireActivity() as MapActivity).getCVPLocation()
             positionMap(location.latitude, location.longitude)
 
             googleMap?.setOnMarkerClickListener(this)
@@ -225,6 +222,6 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         googleMap?.projection?.fromScreenLocation(screenPoint)
 
     override fun onMapClick(p0: LatLng?) {
-        (activity!! as MapActivity).collapseEntityDetails()
+        (requireActivity() as MapActivity).collapseEntityDetails()
     }
 }

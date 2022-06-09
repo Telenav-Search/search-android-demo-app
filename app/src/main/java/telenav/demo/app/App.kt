@@ -152,6 +152,7 @@ fun Context.stopGPSListener(locationCallback: LocationCallback) {
 }
 
 fun Context.convertNumberToDistance(dist: Double): String {
+    if (dist < 0) return ""
     val km = dist / 1000.0
 
     val iso = resources.configuration.locale.getISO3Country()

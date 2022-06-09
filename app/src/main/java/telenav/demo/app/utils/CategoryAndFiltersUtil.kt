@@ -400,9 +400,21 @@ object CategoryAndFiltersUtil {
 
 
     fun generateSearchResult(entityResult: Entity?, currentSearchHotCategory: String?) : SearchResult {
-        if (entityResult == null || entityResult.place==null) {
+        if (entityResult == null || (entityResult.place==null && entityResult.address == null)) {
             return SearchResult.build("No result", "No category") {}
         }
+
+        // address result
+        if (entityResult.place == null) {
+            val address = entityResult.address
+            return SearchResult.build(address.formattedAddress, "") {
+                iconId = R.drawable.ic_more_color
+                latitude = address.navCoordinates.latitude
+                longitude = address.navCoordinates.longitude
+                distance = -1.0 // negative distance to prevent showing 0.0mil on screen
+            }
+        }
+
         var categoryName = " "
         if (entityResult.place.categories.isNotEmpty() && entityResult.place.categories[0] != null && entityResult.place.categories[0].name != null) {
             categoryName = entityResult.place.categories[0].name
