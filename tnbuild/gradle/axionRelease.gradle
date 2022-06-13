@@ -1,0 +1,212 @@
+apply plugin: "pl.allegro.tech.build.axion-release"
+
+scmVersion {
+    repository {
+        pushTagsOnly = false
+    }
+    useHighestVersion = false
+    tag {
+        prefix = project.name // prefix to be used, 'release' by default
+        branchPrefix = [ // set different prefix per branch
+                         'legacy/.*' : 'legacy',
+                         'master'    : 'master',
+                         'release/.*': 'release'
+        ]
+        versionSeparator = '-' // separator between prefix and version number, '-' by default
+        //serialize = { tag, version -> ... } // creates tag name from raw version
+        //deserialize = { tag, position, tagName -> ... } // reads raw version from tag
+        initialVersion = { tag, position ->
+            // println "Current TAG: ${tag}"
+            String branchName = position.branch
+            def initVersion = branchName.split('/')[-1]
+            if (branchName in ['master', 'origin/master']) {
+                initVersion = project.hasProperty('masterInitVersion') ? masterInitVersion : '1.0.0'
+            } else if (!branchName.startsWith('release')) {
+                initVersion = "0.0.1"
+            } else {
+                initVersion = initReleaseVersion(branchName, initVersion)
+            }
+            // println "********** Tag-initialVersion: ${initVersion} **********"
+            return initVersion
+        }
+    }
+    // doc: Version / Decorating
+    //versionCreator { version, position -> ... } // creates version visible for Gradle from raw version and current position in scm
+    versionCreator 'versionWithBranch' // use one of predefined version creators
+    branchVersionCreator = [ // use different creator per branch
+                             'release/.*': 'simple',
+                             'master'    : 'simple'
+    ]
+    // doc: Version / Incrementing
+    //versionIncrementer {context, config -> ...} // closure that increments a version from the raw version, current position in scm and config
+    versionIncrementer 'incrementPatch' // use one of predefined version incrementing rules
+    def branchVersionIncrementerMap =
+            [ // use different incrementer per branch
+              'feature/.*'      : 'incrementMinor',
+              'release/sprint.*': { context ->
+                  println "Incrementing handling pattern release/sprint.*"
+                  return generateCurrentVersionWithSuffix(context)
+              },
+              'release/rel.*'   : { context ->
+                  println "Incrementing handling pattern release/rel-.*"
+                  return generateCurrentVersionWithSuffix(context)
+              }
+            ]
+    boolean enableBetaVersion = project.hasProperty('enableBetaVersion') ? Boolean.valueOf(project.enableBetaVersion) : false
+    if (enableBetaVersion) {
+        branchVersionIncrementerMap.put('release/(\\.*[0-9])*$', { context ->
+            println "Incrementing handling pattern release/1.1"
+            return generateCurrentVersionWithDefault(context)
+        })
+    }
+    branchVersionIncrementer = branchVersionIncrementerMap
+
+    // doc: Pre-release checks
+    checks {
+        uncommittedChanges = false // permanently disable uncommitted changes check
+        aheadOfRemote = true // permanently disable ahead of remote check
+        snapshotDependencies = true
+    }
+}
+
+def generateCurrentVersionWithDefault(context) {
+    def currentVersion = context.currentVersion
+    String normalVersion = currentVersion.getNormalVersion()
+    String preReleaseVersion = currentVersion.getPreReleaseVersion() // return string
+    println "release/(\\.*[0-9])*\$ pattern normal version: [$normalVersion] and preRelease version: [$preReleaseVersion]"
+    println "********** branchVersionIncrementer start: ${currentVersion} **********"
+    if (preReleaseVersion) {
+        currentVersion = currentVersion.incrementPreReleaseVersion()
+    } else {
+        currentVersion = currentVersion.incrementPatchVersion("beta.1".toUpperCase())
+    }
+    println "********** branchVersionIncrementer end: ${currentVersion} **********"
+    return currentVersion
+}
+
+def generateCurrentVersionWithSuffix(context) {
+    def currentVersion = context.currentVersion
+    String normalVersion = currentVersion.getNormalVersion()
+    String preReleaseVersion = currentVersion.getPreReleaseVersion() // return string
+    println "suffix pattern normal version: [$normalVersion] and preRelease version: [$preReleaseVersion]"
+    if (preReleaseVersion.length() <= 0) {
+        println "******* preReleaseVersion is ${preReleaseVersion}"
+        println "No need of more work..."
+        return currentVersion
+    }
+    println "********** branchVersionIncrementer start: ${currentVersion} **********"
+    String[] tokens = preReleaseVersion.split('\\.')
+    tokens[-1] = Integer.parseInt(tokens[-1]) + 1
+    currentVersion = context.currentVersion.setPreReleaseVersion(tokens.join('.')) // return Version object
+    println "********** branchVersionIncrementer end: ${currentVersion} **********"
+    return currentVersion
+}
+
+def initReleaseVersion(String branchName, initVersion) {
+    println "Current Branch Name: $branchName"
+    if (branchName.split('/')[-1].toLowerCase().startsWith("sprint")) {
+        // Support branch name release/sprint128 or release/sprint128-api
+        initVersion = initReleaseVersionWithSprint(branchName)
+    } else if (branchName.split('/')[-1].toLowerCase().startsWith("rel-")) {
+        // Support branch name release/rel-*
+        initVersion = initReleaseVersionWithRel(branchName)
+    } else {
+        boolean enableBetaVersion = project.hasProperty('enableBetaVersion') ? Boolean.valueOf(project.enableBetaVersion) : false
+        if (enableBetaVersion) {
+            initVersion = initReleaseVersionWithSuffix(branchName)
+        } else {
+            // Support branch name release/1.1
+            initVersion = initReleaseVersionWithDefault(branchName)
+        }
+    }
+    return initVersion
+}
+
+def initReleaseVersionWithDefault(String branchName) {
+    println "no release pattern found."
+    def versionList = branchName.split('/')[-1].tokenize('.')
+    fillSemanticVersion(versionList)
+    def initVersion = versionList.join('.')
+    println "Init version is ${initVersion}"
+    return initVersion
+}
+
+def initReleaseVersionWithSuffix(String branchName) {
+    println "1.1 handling code does get executed."
+    def initVersion = initReleaseVersionWithDefault(branchName)
+    initVersion += "-beta.1".toUpperCase()
+    println "Init version is ${initVersion}"
+    return initVersion
+}
+
+def initReleaseVersionWithRel(String branchName) {
+    println "${branchName.split('/')[-1]} handling code does get executed."
+    def productModelYearTokens = branchName.split('/')[-1].tokenize("-")
+    productModelYearTokens.remove(0)
+    def initVersion = "1.0.0-${productModelYearTokens.join("-").toUpperCase()}.0"
+    println "Init version is ${initVersion}"
+    return initVersion
+}
+
+def initReleaseVersionWithSprint(String branchName) {
+    println "sprint handling code does get executed."
+    String sprintNumber = branchName.split('/')[-1].toLowerCase().split("sprint")[-1]
+    sprintNumber = sprintNumber.toUpperCase()
+    println "Extracted sprint number ${sprintNumber}"
+    //if descriptor is in sprint number , sprint111-google-api-removal
+    def initVersion
+    if (sprintNumber.contains("-")) {
+        initVersion = "1.0.${sprintNumber}.0"
+    } else {
+        initVersion = "1.0.${sprintNumber}-SPRINT.0"
+    }
+    return initVersion
+}
+
+def fillSemanticVersion(List<String> versionList) {
+    while (!versionList.last().isInteger() && versionList.size() > 2) {
+        // trim last integer, 1.0.1 -> 1.0
+        versionList.removeLast()
+    }
+    while (versionList.size() < 3) {
+        // append 0 to version, 1 -> 1.0 -> 1.0.0
+        versionList.add('0')
+    }
+}
+
+task loadKeyPassword {
+    doLast {
+        scmVersion.repository.customUsername = System.properties['gitRelease.username']
+        scmVersion.repository.customPassword = System.properties['gitRelease.token']
+    }
+}
+
+currentVersion {
+    doLast {
+        def tnBuildDir = file("${rootDir}/.tnbuild")
+        if (!tnBuildDir.exists()) {
+            tnBuildDir.mkdirs()
+        }
+        def file = file("${rootDir}/.tnbuild/version.properties")
+        if (file.exists()) {
+            file.delete()
+        }
+        file << "version=${version}\n"
+    }
+}
+
+release.dependsOn(loadKeyPassword)
+markNextVersion.dependsOn(loadKeyPassword)
+
+allprojects {
+    // init version is "unspecified"
+    version = (project.hasProperty('version') && version != 'unspecified') ? version : scmVersion.version
+    // If build type is NI, then change version number to add -NI-SNAPSHOT
+    def buildType = project.hasProperty('buildType') ? project.buildType : ''
+    if (buildType == 'NI') {
+        if (version.endsWith("-SNAPSHOT")) {
+            def versionPrefix = "$version".substring(0, "$version".indexOf("-SNAPSHOT"))
+            version = "$versionPrefix-NI-SNAPSHOT"
+        }
+    }
+}
