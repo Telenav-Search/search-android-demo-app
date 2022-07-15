@@ -21,10 +21,9 @@ import com.telenav.sdk.entity.model.prediction.WordPrediction
 import com.telenav.sdk.entity.model.search.*
 import com.telenav.sdk.entity.utils.EntityJsonConverter
 import telenav.demo.app.App
-import telenav.demo.app.homepage.HotCategory
-import telenav.demo.app.search.filters.OpenNowFilter
 import telenav.demo.app.search.filters.PriceLevel
 import telenav.demo.app.search.filters.StarsFilter
+import telenav.demo.app.utils.CategoryAndFiltersUtil
 import java.util.concurrent.Executor
 
 private const val TAG = "SearchViewModel"
@@ -37,7 +36,7 @@ class SearchViewModel : ViewModel() {
 
     var filters: List<Any>? = null
     private val telenavEntityClient: EntityClient by lazy { EntityService.getClient() }
-    var categories = MutableLiveData<List<Category>>().apply { listOf<HotCategory>() }
+    var categories = MutableLiveData<List<Category>>().apply { listOf<CategoryAndFiltersUtil.HotCategory>() }
 
     var searchResults = MutableLiveData<List<Any>>().apply { listOf<Any>() }
     var loading = MutableLiveData<Boolean>()
@@ -220,7 +219,7 @@ class SearchViewModel : ViewModel() {
             }.apply {
                     setFilters(filtersSearch.build())
                 }
-            .setLocation(location.latitude, location.longitude)
+            .setLocation(37.78509, -122.41988)
             .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
                     SEARCH_LIMIT_WITH_FILTERS.toString())!!.toInt())
             .asyncCall(
@@ -298,9 +297,6 @@ class SearchViewModel : ViewModel() {
             )
         }
         filters?.forEach { it ->
-            if (it is OpenNowFilter) {
-                filteredResults = filterByOpen(results)
-            }
             if (it is StarsFilter) {
                 filteredResults = filterByStar(results, it)
             }

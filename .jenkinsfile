@@ -1,0 +1,51 @@
+#! groovy
+properties([
+        [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', numToKeepStr: '200']],
+        parameters([
+                string(name: 'LIB_VERSION', defaultValue: 'release/1.0', description: 'You can input the Jenkins shared library version, default is 1.0, the repository link: https://bitbucket.telenav.com/scm/sear/jenkins-shared-libs.git'),
+                choice(name: 'BUILD_TYPE', choices: ['CI', 'DEV', 'RC'], description: 'Build type'),
+                booleanParam(name: 'FORCE_BUILD', defaultValue: false, description: 'Force build current project.'),
+                string(name: 'TELENAV_JFORG_USER', defaultValue: '', description: 'JFrog Username'),
+                string(name: 'TELENAV_JFORG_PASSWORD', defaultValue: '', description: 'JFrog Password'),
+                string(name: 'TELENAV_USER_ID', defaultValue: '', description: 'Telenav user id'),
+                string(name: 'TELENAV_API_KEY', defaultValue: '', description: 'Telenav api key'),
+                string(name: 'TELENAV_API_SECRET', defaultValue: '', description: 'Telenav api secret'),
+                string(name: 'TELENAV_CLOUD_ENDPOINT', defaultValue: '', description: 'Telenav cloud endpoint'),
+                string(name: 'RSA_PUBLIC_KEY', defaultValue: '', description: 'RSA public key'),
+                string(name: 'RSA_PRIVATE_KEY', defaultValue: '', description: 'RSA private key'),
+                booleanParam(name: 'REFRESH_BUILD', defaultValue: false, description: 'Do NOT do anything only refresh current script and skip all steps.')
+        ])
+])
+
+library "searchpipeline@${params.LIB_VERSION}"
+
+def buildType = params.BUILD_TYPE.trim()
+boolean forceBuild = params.FORCE_BUILD
+boolean refreshBuild = params.REFRESH_BUILD
+
+def telenav_jfrog_user = params.TELENAV_JFORG_USER.trim()
+def telenav_jfrog_password = params.TELENAV_JFORG_PASSWORD.trim()
+def telenav_user_id = params.TELENAV_USER_ID.trim()
+def telenav_api_key = params.TELENAV_API_KEY.trim()
+def telenav_api_secret = params.TELENAV_API_SECRET.trim()
+def telenav_cloud_endpoint = params.TELENAV_CLOUD_ENDPOINT.trim()
+def rsa_public_key = params.RSA_PUBLIC_KEY.trim()
+def rsa_private_key = params.RSA_PRIVATE_KEY.trim()
+
+def buildParameters = [:]
+buildParameters.put('telenav_jfrog_user', telenav_jfrog_user)
+buildParameters.put('telenav_jfrog_password', telenav_jfrog_password)
+buildParameters.put('telenav_user_id', telenav_user_id)
+buildParameters.put('telenav_api_key', telenav_api_key)
+buildParameters.put('telenav_api_secret', telenav_api_secret)
+buildParameters.put('telenav_cloud_endpoint', telenav_cloud_endpoint)
+buildParameters.put('rsa_public_key', rsa_public_key)
+buildParameters.put('rsa_private_key', rsa_private_key)
+
+buildPipeline(
+        env: env,
+        buildType: buildType,
+        forceBuild: forceBuild,
+        buildParameters: buildParameters,
+        refreshBuild: refreshBuild
+)

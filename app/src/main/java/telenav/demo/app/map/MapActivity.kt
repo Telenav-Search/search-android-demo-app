@@ -6,38 +6,50 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.InputMethodManager
+
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.helper.widget.Flow
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.telenav.sdk.entity.model.base.Entity
-import com.telenav.sdk.entity.model.prediction.Suggestion
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.telenav.sdk.core.Callback
+
 import kotlinx.android.synthetic.main.activity_map.*
+import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
 import kotlinx.android.synthetic.main.view_bottom.*
+import kotlinx.android.synthetic.main.view_header_search.*
+
+import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.prediction.api.PredictionService
+import com.telenav.sdk.prediction.api.model.destination.DestinationPredictionResponse
+
 import telenav.demo.app.R
-import telenav.demo.app.homepage.CategoriesFragment
-import telenav.demo.app.homepage.HotCategory
-import telenav.demo.app.homepage.getUIExecutor
-import telenav.demo.app.initialization.InitializationActivity
-import telenav.demo.app.personalinfo.PersonalInfoActivity
+import telenav.demo.app.*
+import telenav.demo.app.model.SearchResult
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
-import telenav.demo.app.search.filters.Filter
-import telenav.demo.app.setGPSListener
+import telenav.demo.app.search.filters.*
 import telenav.demo.app.settings.SettingsActivity
-import telenav.demo.app.stopGPSListener
-import telenav.demo.app.utils.CategoryAndFiltersUtil.getOriginalQuery
 import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
-import telenav.demo.app.widgets.CategoryView
-import java.util.*
+import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
+import telenav.demo.app.utils.LocationUtil
+import telenav.demo.app.widgets.CategoryAdapter
+
+import java.lang.reflect.Type
 import java.util.concurrent.Executor
 
 class MapActivity : AppCompatActivity() {
@@ -47,25 +59,35 @@ class MapActivity : AppCompatActivity() {
         private const val MAP_FRAGMENT_TAG = "MapFragment"
         private const val CODE_SETTINGS = 3
         const val IS_ENV_CHANGED = "IS_ENV_CHANGED"
+        private val FRAGMENT_TAG = "EntityDetailsFragment"
     }
 
-    private var filters: List<Filter>? = null
     private var lastSearch: String = ""
+    private var navigationFromSearchInfo = false
+    private var navigationFromPersonalInfo = false
     private var locationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult?) {
             locationResult ?: return
-            lastKnownLocation = locationResult.lastLocation
+            gpsLocation = locationResult.lastLocation
+            val cameraLocation = cvpLocation ?: gpsLocation
             mapFragment?.animateCameraToCurrentLocation(
                 LatLng(
-                    lastKnownLocation!!.latitude,
-                    lastKnownLocation!!.longitude
+                    cameraLocation.latitude,
+                    cameraLocation.longitude
                 )
             )
         }
     }
     lateinit var behavior: BottomSheetBehavior<*>
-    var lastKnownLocation: Location = Location("")
+    lateinit var entityDetailsBehavior: BottomSheetBehavior<*>
+    private var gpsLocation: Location = Location("")
+    private var cvpLocation: Location? = Location("") // null means use gpsLocation
+    private var saLocation: Location? = Location("") // null means use gpsLocation
     private var mapFragment: MapFragment? = null
+    private var hotCategoryName = ""
+    private var hotCategoryTag = ""
+    private var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
+    private var predictLocation: List<Entity> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,66 +97,69 @@ class MapActivity : AppCompatActivity() {
         showMapFragment(mapFragment!!)
         displayHotCategories()
         displayUserInfo()
-    }
-
-    fun redoButtonLogic() {
-        if (lastSearch.isEmpty()) {
-            redo_button.visibility = View.GONE
-        } else {
-            redo_button.visibility = View.VISIBLE
-        }
-        redo_button.setOnClickListener {
-            enableDisableRedoButton(false)
-            val region = mapFragment?.getRegion()
-            if (filters != null) {
-                mapFragment?.setFilters(filters!!)
-            } else {
-                mapFragment?.setFilters(null)
-            }
-            try {
-                lastSearch.toInt()
-                mapFragment?.searchInRegion(null, lastSearch, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            } catch (e: Exception) {
-                mapFragment?.searchInRegion(lastSearch, null, lastKnownLocation, getUIExecutor(),
-                        region?.nearLeft, region?.farRight)
-            }
-        }
-    }
-
-    fun enableDisableRedoButton(enable: Boolean) {
-        redo_button.isEnabled = enable
+        displayRecentSearchInfo()
+        resetFilters()
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupListeners() {
-        fab_search.setOnClickListener { openSearch() }
-        app_mode_select.setOnClickListener { showSettingsActivity() }
-        app_personal_info.setOnClickListener { showPersonalInfoActivity() }
         user_icon.setOnClickListener {
             collapseBottomSheet()
             showPersonalInfoFragment()
         }
+
+        entity_details_back.setOnClickListener {
+            onBackSearchInfoFragment()
+        }
+
+        entity_header_clear.setOnClickListener {
+            onBackSearchInfoFragment()
+        }
+
+        search.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchListBottomFragment()
+            }
+        }
+        search.setOnClickListener { showSearchListBottomFragment() }
     }
 
-    private fun showPersonalInfoActivity() {
-        startActivity(Intent(this, PersonalInfoActivity::class.java))
+    fun onBackFromFilterFragment() {
+        showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag, false)
     }
 
-    private fun showSettingsActivity() {
+    private fun onBackSearchInfoFragment() {
+        entity_details.visibility = View.GONE
+        top_navigation_panel.visibility = View.GONE
+        view_bottom.visibility = View.VISIBLE
+        when {
+            navigationFromSearchInfo -> {
+                showSearchInfoBottomFragment(hotCategoryName, hotCategoryTag, true)
+                navigationFromSearchInfo = false
+            }
+            navigationFromPersonalInfo -> {
+                showPersonalInfoFragment()
+                navigationFromPersonalInfo = false
+            }
+            else -> {
+                updateBottomSheetState()
+            }
+        }
+    }
+
+    fun showSettingsActivity() {
         startActivityForResult(Intent(this, SettingsActivity::class.java), CODE_SETTINGS)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === CODE_SETTINGS) {
+            // update CVP Locations when back from settings
+            updateLocationsFromSP()
             if (resultCode === Activity.RESULT_OK) {
                 if (data != null) {
                     val isChanged = data.getBooleanExtra(IS_ENV_CHANGED, false)
                     if (isChanged) {
-                        val toInit = Intent(this@MapActivity, InitializationActivity::class.java)
-                        toInit.putExtra(IS_ENV_CHANGED, true)
-                        startActivity(toInit)
                         finish()
                     }
                 }
@@ -142,17 +167,16 @@ class MapActivity : AppCompatActivity() {
         }
     }
 
-    var searchFragment: SearchBottomFragment? = null
-    private fun openSearch() {
-        filters = null
-        searchFragment = SearchBottomFragment()
-        searchFragment!!.setSearchType(SearchBottomFragment.CATEGORY_SEARCH)
-        searchFragment!!.show(supportFragmentManager, searchFragment!!.tag)
+    override fun onDestroy() {
+        super.onDestroy()
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
     override fun onResume() {
         super.onResume()
         setGPSListener(locationCallback)
+        updateLocationsFromSP()
+        fetchPredictionLocation()
     }
 
     override fun onPause() {
@@ -181,56 +205,59 @@ class MapActivity : AppCompatActivity() {
      * -------- !!!!!!! this methods are called by fragments ---------
      */
     fun displaySearchResults(it: List<Entity>?, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(it, lastKnownLocation, currentSearchHotCategory)
+        mapFragment?.addSearchResultsOnMap(it, getSearchAreaLocation(), currentSearchHotCategory)
     }
 
-    fun displaySuggestion(suggestion: Suggestion) {
-        for (eachHotCategory in hotCategoriesList) {
-            if (eachHotCategory.name.toLowerCase(Locale.ROOT).indexOf(getOriginalQuery(suggestion.query).toLowerCase(
-                    Locale.ROOT)) != -1) {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, eachHotCategory.id)
-                break
-            } else {
-                mapFragment?.addSearchResultsOnMap(listOf(suggestion.entity), lastKnownLocation, "")
+    fun updateBottomSheetState() {
+        if (this::behavior.isInitialized) {
+            behavior.state = bottomSheetState
+        }
+    }
+
+    fun clearTextAndFocus() {
+        search.setText("")
+        search.clearFocus()
+    }
+
+    fun collapseBottomSheet() {
+        if (this::behavior.isInitialized) {
+            if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED ||
+                behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                bottomSheetState = behavior.state
             }
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
     }
 
     private fun displayHotCategories() {
         val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.bottom_sheet)
-        val flowLayout = findViewById<Flow>(R.id.flow_main_root)
-        val set = ConstraintSet()
-        set.clone(bottomSheetLayout)
 
-        val hotCategoryIdArray = ArrayList<Int>()
-        for (hotCategory in hotCategoriesList) {
-            val categoryView = getCategoryView(hotCategory)
-            bottomSheetLayout.addView(categoryView)
-            hotCategoryIdArray.add(categoryView.id)
+        // setup recyclerView
+        val recyclerView = bottomSheetLayout.findViewById<RecyclerView>(R.id.category_container)
+        recyclerView.layoutManager = GridLayoutManager(this, CategoryAndFiltersUtil.DISPLAY_LIMIT,
+            GridLayoutManager.VERTICAL, false)
+        recyclerView.adapter = CategoryAdapter { position, _ ->
+            // onClick call back, get name and tag from position, then start search fragment
+            val category = hotCategoriesList[position]
+            hotCategoryName = category.name
+            hotCategoryTag = category.tag
+            collapseBottomSheet()
+            if (hotCategoryTag.isNotEmpty()) {
+                showSearchInfoBottomFragment(category.name, category.tag, false)
+            } else {
+                showMoreCategoriesFragment()
+            }
+        }.apply {
+            // feed data into adapter
+            setData(hotCategoriesList.map { it.toViewData() })
         }
 
-        flowLayout.referencedIds = hotCategoryIdArray.toIntArray()
         behavior = BottomSheetBehavior.from(bottomSheetLayout)
     }
 
-    fun collapseBottomSheet() {
-        if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-    }
-
-    fun showBottomSheet() {
-        if (this::behavior.isInitialized) {
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        }
-    }
-
-    private fun getCategoryView(hotCategory: HotCategory): CategoryView {
-        val categoryView = CategoryView(this)
-        categoryView.init(hotCategory)
-        categoryView.id = View.generateViewId()
-
-        return categoryView
+    fun updateBottomView() {
+        displayUserInfo()
+        displayRecentSearchInfo()
     }
 
     private fun displayUserInfo() {
@@ -238,53 +265,246 @@ class MapActivity : AppCompatActivity() {
             UserAddressFragment.newInstance()).commit()
     }
 
+    private fun displayRecentSearchInfo() {
+        val entities: List<Entity>? = getRecentSearchData()
+        supportFragmentManager.beginTransaction().replace(R.id.search_recent_data,
+            RecentSearchListFragment.newInstance(entities)).commit()
+
+        extend.setOnClickListener {
+            collapseBottomSheet()
+            showRecentSearchFullListFragment()
+        }
+
+        if (entities.isNullOrEmpty()) {
+            search_recent_data.visibility = View.GONE
+            extend.visibility = View.GONE
+            search_recent_data_header.visibility = View.GONE
+        } else {
+            search_recent_data.visibility = View.VISIBLE
+            extend.visibility = View.VISIBLE
+            search_recent_data_header.visibility = View.VISIBLE
+        }
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            searchFragment?.popUpLogicCLose()
+            searchListBottomFragment?.popUpLogicCLose()
+            if (top_navigation_panel.visibility == View.VISIBLE) {
+                onBackSearchInfoFragment()
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
-    fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(
-            listOf(entity),
-            lastKnownLocation,
+    fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?,
+                             navigationFromSearchInfo: Boolean = false,
+                             navigationFromPersonalInfo: Boolean = false) {
+        mapFragment?.addEntityResultOnMap(
+            entity,
+            getSearchAreaLocation(),
             currentSearchHotCategory
         )
-    }
-
-    var searchListFragment: SearchHotCategoriesFragment? = null
-    fun showSearchHotCategoriesFragment(results: List<Entity>, categoryId: String?) {
-        searchListFragment = SearchHotCategoriesFragment.newInstance(results, categoryId)
-        searchListFragment!!.show(supportFragmentManager, searchListFragment!!.tag)
-    }
-
-    var subcategoriesFragment: CategoriesResultFragment? = null
-    fun showSubcategoriesFragment() {
-        subcategoriesFragment = CategoriesResultFragment.newInstance()
-        subcategoriesFragment!!.show(supportFragmentManager, subcategoriesFragment!!.tag)
+        searchInfoBottomFragment?.dismiss()
+        this.navigationFromSearchInfo = navigationFromSearchInfo
+        this.navigationFromPersonalInfo = navigationFromPersonalInfo
     }
 
     var personalInfoFragment: PersonalInfoFragment? = null
-    private fun showPersonalInfoFragment() {
+    fun showPersonalInfoFragment() {
         personalInfoFragment = PersonalInfoFragment.newInstance()
         personalInfoFragment!!.show(supportFragmentManager, personalInfoFragment!!.tag)
     }
 
-    fun setFiltersSub() {
-        if (filters != null) {
-            subcategoriesFragment?.setFilters(filters!!)
-        }
+    var searchInfoBottomFragment: SearchInfoBottomFragment? = null
+    fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?, shouldLoadSaveData: Boolean) {
+        categoryName?.let { this.hotCategoryName = it }
+        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, shouldLoadSaveData)
+        searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
-    fun setFilters(filters: List<telenav.demo.app.search.filters.Filter>) {
-        this.filters = filters
-        searchFragment?.setFilters(filters)
+    var parkingFiltersFragment: ParkingFiltersFragment? = null
+    fun showParkingFiltersFragment() {
+        parkingFiltersFragment = ParkingFiltersFragment.newInstance()
+        parkingFiltersFragment!!.show(supportFragmentManager, parkingFiltersFragment!!.tag)
+    }
+
+    var evFiltersFragment: EvFiltersFragment? = null
+    fun showEvFiltersFragment() {
+        evFiltersFragment = EvFiltersFragment.newInstance()
+        evFiltersFragment!!.show(supportFragmentManager, evFiltersFragment!!.tag)
+    }
+
+    var generalFiltersFragment: GeneralFiltersFragment? = null
+    fun showGeneralFiltersFragment() {
+        generalFiltersFragment = GeneralFiltersFragment.newInstance()
+        generalFiltersFragment!!.show(supportFragmentManager, generalFiltersFragment!!.tag)
+    }
+
+    var searchListBottomFragment: SearchListBottomFragment? = null
+    fun showSearchListBottomFragment() {
+        searchListBottomFragment = SearchListBottomFragment.newInstance(hotCategoryTag)
+        searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
+    }
+
+    var recentSearchFullListFragment: RecentSearchFullListFragment? = null
+    private fun showRecentSearchFullListFragment() {
+        recentSearchFullListFragment = RecentSearchFullListFragment.newInstance(getRecentSearchData())
+        recentSearchFullListFragment!!.show(supportFragmentManager, recentSearchFullListFragment!!.tag)
+    }
+
+    var moreCategoriesFragment: MoreCategoriesFragment? = null
+    private fun showMoreCategoriesFragment() {
+        moreCategoriesFragment = MoreCategoriesFragment.newInstance()
+        moreCategoriesFragment!!.show(supportFragmentManager, moreCategoriesFragment!!.tag)
+    }
+
+    fun showSearchListBottomFragmentFromUserAddress(
+        shouldUpdateWorkAddress: Boolean = false,
+        shouldUpdateHomeAddress: Boolean = false) {
+        searchListBottomFragment = if (personalInfoFragment?.isAdded == true) {
+            personalInfoFragment?.dismiss()
+            SearchListBottomFragment.newInstance(
+                hotCategoryTag, shouldUpdateWorkAddress,
+                shouldUpdateHomeAddress, false)
+        } else {
+            SearchListBottomFragment.newInstance(
+                hotCategoryTag, shouldUpdateWorkAddress,
+                shouldUpdateHomeAddress, true)
+        }
+        searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
     }
 
     fun setLastSearch(lastSearch: String) {
         this.lastSearch = lastSearch
+    }
+
+    fun showEntityDetails(searchResult: SearchResult, entity: Entity) {
+        entity_details.visibility = View.VISIBLE
+        top_navigation_panel.visibility = View.VISIBLE
+        view_bottom.visibility = View.GONE
+
+        navigation_header.text = hotCategoryName
+
+        val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.entity_root)
+        entityDetailsBehavior= BottomSheetBehavior.from(bottomSheetLayout)
+        entityDetailsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+        supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
+            EntityDetailsFragment.newInstance(searchResult, entity), FRAGMENT_TAG).commit()
+
+        entityDetailsBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {}
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+
+                val fragment: Fragment? = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+                if (fragment != null && fragment is EntityDetailsFragment) {
+                    fragment.updateItemVisibility(slideOffset)
+                }
+            }
+        })
+
+        bottomSheetLayout.setOnClickListener {
+            if (entityDetailsBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+                entityDetailsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            }
+        }
+    }
+
+    fun collapseEntityDetails() {
+        if (this::entityDetailsBehavior.isInitialized) {
+            entityDetailsBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    fun hideKeyboard(view: View) {
+        view.hideKeyboard()
+    }
+    private fun getRecentSearchData(): List<Entity>? {
+        val prefs =
+            getSharedPreferences(
+                getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+
+        val listType: Type = object : TypeToken<List<Entity>>() {}.type
+        val recentSearchEntities: List<Entity>? =  Gson().fromJson(
+            prefs?.getString(
+                getString(R.string.saved_recent_search_key),
+                ""
+            ), listType
+        )
+
+        // put prediction at first place, then followed by recent searches
+        val result = mutableListOf<Entity>()
+        result.addAll(predictLocation)
+        recentSearchEntities?.let {
+            result.addAll(it)
+        }
+        return result.ifEmpty { null }
+    }
+
+    private fun resetFilters() {
+        App.writeToSharedPreferences(App.RATE_STARS, Stars.DEFAULT.starsNumber)
+        App.writeToSharedPreferences(App.PRICE_LEVEL, PriceLevelType.DEFAULT.priceLevel)
+        App.writeBooleanToSharedPreferences(App.OPEN_TIME, false)
+        App.writeBooleanToSharedPreferences(App.RESERVED, false)
+        App.writeStringToSharedPreferences(App.CONNECTION_TYPES, "")
+        App.writeStringToSharedPreferences(App.CHARGER_BRAND, "")
+        App.writeStringToSharedPreferences(App.POWER_FEED, "")
+        App.writeToSharedPreferences(App.PARKING_DURATION, 0)
+        App.writeStringToSharedPreferences(App.PARKING_START_FROM, "")
+    }
+
+    private fun updateLocationsFromSP() {
+        val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+
+        // read settings from sp
+        val cvpFollowGPS = sp.getBoolean(App.KEY_CVP_GPS, true)
+        cvpLocation = if (cvpFollowGPS) {
+            null
+        } else {
+            val lat = sp.getFloat(App.KEY_CVP_LAT, LocationUtil.DEFAULT_LAT)
+            val long = sp.getFloat(App.KEY_CVP_LONG, LocationUtil.DEFAULT_LONG)
+            LocationUtil.createLocation(lat.toDouble(), long.toDouble())
+        }
+
+        val salFollowCVP = sp.getBoolean(App.KEY_SAL_CVP, true)
+        val salFollowGPS = sp.getBoolean(App.KEY_SAL_GPS, true)
+        saLocation = when {
+            salFollowCVP -> cvpLocation
+            salFollowGPS -> null
+            else -> {
+                val lat = sp.getFloat(App.KEY_SAL_LAT, LocationUtil.DEFAULT_LAT)
+                val long = sp.getFloat(App.KEY_SAL_LONG, LocationUtil.DEFAULT_LONG)
+                LocationUtil.createLocation(lat.toDouble(), long.toDouble())
+            }
+        }
+    }
+
+    fun getCVPLocation(): Location = cvpLocation ?: gpsLocation
+
+    fun getSearchAreaLocation(): Location = saLocation ?: gpsLocation
+
+    private fun fetchPredictionLocation() {
+        Log.i(TAG, "fetchPredictionLocation: start to fetch")
+        val location = getCVPLocation()
+        PredictionService.getClient().destinationPredictionRequest()
+            .predictionTime(0)
+            .predictionLocation(location.latitude, location.longitude)
+            .asyncCall(getUIExecutor(), object : Callback<DestinationPredictionResponse> {
+                override fun onSuccess(response: DestinationPredictionResponse) {
+                    val gson = Gson()
+                    predictLocation = response.results.map { gson.fromJson(gson.toJson(it.entity), Entity::class.java) }
+                    Log.i(TAG, "fetchPredictionLocation: onSuccess, result count = ${predictLocation.size}")
+                    if (predictLocation.isNotEmpty()) displayRecentSearchInfo()
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    Log.w(TAG, "fetchPredictionLocation: onFailure, msg = ${t?.message} ")
+                }
+            })
     }
 }
 

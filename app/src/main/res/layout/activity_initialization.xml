@@ -1,51 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
+    android:background="@color/initBackground"
     android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:background="@color/colorPrimary"
-            android:paddingVertical="10dp"
-            android:paddingLeft="10dp"
-            android:text="Initialization"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="2px"
         android:background="@color/colorAccent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/initialization_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:visibility="gone">
 
-        <TextView
+        <ImageView
+            android:id="@+id/initialization_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Initializing SDK. Please wait..." />
-    </LinearLayout>
+            android:src="@drawable/ic_logo"
+            app:layout_constraintVertical_bias="0.4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/initialization_access"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingHorizontal="10dp"
@@ -56,16 +44,21 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
+            android:paddingHorizontal="35dp"
+            android:textColor="@color/initTextColor"
+            android:lineSpacingExtra="3dp"
             android:text="@string/permission_note"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/initialization_request_permissions"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="20dp"
+            android:backgroundTint="@color/blue_c1"
+            android:textSize="12sp"
+            android:textAllCaps="false"
             android:text="Grant Access" />
 
     </LinearLayout>
@@ -74,7 +67,6 @@
         android:id="@+id/initialization"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingHorizontal="10dp"
@@ -85,26 +77,33 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center"
+            android:paddingHorizontal="35dp"
+            android:textColor="@color/initTextColor"
+            android:lineSpacingExtra="3dp"
             android:text="@string/initialization_note"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/initialization_select_index"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="@color/telenav_gray_pressed"
+            android:visibility="gone"
+            android:backgroundTint="@color/blue_c1"
             android:layout_marginBottom="20dp"
+            android:textSize="12sp"
+            android:textAllCaps="false"
             android:text="Select index data folder" />
 
         <Button
             android:id="@+id/initialization_next"
-            android:layout_width="match_parent"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:backgroundTint="@color/telenav_gray_pressed"
+            android:backgroundTint="@color/blue_c1"
             android:layout_marginBottom="20dp"
+            android:textAllCaps="false"
+            android:textSize="12sp"
             android:text="Go Next" />
 
     </LinearLayout>

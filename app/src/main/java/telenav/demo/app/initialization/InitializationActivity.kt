@@ -1,6 +1,9 @@
 package telenav.demo.app.initialization
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,33 +12,66 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
 import android.view.View
+import android.view.animation.BounceInterpolator
 import android.widget.Toast
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.entity.api.EntityService
 import com.telenav.sdk.ota.api.OtaService
-import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.telenav.sdk.prediction.api.PredictionService
+
 import telenav.demo.app.App
 import telenav.demo.app.AppLifecycleCallbacks
 import telenav.demo.app.BuildConfig
 import telenav.demo.app.R
-import telenav.demo.app.homepage.getUIExecutor
 import telenav.demo.app.map.MapActivity
+import telenav.demo.app.model.ServerDataUtil
+
+import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+
 import java.io.File
 import java.util.*
+import java.util.concurrent.Executor
 
 class InitializationActivity : AppCompatActivity() {
+    companion object {
+        private const val BOUNCE_DISTANCE = -100f
+        private const val ANIMATION_DURATION = 2000L
+        private const val ANIMATION_DELAY = 1000L
+    }
 
     private lateinit var vLoading: View
     private lateinit var vAccess: View
     private lateinit var vInitialization: View
+
+    // animate bouncing icon
+    private lateinit var vIcon: View
+    private val mAnimator by lazy {
+        ObjectAnimator.ofFloat(vIcon, View.TRANSLATION_Y, 0f, BOUNCE_DISTANCE, 0f).apply {
+            interpolator = BounceInterpolator()
+            duration = ANIMATION_DURATION
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator?) {}
+                override fun onAnimationEnd(animation: Animator?) {
+                    startAnimation() // Loop animate
+                }
+                override fun onAnimationCancel(animation: Animator?) {}
+                override fun onAnimationRepeat(animation: Animator?) {}
+            })
+        }
+    }
+    private val mAnimate: Runnable = Runnable { mAnimator.start() }
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
@@ -48,12 +84,17 @@ class InitializationActivity : AppCompatActivity() {
         vAccess = findViewById(R.id.initialization_access)
         vInitialization = findViewById(R.id.initialization)
         vLoading = findViewById(R.id.initialization_loading)
+        vIcon = findViewById(R.id.initialization_icon)
 
         findViewById<View>(R.id.initialization_select_index).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
         }
+
+        val indexPath = File(filesDir.absolutePath + "/indexData")
+        if (!indexPath.exists()) indexPath.mkdir()
+        indexDataPath = indexPath.absolutePath
     }
 
     override fun onResume() {
@@ -119,11 +160,13 @@ class InitializationActivity : AppCompatActivity() {
 
                 EntityService.initialize(sdkOptions)
 
+                ServerDataUtil.fetchServerList(this@InitializationActivity)
+
                 getUIExecutor().execute {
                     if (!isChanged) {
                         DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
                         OtaService.initialize(this@InitializationActivity, sdkOptions)
-
+                        PredictionService.initialize(sdkOptions)
                     }
                     application.registerActivityLifecycleCallbacks(AppLifecycleCallbacks())
 
@@ -155,8 +198,7 @@ class InitializationActivity : AppCompatActivity() {
                     this,
                     arrayOf(
                             Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            Manifest.permission.READ_EXTERNAL_STORAGE
                     ),
                     1
             )
@@ -164,6 +206,7 @@ class InitializationActivity : AppCompatActivity() {
             vLoading.visibility = View.GONE
             vInitialization.visibility = View.GONE
             vAccess.visibility = View.VISIBLE
+            stopAnimation()
         } else {
             getSavedSearchMode()
             getSavedIndexPath()
@@ -188,11 +231,28 @@ class InitializationActivity : AppCompatActivity() {
     private fun showProgress() {
         vLoading.visibility = View.VISIBLE
         vInitialization.visibility = View.GONE
+        startAnimation()
     }
 
     private fun hideProgress() {
         vLoading.visibility = View.GONE
         vInitialization.visibility = View.VISIBLE
+        stopAnimation()
+    }
+
+    private fun startAnimation() {
+        vIcon.postDelayed(mAnimate, ANIMATION_DELAY)
+    }
+
+    private fun stopAnimation() {
+        mAnimator.cancel()
+        vIcon.translationY = 0f // move icon to original place
+        vIcon.removeCallbacks(mAnimate)
+    }
+
+    override fun onStop() {
+        stopAnimation()
+        super.onStop()
     }
 }
 
@@ -205,11 +265,17 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
 
     saveIndexDataPath(dataPath)
 
-    var apiKey = BuildConfig.telenav_api_key
-    var apiSecret = BuildConfig.telenav_api_secret
-    var apiEndpoint = BuildConfig.telenav_cloud_endpoint
-    var userId = BuildConfig.telenav_user_id
+    // read server settings from sp
+    val serverData = ServerDataUtil.getInfo(this)
 
+    val apiKey = serverData?.apiKey ?: BuildConfig.telenav_api_key
+    val apiSecret = serverData?.apiSecret ?: BuildConfig.telenav_api_secret
+    val apiEndpoint = serverData?.endpoint ?: BuildConfig.telenav_cloud_endpoint
+    val userId = App.readStringFromSharedPreferences(App.KEY_USER_ID, "").ifEmpty { BuildConfig.telenav_user_id }
+    val application = ApplicationInfo.builder(
+        BuildConfig.telenav_data_collector_applicationName,
+        BuildConfig.telenav_data_cpllector_applicationVersion
+    ).build()
     if (environment == 1) {
         /*
         USE RELEASE REAL DATA
@@ -227,6 +293,7 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = "", environmen
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)
+        .setApplicationInfo(application)
         .build()
 }
 
@@ -263,5 +330,8 @@ fun Context.checkLocationPermission(): Boolean =
     checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED
 
 fun Context.checkExternalStoragePermissions(): Boolean =
-    checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED &&
-            checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
+    checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE") == PackageManager.PERMISSION_GRANTED
+
+fun Activity.getUIExecutor(): Executor {
+    return Executor { r -> runOnUiThread(r) }
+}

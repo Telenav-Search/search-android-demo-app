@@ -10,9 +10,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,18 +23,24 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.PolygonOptions
+
 import com.telenav.sdk.core.Callback
 import com.telenav.sdk.ota.api.OtaService
+import com.telenav.sdk.ota.impl.HomeAreaClientImpl
+import com.telenav.sdk.ota.impl.ProfileLocationImpl
+import com.telenav.sdk.ota.jni.ProfileLocationLabel
 import com.telenav.sdk.ota.model.AreaStatus
+
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+
 import telenav.demo.app.R
 import telenav.demo.app.setGPSListener
 import telenav.demo.app.stopGPSListener
+
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 class HomeAreaActivity : AppCompatActivity() {
     private val homeAreaClient by lazy { OtaService.getHomeAreaClient() }
@@ -115,12 +123,29 @@ class HomeAreaActivity : AppCompatActivity() {
         updateUI()
     }
 
+    /**
+     * removing "first_time" tag in profile location, to ensure cvp location works fine
+     * using reflection to access fields in sdk
+     */
+    private fun removeFirstTime() {
+        val profile = (homeAreaClient as HomeAreaClientImpl).javaClass.getDeclaredField("profile").let {
+            it.isAccessible = true
+            it.get(homeAreaClient) as ProfileLocationImpl
+        }
+        val method = profile.javaClass.getDeclaredMethod("removeLocation", ProfileLocationLabel::class.java).apply {
+            isAccessible = true
+        }
+        method.invoke(profile, ProfileLocationLabel.FIRST_TIME)
+    }
+
     private fun updateHomeArea() {
         setUpdateStatus(true)
+        val location = (intent.extras?.get(KEY_CVP_LOCATION) ?: lastKnownLocation) as Location?
+        removeFirstTime()
         homeAreaClient.updateRequest()
             .setCurrentLocation(
-                lastKnownLocation?.latitude ?: .0,
-                lastKnownLocation?.longitude ?: .0
+                location?.latitude ?: .0,
+                location?.longitude ?: .0
             )
             .setTimeout(1800) // in seconds
             .asyncCall(object : Callback<AreaStatus?> {

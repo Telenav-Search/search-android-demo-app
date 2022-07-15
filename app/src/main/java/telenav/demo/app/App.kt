@@ -2,12 +2,14 @@ package telenav.demo.app
 
 import android.app.Application
 import android.content.Context
-import android.os.Environment
 import android.os.Looper
-import android.preference.PreferenceManager
+
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+
+import com.instabug.library.Instabug
+import com.instabug.library.invocation.InstabugInvocationEvent
 
 class App : Application() {
 
@@ -22,13 +24,33 @@ class App : Application() {
         const val ENVIRONMENT = "environment"
         const val FILTER_NUMBER_VALUE = 10
 
-        fun writeToSharedPreferences(keyName: String, filterNr: Int) {
+        const val RATE_STARS = "rate_stars"
+        const val PRICE_LEVEL = "price_level"
+        const val OPEN_TIME = "open_time"
+        const val RESERVED = "reserved"
+        const val FREE_CHARGER = "free_charger"
+        const val CONNECTION_TYPES = "connection_types"
+        const val CHARGER_BRAND = "charger_brand"
+        const val POWER_FEED = "power_feed"
+        const val PARKING_DURATION = "parking_duration"
+        const val PARKING_START_FROM = "parking_start_from"
+
+        const val KEY_CVP_LAT = "key_cvp_lat"
+        const val KEY_CVP_LONG = "key_cvp_long"
+        const val KEY_CVP_GPS = "key_cvp_gps"
+        const val KEY_SAL_LAT = "key_sal_lat"
+        const val KEY_SAL_LONG = "key_sal_long"
+        const val KEY_SAL_GPS = "key_sal_gps"
+        const val KEY_SAL_CVP = "key_sal_cvp"
+        const val KEY_USER_ID = "key_user_id"
+
+        fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
                     application?.applicationContext?.getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE
                 )?.edit()
-            prefs?.putInt(keyName, filterNr)
+            prefs?.putInt(keyName, defaultValue)
             prefs?.apply()
         }
 
@@ -51,18 +73,55 @@ class App : Application() {
             prefs?.apply()
         }
 
-        fun readStringFromSharedPreferences(keyName: String, def: String): String? {
+        fun writeBooleanToSharedPreferences(keyName: String, state: Boolean) {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )?.edit()
+            prefs?.putBoolean(keyName, state)
+            prefs?.apply()
+        }
+
+        fun readStringFromSharedPreferences(keyName: String, def: String): String {
             val prefs =
                 application?.applicationContext?.getSharedPreferences(
                     application?.applicationContext?.getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE
                 )
-            return prefs?.getString(keyName, def)
+            return prefs?.getString(keyName, def) ?: def
+        }
+
+        fun readIntFromSharedPreferences(keyName: String, def: Int): Int {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getInt(keyName, def) ?: 0
+        }
+
+        fun readBooleanFromSharedPreferences(keyName: String, def: Boolean): Boolean {
+            val prefs =
+                application?.applicationContext?.getSharedPreferences(
+                    application?.applicationContext?.getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE
+                )
+            return prefs?.getBoolean(keyName, def) ?: def
         }
     }
 
     init {
         application = this
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // init Instabug
+        Instabug.Builder(this, "db94621802370e5ba6429e1a504e821d")
+            .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.FLOATING_BUTTON)
+            .build()
     }
 }
 
@@ -93,6 +152,7 @@ fun Context.stopGPSListener(locationCallback: LocationCallback) {
 }
 
 fun Context.convertNumberToDistance(dist: Double): String {
+    if (dist < 0) return ""
     val km = dist / 1000.0
 
     val iso = resources.configuration.locale.getISO3Country()

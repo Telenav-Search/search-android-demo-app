@@ -16,6 +16,10 @@
         <item>Test</item>
         <item>Release</item>
     </string-array>
+    <string-array name="test_server_list">
+        <item>Sync4 Cloud</item>
+        <item>Denali Cloud</item>
+    </string-array>
     <string name="permission_note">For Hybrid SDK to work with index files access must be provided.</string>
     <string name="initialization_note">In order to Hybrid SDK works, download an index file from Telenav and extract it to Telenav folder on internal storage. Or if you already have one you could select it as index data folder</string>
     <string name="home_title">This is your home</string>
@@ -26,6 +30,8 @@
     <string name="saved_home_address_key">home_address</string>
     <string name="saved_work_address_key">work_address</string>
     <string name="saved_favorite_list_key">favorite_list</string>
+    <string name="saved_recent_search_key">saved_recent_search</string>
+    <string name="saved_recent_category_key">saved_recent_category</string>
     <string name="saved_update_status">update_status</string>
     <string name="saved_device_id">device_id</string>
     <string name="home_area_last_update">Last update: %s, Size: %.2fM</string>
@@ -47,7 +53,24 @@
     <string name="path">Path</string>
     <string name="search_mode">SDK Search Mode</string>
     <string name="settings">Settings</string>
-
+    <string name="open_time">Open time</string>
+    <string name="reviews"> %d Reviews</string>
+    <string name="phone_number">Phone number</string>
+    <string name="favorite">Favorite</string>
+    <string name="call">Call</string>
+    <string name="open">Open</string>
+    <string name="closed">Closed</string>
+    <string name="available_parking_lot">Available parking lot</string>
+    <string name="price">Price</string>
+    <string name="available_service">Available service</string>
+    <string name="connectors_number">Connectors number</string>
+    <string name="connectors_type">Connectors type</string>
+    <string name="power_feed">Power feed</string>
+    <string name="charger_brand">Charger brand</string>
+    <string name="extend">Extend</string>
+    <string name="collapse">Collapse</string>
+    <string name="visit_again">Some place you may want to visit again...</string>
+    <string name="more_categories">More categories</string>
 
     <!-- filters-->
     <string name="open_now">Open now</string>
@@ -55,14 +78,28 @@
     <string name="apply_filter">Apply</string>
     <string name="search_label">Search..</string>
     <string name="filters_label">Filters >></string>
+    <string name="filters_header">Filters</string>
     <string name="appwidget_text">SEARCH SDK</string>
     <string name="configure">Configure Telenav Search SDK widget</string>
     <string name="add_widget">Add widget</string>
     <string name="email_placeholder">visitor@email.com</string>
+    <string name="reset">Reset</string>
+    <string name="reservation">Reservation</string>
+    <string name="parking_time_start_from">Parking time start from</string>
+    <string name="parking_duration">Parking duration</string>
+    <string name="ev_connector_types">Ev connector types</string>
+    <string name="ev_power_feed_levels">Ev power feed levels</string>
+    <string name="ev_charger_brands">Ev charger brands</string>
+    <string name="free_charge">Free charge</string>
+    <string name="rating">Rating</string>
+    <string name="recent">Recents</string>
 
     <string name="suggestions_label">Suggestions: </string>
     <string name="no_suggestion">No suggestions found</string>
     <string name="suggestion_error_loading">Suggestions loading error</string>
+
+    <string name="no_result">No results found</string>
+    <string name="result_error_loading">Loading error</string>
 
     <string name="dollar">$</string>
     <string name="star_1">1</string>
@@ -75,7 +112,7 @@
     <string name="tts_and">and</string>
     <string name="set_as_home">Set As Home</string>
     <string name="set_as_work">Set As Work</string>
-    <string name="perm_closed">Permanently closed: Yes</string>
+    <string name="perm_closed">Closed</string>
     <string name="default_search_limit">Default search limit</string>
     <string name="default_suggestions_limit">Default suggestions limit</string>
     <string name="default_predictions_limit">Default predictions limit</string>
@@ -83,4 +120,15 @@
     <string name="environment">Environment</string>
     <string name="predictions_limit">Predictions limit</string>
     <string name="suggestions_limit">Suggestions limit</string>
+    <string name="engine">Engine</string>
+    <string name="cvp_location">CVP Location</string>
+    <string name="search_area_location">Search Area Location</string>
+    <string name="quick_link">Quick Links</string>
+    <string name="cvp_same">Same with CVP</string>
+    <string name="same_gps">Same with GPS</string>
+    <string name="invalid_latlong_toast">Invalid latitude or longitude format</string>
+    <string name="alert_title">Attention!</string>
+    <string name="alert_text">App need restart due to environment changed.</string>
+    <string name="ok">OK</string>
+    <string name="user_id">User ID</string>
 </resources>

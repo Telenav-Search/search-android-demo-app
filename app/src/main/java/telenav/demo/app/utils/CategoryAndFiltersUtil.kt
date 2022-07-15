@@ -6,36 +6,53 @@ import android.graphics.Canvas
 import android.location.Location
 import android.view.View
 import android.widget.ImageView
+
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+
+import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
+
 import telenav.demo.app.R
-import telenav.demo.app.homepage.HotCategory
 import telenav.demo.app.model.SearchResult
-import java.util.*
 
 object CategoryAndFiltersUtil {
-    const val PREFS_NAME = "telenav.demo.app.searchwidgets.NewAppWidget"
-    const val PREF_PREFIX_KEY = "appwidget_"
+
+    const val FOOD_TAG = "RESTAURANT"
+    const val PARKING_TAG = "PARKING"
+    const val COFFEE_TAG = "COFFEE_HOUSE"
+    const val FUEL_TAG = "FUEL_STATION"
+    const val SHOPPING_TAG = "SHOPPING"
+    const val HOTELS_TAG = "HOTEL_MOTEL"
+    const val BANKS_TAG = "BANKS"
+    const val ATTRACTIONS_TAG = "TOURIST_ATTRACTION"
+    const val EV_CHARGER_TAG = "ELECTRIC_CHARGE_STATION"
+    const val ENTERTAINMENT_ARTS_TAG = "ENTERTAINMENT_ARTS"
+    const val HOSPITAL_TAG = "HEALTH_MEDICINE"
+
+    // category views limit 6 in a row
+    const val DISPLAY_LIMIT = 6
 
     val hotCategoriesList = arrayListOf(
-        HotCategory("Food", R.drawable.ic_food_color, R.drawable.ic_food, "226"),
-        HotCategory("Parking", R.drawable.ic_parking_color, R.drawable.ic_parking, "600"),
-        HotCategory("Coffee", R.drawable.ic_coffee_color, R.drawable.ic_coffee, "241"),
-        HotCategory("Fuel", R.drawable.ic_gas_color, R.drawable.ic_gas, "811"),
-        HotCategory("Shopping", R.drawable.ic_shopping_color, R.drawable.ic_shopping, "4090"),
-        HotCategory("Hotels", R.drawable.ic_hotel_color, R.drawable.ic_hotel, "595"),
-        HotCategory("Banks", R.drawable.ic_atm_color, R.drawable.ic_atm, "374"),
-        HotCategory("Attractions", R.drawable.ic_attraction_color, R.drawable.ic_attraction, "605"),
-        HotCategory("EV Charger", R.drawable.ic_ev_color, R.drawable.ic_ev, "771"),
-        HotCategory("Grocery", R.drawable.ic_grocery_color, R.drawable.ic_grocery, "221"),
-        HotCategory("More", R.drawable.ic_more_color, R.drawable.ic_more, "")
+        HotCategory("Food", FOOD_TAG, R.drawable.ic_food_color),
+        HotCategory("Parking", PARKING_TAG, R.drawable.ic_parking_color),
+        HotCategory("Coffee", COFFEE_TAG, R.drawable.ic_coffee_color),
+        HotCategory("Fuel", FUEL_TAG, R.drawable.ic_fuel_color),
+        HotCategory("Shopping", SHOPPING_TAG, R.drawable.ic_shopping_color),
+        HotCategory("Hotels", HOTELS_TAG, R.drawable.ic_hotel_color),
+        HotCategory("EV Charger", EV_CHARGER_TAG, R.drawable.ic_ev_color),
+        HotCategory("Attractions", ATTRACTIONS_TAG, R.drawable.ic_attraction_color),
+        HotCategory("Banks", BANKS_TAG, R.drawable.ic_banks_color),
+        HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
+        HotCategory("Hospital", HOSPITAL_TAG, R.drawable.ic_hospital_color),
+        HotCategory("More", "",  R.drawable.ic_more_color)
     )
 
     val categoriesColors = arrayListOf(
@@ -50,18 +67,102 @@ object CategoryAndFiltersUtil {
         R.color.c9
     )
 
-    val searchLabelsList = arrayListOf(
-        "Pizza",
-        "Coffee",
-        "Breakfast",
-        "Burgers",
-        "Vegan",
-        "Vegetarian",
-        "Seafood",
-        "Beagles",
-        "Dinner",
-        "Terrace"
+    val chargerBrandsMap = mapOf<String, String>(
+        "Circuit Electrique" to "99100014",
+        "Tesla Destination" to "99100006",
+        "ElectrifyAmerica" to "99100010",
+        "Lastestasjoner" to "99100022",
+        "GE WattStation" to "99100012",
+        "Aerovironment" to "99100017",
+        "Supercharger" to "99100007",
+        "ChargePoint" to "99100001",
+        "Oplaadpalen" to "99100020",
+        "SemaConnect" to "99100004",
+        "CarCharging" to "99100024",
+        "Sun Country" to "99100011",
+        "Greenlots" to "99100005",
+        "OpConnect" to "99100008",
+        "Shorepower" to "99100018",
+        "EV Connect" to "99100009",
+        "ChargeNet" to "99100026",
+        "EnelDrive" to "99100023",
+        "Recargo" to "99100027",
+        "Endesa" to "99100021",
+        "Innogy" to "99100016",
+        "Volta" to "99100013",
+        "Blink" to "99100002",
+        "POLAR" to "99100029",
+        "FLO" to "99100248",
+        "eVgo" to "99100003",
+        "JNSH" to "99100025",
+        "RWE" to "99100019",
+        "KSI" to "99100028"
     )
+
+    val connectorTypesMap = mapOf<String, String>(
+        "J1772" to "30001",
+        "Sae Combo" to "30002",
+        "CHAdeMo" to "30003",
+        "NEMA 515/520" to "30007",
+        "NEMA 14-50" to "30008",
+        "Plug Type F" to "30009",
+        "Type 2" to "30005",
+        "Type 3" to "30006",
+        "Tesla" to "30006"
+    )
+
+    val powerFeedLevelsMap = mapOf<String, String>(
+        "Level 1" to "1", "Level 2" to "2", "DC Fast" to "5", "Ultra Fast" to "6")
+
+    fun getCategoryIcon(categoryTag: String, name: String): Int {
+        when {
+            categoryTag.equals(FOOD_TAG) -> {
+                return when {
+                    name.contains("Burger") -> {
+                        R.drawable.ic_burger_color
+                    }
+                    name.contains("Pizza") -> {
+                        R.drawable.ic_pizza_color
+                    }
+                    else -> {
+                        R.drawable.ic_food_color
+                    }
+                }
+            }
+            categoryTag.equals(PARKING_TAG) -> {
+                return R.drawable.ic_parking_color
+            }
+            categoryTag.equals(COFFEE_TAG) -> {
+                return R.drawable.ic_coffee_color
+            }
+            categoryTag.equals(FUEL_TAG) -> {
+                return R.drawable.ic_fuel_color
+            }
+            categoryTag.equals(SHOPPING_TAG) -> {
+                return R.drawable.ic_shopping_color
+            }
+            categoryTag.equals(HOTELS_TAG) -> {
+                return R.drawable.ic_hotel_color
+            }
+            categoryTag.equals(BANKS_TAG) -> {
+                return R.drawable.ic_atm_color
+            }
+            categoryTag.equals(ATTRACTIONS_TAG) -> {
+                return R.drawable.ic_attraction_color
+            }
+            categoryTag.equals(EV_CHARGER_TAG) -> {
+                return R.drawable.ic_ev_color
+            }
+            categoryTag.equals(ENTERTAINMENT_ARTS_TAG) -> {
+                return R.drawable.ic_entertainment_color
+            }
+            categoryTag.equals(HOSPITAL_TAG) -> {
+                return R.drawable.ic_hospital_color
+            }
+        }
+
+        return 0
+    }
 
     fun setStarsViewBasedOnRating(view: View, ratingLevel: Double, context: Context) {
         val firstStar = view.findViewById<ImageView>(R.id.star_0)
@@ -71,6 +172,14 @@ object CategoryAndFiltersUtil {
         val fifthStar = view.findViewById<ImageView>(R.id.star_4)
 
         when (ratingLevel) {
+
+            -1.0 -> {
+                firstStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
+                secondStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
+                thirdStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
+                fourthStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
+                fifthStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
+            }
 
             0.0 -> {
                 firstStar.setImageDrawable(context.getDrawable(R.drawable.ic_star_empty))
@@ -170,6 +279,61 @@ object CategoryAndFiltersUtil {
         }
     }
 
+    fun setYelpStarsViewBasedOnRating(view: View, ratingLevel: Double, context: Context) {
+        val star = view.findViewById<ImageView>(R.id.star)
+
+        when (ratingLevel) {
+
+            -1.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_0))
+            }
+
+            0.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_0))
+            }
+
+            1.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_1))
+            }
+
+            1.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_1_half))
+            }
+
+            2.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_2))
+            }
+
+            2.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_2_half))
+            }
+
+            3.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_3))
+            }
+
+            3.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_3_half))
+            }
+
+            4.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_4))
+            }
+
+            4.5 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_4_half))
+            }
+
+            5.0 -> {
+                star.setImageDrawable(context.getDrawable(R.drawable.stars_regular_5))
+            }
+
+            else -> {
+                star.visibility = View.INVISIBLE
+            }
+        }
+    }
+
     fun setPriceIconBasedOnPriceLevel(view: View, priceLevel: Int, context: Context) {
         val firstLevel = view.findViewById<ImageView>(R.id.price_0)
         val secondLevel = view.findViewById<ImageView>(R.id.price_1)
@@ -206,20 +370,51 @@ object CategoryAndFiltersUtil {
         val background = ContextCompat.getDrawable(context, R.drawable.ic_map_pin)
         background!!.setBounds(0, 0, background.intrinsicWidth, background.intrinsicHeight)
         val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId)
-        vectorDrawable?.setTint(context.getColor(R.color.telenav_indigo_mid_tone))
-        vectorDrawable!!.setBounds(25, 15, vectorDrawable.intrinsicWidth + 15, vectorDrawable.intrinsicHeight + 5)
+        vectorDrawable!!.setTint(context.getColor(android.R.color.white))
+
+        // calculate position of icon, to place it on the correct position on the Pin
+        val centerW = background.intrinsicWidth / 2
+        val centerH = background.intrinsicHeight / 2
+        val iconHalfW = vectorDrawable.intrinsicWidth / 2
+        val iconHalfH = vectorDrawable.intrinsicHeight / 2
+
+        // put icon in the center
+        vectorDrawable.setBounds(
+            centerW - iconHalfW,
+            centerH - iconHalfH,
+            centerW + iconHalfW,
+            centerH + iconHalfH
+        )
+
+        // draw background on a bitmap with same size of background drawable
         val bitmap = Bitmap.createBitmap(background.intrinsicWidth, background.intrinsicHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         background.draw(canvas)
+
+        // scale the icon to fit Pin, 20% smaller, and place a little higher. use experience value
+        canvas.scale(0.8f, 0.8f, centerW.toFloat(), centerH.toFloat())
+        canvas.translate(0f, -background.intrinsicHeight.toFloat() / 7)
         vectorDrawable.draw(canvas)
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 
 
     fun generateSearchResult(entityResult: Entity?, currentSearchHotCategory: String?) : SearchResult {
-        if (entityResult == null || entityResult.place==null) {
+        if (entityResult == null || (entityResult.place==null && entityResult.address == null)) {
             return SearchResult.build("No result", "No category") {}
         }
+
+        // address result
+        if (entityResult.place == null) {
+            val address = entityResult.address
+            return SearchResult.build(address.formattedAddress, "") {
+                iconId = R.drawable.ic_more_color
+                latitude = address.navCoordinates.latitude
+                longitude = address.navCoordinates.longitude
+                distance = -1.0 // negative distance to prevent showing 0.0mil on screen
+            }
+        }
+
         var categoryName = " "
         if (entityResult.place.categories.isNotEmpty() && entityResult.place.categories[0] != null && entityResult.place.categories[0].name != null) {
             categoryName = entityResult.place.categories[0].name
@@ -243,9 +438,9 @@ object CategoryAndFiltersUtil {
                 priceLevel = entityResult.facets.priceInfo.priceLevel
             }
 
-            iconId = R.drawable.ic_more
+            iconId = R.drawable.ic_more_color
             for (eachCategory in hotCategoriesList) {
-                if ((eachCategory.id) == currentSearchHotCategory) {
+                if ((eachCategory.tag) == currentSearchHotCategory) {
                     iconId = eachCategory.iconPurple
                     break
                 }
@@ -320,16 +515,27 @@ object CategoryAndFiltersUtil {
         return websitesArray[position]
     }
 
-    fun generateRandomInt(): Int {
-        val rand = Random()
-        return rand.nextInt(100)
-    }
+    /**
+     * Convert Category data into CategoryAdapter needed format
+     *
+     * @param tag categoryTag
+     * @return CategoryViewData
+     */
+    fun Category.toViewData(tag: String): CategoryViewData = CategoryViewData(name, getCategoryIcon(tag, name))
 
-    fun getOriginalQuery(fullQuery: String): String {
-        val referenceWord = "originalQuery="
-        val delimitingWord = ";source="
-        val firstIndex = fullQuery.lastIndexOf(referenceWord) + referenceWord.length
-        val lastIndex = fullQuery.indexOf(delimitingWord)
-        return fullQuery.substring(firstIndex, lastIndex)
-    }
+    /**
+     * Convert HotCategory data into CategoryAdapter needed format
+     *
+     * @return CategoryViewData
+     */
+    fun HotCategory.toViewData(): CategoryViewData = CategoryViewData(name, iconPurple)
+
+    class HotCategory(val name: String, val tag: String, val iconPurple: Int)
+
+    /**
+     * Data class to storage the items view needed to show
+     *
+     * @since 2022-05-11
+     */
+    data class CategoryViewData(val name: String, val icon: Int)
 }
