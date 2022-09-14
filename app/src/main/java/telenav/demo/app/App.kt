@@ -43,6 +43,11 @@ class App : Application() {
         const val KEY_SAL_GPS = "key_sal_gps"
         const val KEY_SAL_CVP = "key_sal_cvp"
         const val KEY_USER_ID = "key_user_id"
+        const val KEY_EXPLORE_ENABLED = "key_explore_enabled"
+        const val KEY_EXPLORE_INTENT = "key_explore_intent"
+        const val KEY_EXPLORE_LIMIT = "key_explore_limit"
+        const val KEY_EXPLORE_RADIUS = "key_explore_radius"
+
 
         fun writeToSharedPreferences(keyName: String, defaultValue: Int) {
             val prefs =
@@ -120,7 +125,11 @@ class App : Application() {
 
         // init Instabug
         Instabug.Builder(this, "db94621802370e5ba6429e1a504e821d")
-            .setInvocationEvents(InstabugInvocationEvent.SHAKE, InstabugInvocationEvent.FLOATING_BUTTON)
+            .setInvocationEvents(
+                InstabugInvocationEvent.SHAKE,
+                InstabugInvocationEvent.SCREENSHOT,
+                InstabugInvocationEvent.FLOATING_BUTTON
+            )
             .build()
     }
 }

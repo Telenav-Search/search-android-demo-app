@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.content.ContextCompat
 
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -229,7 +230,6 @@ class SearchInfoBottomFragment : BottomSheetDialogFragment() {
 
     private fun displayHotCategories(categories: List<Category>) {
         binding ?: throw IllegalStateException("viewBinding is null")
-
         // setup recyclerView
         val recyclerView = binding!!.categoryContainer
         recyclerView.layoutManager = GridLayoutManager(requireContext(), CategoryAndFiltersUtil.DISPLAY_LIMIT,

@@ -1,30 +1,31 @@
 package telenav.demo.app.settings
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.view.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.View
+import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
-
 import androidx.appcompat.app.AppCompatActivity
-
-import kotlinx.android.synthetic.main.activity_settings.*
-
-import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
-
+import androidx.fragment.app.Fragment
 import com.telenav.sdk.core.SDKRuntime
-
+import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
+import kotlinx.android.synthetic.main.activity_settings.*
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
-import telenav.demo.app.model.*
+import telenav.demo.app.model.ServerDataUtil
 import telenav.demo.app.utils.LocationUtil
-
 import java.io.File
+
 
 class SettingsActivity : AppCompatActivity() {
     companion object {
@@ -36,9 +37,19 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var vIndexDataPath: TextView
     private lateinit var vModeHybrid: RadioButton
     private lateinit var vModeOnBoard: RadioButton
+    private lateinit var vExploreEnabled: RadioButton
+    private lateinit var vExploreDisabled: RadioButton
+    private lateinit var vExploreLimit: TextView
+    private lateinit var vExploreRadius: TextView
+    private lateinit var vExploreIntent: Spinner
 
     private var indexDataPath = ""
     private var searchMode = SearchMode.HYBRID
+    private var exploreEnabled = false
+    private var exploreIntentPosition = "0"
+    private var exploreLimit = 10
+    private var exploreRadius = 5000
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +64,12 @@ class SettingsActivity : AppCompatActivity() {
         vIndexDataPath = findViewById(R.id.settings_index_data_path)
         vModeHybrid = findViewById(R.id.settings_mode_hybrid)
         vModeOnBoard = findViewById(R.id.settings_mode_onboard)
-
+        vExploreEnabled = findViewById(R.id.settings_explore_enabled)
+        vExploreDisabled = findViewById(R.id.settings_explore_disabled)
+        vExploreLimit = findViewById(R.id.explore_limit)
+        vExploreRadius = findViewById(R.id.explore_radius)
+        vExploreIntent = findViewById(R.id.explore_intent)
+        initExplore()
         // listeners
         initServers()
         initLocations()
@@ -63,6 +79,13 @@ class SettingsActivity : AppCompatActivity() {
         vModeOnBoard.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) searchMode = SearchMode.ONBOARD
         }
+        vExploreEnabled.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) exploreEnabled = true
+        }
+        vExploreDisabled.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) exploreEnabled = false
+        }
+
         findViewById<View>(R.id.settings_back).setOnClickListener { save() }
         findViewById<View>(R.id.settings_select_index_data_path).setOnClickListener { openDirectoryForIndex() }
 
@@ -70,6 +93,19 @@ class SettingsActivity : AppCompatActivity() {
         val userIdText = findViewById<TextView>(R.id.user_id_text)
         userIdText.setOnClickListener { showEditTextDialog { viewModel.onUserIdChange(it) } }
         viewModel.userId.observe(this) { userIdText.text = it }
+
+    }
+
+    private fun initExplore() {
+
+        val exploreIntentAdapter = ArrayAdapter(
+            this,
+            R.layout.spinner_item,
+            mutableListOf<String>("POI", "Address", "All")
+        )
+        exploreIntentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        explore_intent.adapter = exploreIntentAdapter
+
     }
 
     private fun initLocations() {
@@ -77,8 +113,20 @@ class SettingsActivity : AppCompatActivity() {
         sal_reset.setOnClickListener { viewModel.onLocationChange(SalFollowGPS(true)) }
         setLocationListener(cvp_text) { viewModel.onLocationChange(CvpChange(it)) }
         setLocationListener(sal_text) { viewModel.onLocationChange(SalChange(it)) }
-        cvp_quick_link.setOnClickListener { showQuickLinkDialog { viewModel.onLocationChange(CvpChange(it)) } }
-        sal_quick_link.setOnClickListener { showQuickLinkDialog { viewModel.onLocationChange(SalChange(it)) } }
+        cvp_quick_link.setOnClickListener {
+            showQuickLinkDialog {
+                viewModel.onLocationChange(
+                    CvpChange(it)
+                )
+            }
+        }
+        sal_quick_link.setOnClickListener {
+            showQuickLinkDialog {
+                viewModel.onLocationChange(
+                    SalChange(it)
+                )
+            }
+        }
 
         // follow cvp checkbox
         cvp_same_checkbox.setOnCheckedChangeListener { _, isChecked ->
@@ -116,7 +164,12 @@ class SettingsActivity : AppCompatActivity() {
     private fun initServers() {
         engine_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             var isFirst = true
-            override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+            override fun onItemSelected(
+                adapterView: AdapterView<*>?,
+                p1: View?,
+                position: Int,
+                p3: Long
+            ) {
                 if (isFirst) {
                     isFirst = false
                     return
@@ -128,7 +181,12 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         env_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(adapterView: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+            override fun onItemSelected(
+                adapterView: AdapterView<*>?,
+                p1: View?,
+                position: Int,
+                p3: Long
+            ) {
                 viewModel.onEnvChange(position)
             }
 
@@ -211,6 +269,12 @@ class SettingsActivity : AppCompatActivity() {
 
         // saved index path
         indexDataPath = sp.getString(getString(R.string.saved_index_data_path_key), "")!!
+        // saved explore related
+        exploreEnabled = sp.getBoolean(App.KEY_EXPLORE_ENABLED, exploreEnabled)
+        exploreIntentPosition = sp.getString(App.KEY_EXPLORE_INTENT, exploreIntentPosition)!!
+        exploreLimit = sp.getInt(App.KEY_EXPLORE_LIMIT, exploreLimit)
+        exploreRadius = sp.getInt(App.KEY_EXPLORE_RADIUS, exploreRadius)
+
     }
 
     private fun openDirectoryForIndex() {
@@ -236,6 +300,21 @@ class SettingsActivity : AppCompatActivity() {
                 vModeOnBoard.isChecked = true
             }
         }
+        //explore
+        when (exploreEnabled) {
+            true -> {
+                vExploreDisabled.isChecked = false
+                vExploreEnabled.isChecked = true
+            }
+            false -> {
+                vExploreDisabled.isChecked = true
+                vExploreEnabled.isChecked = false
+            }
+        }
+        vExploreLimit.text = exploreLimit.toString()
+        vExploreRadius.text = exploreRadius.toString()
+        //explore intent
+        vExploreIntent.setSelection(Integer.parseInt(exploreIntentPosition))
     }
 
     private fun save() {
@@ -248,7 +327,10 @@ class SettingsActivity : AppCompatActivity() {
             // search mode
             putInt(getString(R.string.saved_search_mode_key), searchMode.value)
             // index data path
-            if (indexDataPath.isNotEmpty()) putString(getString(R.string.saved_index_data_path_key), indexDataPath)
+            if (indexDataPath.isNotEmpty()) putString(
+                getString(R.string.saved_index_data_path_key),
+                indexDataPath
+            )
             // cvp locations
             val searchLocations = viewModel.locations.value!!
             putFloat(App.KEY_CVP_LAT, searchLocations.cvpLocation.latitude.toFloat())
@@ -259,6 +341,13 @@ class SettingsActivity : AppCompatActivity() {
             putBoolean(App.KEY_SAL_GPS, searchLocations.saFollowGPS)
             putBoolean(App.KEY_SAL_CVP, searchLocations.saFollowCvp)
 
+            // explore
+            putBoolean(App.KEY_EXPLORE_ENABLED, exploreEnabled)
+
+            putString(App.KEY_EXPLORE_INTENT, vExploreIntent.selectedItemPosition.toString())
+            putInt(App.KEY_EXPLORE_LIMIT, Integer.parseInt(vExploreLimit.text.toString()))
+            putInt(App.KEY_EXPLORE_RADIUS, Integer.parseInt(vExploreRadius.text.toString()))
+
             // serverInfo
             viewModel.mCurrentServer?.let { ServerDataUtil.saveInfo(it, this) }
 
@@ -268,7 +357,7 @@ class SettingsActivity : AppCompatActivity() {
             // write batch
             apply()
         }
-
+        hideKeyboard()
         // consider to kill the app to re-init sdk
         SDKRuntime.setNetworkAvailable(searchMode == SearchMode.HYBRID)
         if (serverChanged) {
@@ -288,15 +377,27 @@ class SettingsActivity : AppCompatActivity() {
     }
 }
 
-private fun Location.toLatLongString(): String = String.format("%.4f, ", latitude) + String.format("%.4f", longitude)
+fun Activity.hideKeyboard() {
+    hideKeyboard(currentFocus ?: View(this))
+}
+
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+private fun Location.toLatLongString(): String =
+    String.format("%.4f, ", latitude) + String.format("%.4f", longitude)
 
 /**
  * View data for location settings
  *
  * @since 2022-05-18
  */
-data class SearchLocations(var cvpLocation: Location,
-                           var cvpFollowGPS: Boolean,
-                           var searchAreaLocation: Location,
-                           var saFollowGPS: Boolean,
-                           var saFollowCvp: Boolean)
+data class SearchLocations(
+    var cvpLocation: Location,
+    var cvpFollowGPS: Boolean,
+    var searchAreaLocation: Location,
+    var saFollowGPS: Boolean,
+    var saFollowCvp: Boolean
+)

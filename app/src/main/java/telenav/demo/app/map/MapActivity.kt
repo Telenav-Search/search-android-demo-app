@@ -11,13 +11,12 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.InputMethodManager
-
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
@@ -25,32 +24,31 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.telenav.sdk.core.Callback
-
+import com.telenav.sdk.entity.model.base.Entity
+import com.telenav.sdk.prediction.api.PredictionService
+import com.telenav.sdk.prediction.api.model.destination.DestinationPredictionResponse
 import kotlinx.android.synthetic.main.activity_map.*
 import kotlinx.android.synthetic.main.search_info_bottom_fragment_layout.search
 import kotlinx.android.synthetic.main.view_bottom.*
 import kotlinx.android.synthetic.main.view_header_search.*
-
-import com.telenav.sdk.entity.model.base.Entity
-import com.telenav.sdk.prediction.api.PredictionService
-import com.telenav.sdk.prediction.api.model.destination.DestinationPredictionResponse
-
+import telenav.demo.app.App
 import telenav.demo.app.R
-import telenav.demo.app.*
 import telenav.demo.app.model.SearchResult
 import telenav.demo.app.personalinfo.PersonalInfoFragment
 import telenav.demo.app.personalinfo.UserAddressFragment
 import telenav.demo.app.search.*
 import telenav.demo.app.search.filters.*
+import telenav.demo.app.setGPSListener
 import telenav.demo.app.settings.SettingsActivity
-import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
+import telenav.demo.app.stopGPSListener
 import telenav.demo.app.utils.CategoryAndFiltersUtil
+import telenav.demo.app.utils.CategoryAndFiltersUtil.hotCategoriesList
 import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
 import telenav.demo.app.utils.LocationUtil
 import telenav.demo.app.widgets.CategoryAdapter
-
 import java.lang.reflect.Type
 import java.util.concurrent.Executor
+
 
 class MapActivity : AppCompatActivity() {
 
@@ -62,6 +60,8 @@ class MapActivity : AppCompatActivity() {
         private val FRAGMENT_TAG = "EntityDetailsFragment"
     }
 
+    private var gpsInit = false
+    private val viewModel: SearchInfoViewModel by viewModels()
     private var lastSearch: String = ""
     private var navigationFromSearchInfo = false
     private var navigationFromPersonalInfo = false
@@ -76,6 +76,8 @@ class MapActivity : AppCompatActivity() {
                     cameraLocation.longitude
                 )
             )
+            if (!gpsInit) explore(null)
+            gpsInit = true
         }
     }
     lateinit var behavior: BottomSheetBehavior<*>
@@ -177,7 +179,38 @@ class MapActivity : AppCompatActivity() {
         setGPSListener(locationCallback)
         updateLocationsFromSP()
         fetchPredictionLocation()
+        explore(null)
     }
+
+    fun explore(latLng: LatLng?) {
+        Log.i(TAG, "explore trigger")
+        val latitude = latLng?.latitude;
+        val longitude = latLng?.longitude;
+
+        var location = Location("")
+        if (latitude == null || longitude == null) {
+            location = getCVPLocation()
+        } else {
+            location.latitude = latitude
+            location.longitude = longitude
+        }
+        if (location.latitude > 0.0 && getSearchAreaLocation().latitude > 0.0) {
+            this.getUIExecutor().let {
+                viewModel.explore("", null, location, it, getSearchAreaLocation())
+                viewModel.searchResults.observe(this) {
+                    displaySearchResults(viewModel.searchResults.value, "")
+                    mapFragment?.moveToCurrentLocation(
+                        LatLng(
+                            location.latitude,
+                            location.longitude
+                        )
+                    )
+                }
+            }
+        }
+
+    }
+
 
     override fun onPause() {
         stopGPSListener(locationCallback)
@@ -222,7 +255,8 @@ class MapActivity : AppCompatActivity() {
     fun collapseBottomSheet() {
         if (this::behavior.isInitialized) {
             if (behavior.state == BottomSheetBehavior.STATE_COLLAPSED ||
-                behavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+                behavior.state == BottomSheetBehavior.STATE_EXPANDED
+            ) {
                 bottomSheetState = behavior.state
             }
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -234,8 +268,10 @@ class MapActivity : AppCompatActivity() {
 
         // setup recyclerView
         val recyclerView = bottomSheetLayout.findViewById<RecyclerView>(R.id.category_container)
-        recyclerView.layoutManager = GridLayoutManager(this, CategoryAndFiltersUtil.DISPLAY_LIMIT,
-            GridLayoutManager.VERTICAL, false)
+        recyclerView.layoutManager = GridLayoutManager(
+            this, CategoryAndFiltersUtil.DISPLAY_LIMIT,
+            GridLayoutManager.VERTICAL, false
+        )
         recyclerView.adapter = CategoryAdapter { position, _ ->
             // onClick call back, get name and tag from position, then start search fragment
             val category = hotCategoriesList[position]
@@ -261,14 +297,18 @@ class MapActivity : AppCompatActivity() {
     }
 
     private fun displayUserInfo() {
-        supportFragmentManager.beginTransaction().replace(R.id.user_address,
-            UserAddressFragment.newInstance()).commit()
+        supportFragmentManager.beginTransaction().replace(
+            R.id.user_address,
+            UserAddressFragment.newInstance()
+        ).commit()
     }
 
     private fun displayRecentSearchInfo() {
         val entities: List<Entity>? = getRecentSearchData()
-        supportFragmentManager.beginTransaction().replace(R.id.search_recent_data,
-            RecentSearchListFragment.newInstance(entities)).commit()
+        supportFragmentManager.beginTransaction().replace(
+            R.id.search_recent_data,
+            RecentSearchListFragment.newInstance(entities)
+        ).commit()
 
         extend.setOnClickListener {
             collapseBottomSheet()
@@ -297,9 +337,11 @@ class MapActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-    fun displayEntityClicked(entity: Entity, currentSearchHotCategory: String?,
-                             navigationFromSearchInfo: Boolean = false,
-                             navigationFromPersonalInfo: Boolean = false) {
+    fun displayEntityClicked(
+        entity: Entity, currentSearchHotCategory: String?,
+        navigationFromSearchInfo: Boolean = false,
+        navigationFromPersonalInfo: Boolean = false
+    ) {
         mapFragment?.addEntityResultOnMap(
             entity,
             getSearchAreaLocation(),
@@ -317,9 +359,14 @@ class MapActivity : AppCompatActivity() {
     }
 
     var searchInfoBottomFragment: SearchInfoBottomFragment? = null
-    fun showSearchInfoBottomFragment(categoryName: String?, hotCategoryTag: String?, shouldLoadSaveData: Boolean) {
+    fun showSearchInfoBottomFragment(
+        categoryName: String?,
+        hotCategoryTag: String?,
+        shouldLoadSaveData: Boolean
+    ) {
         categoryName?.let { this.hotCategoryName = it }
-        searchInfoBottomFragment = SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, shouldLoadSaveData)
+        searchInfoBottomFragment =
+            SearchInfoBottomFragment.newInstance(categoryName, hotCategoryTag, shouldLoadSaveData)
         searchInfoBottomFragment!!.show(supportFragmentManager, searchInfoBottomFragment!!.tag)
     }
 
@@ -349,8 +396,12 @@ class MapActivity : AppCompatActivity() {
 
     var recentSearchFullListFragment: RecentSearchFullListFragment? = null
     private fun showRecentSearchFullListFragment() {
-        recentSearchFullListFragment = RecentSearchFullListFragment.newInstance(getRecentSearchData())
-        recentSearchFullListFragment!!.show(supportFragmentManager, recentSearchFullListFragment!!.tag)
+        recentSearchFullListFragment =
+            RecentSearchFullListFragment.newInstance(getRecentSearchData())
+        recentSearchFullListFragment!!.show(
+            supportFragmentManager,
+            recentSearchFullListFragment!!.tag
+        )
     }
 
     var moreCategoriesFragment: MoreCategoriesFragment? = null
@@ -361,16 +412,19 @@ class MapActivity : AppCompatActivity() {
 
     fun showSearchListBottomFragmentFromUserAddress(
         shouldUpdateWorkAddress: Boolean = false,
-        shouldUpdateHomeAddress: Boolean = false) {
+        shouldUpdateHomeAddress: Boolean = false
+    ) {
         searchListBottomFragment = if (personalInfoFragment?.isAdded == true) {
             personalInfoFragment?.dismiss()
             SearchListBottomFragment.newInstance(
                 hotCategoryTag, shouldUpdateWorkAddress,
-                shouldUpdateHomeAddress, false)
+                shouldUpdateHomeAddress, false
+            )
         } else {
             SearchListBottomFragment.newInstance(
                 hotCategoryTag, shouldUpdateWorkAddress,
-                shouldUpdateHomeAddress, true)
+                shouldUpdateHomeAddress, true
+            )
         }
         searchListBottomFragment!!.show(supportFragmentManager, searchListBottomFragment!!.tag)
     }
@@ -387,13 +441,16 @@ class MapActivity : AppCompatActivity() {
         navigation_header.text = hotCategoryName
 
         val bottomSheetLayout = findViewById<ConstraintLayout>(R.id.entity_root)
-        entityDetailsBehavior= BottomSheetBehavior.from(bottomSheetLayout)
+        entityDetailsBehavior = BottomSheetBehavior.from(bottomSheetLayout)
         entityDetailsBehavior.state = BottomSheetBehavior.STATE_EXPANDED
 
-        supportFragmentManager.beginTransaction().replace(R.id.frame_entity_details,
-            EntityDetailsFragment.newInstance(searchResult, entity), FRAGMENT_TAG).commit()
+        supportFragmentManager.beginTransaction().replace(
+            R.id.frame_entity_details,
+            EntityDetailsFragment.newInstance(searchResult, entity), FRAGMENT_TAG
+        ).commit()
 
-        entityDetailsBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        entityDetailsBehavior.addBottomSheetCallback(object :
+            BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {}
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
@@ -421,6 +478,7 @@ class MapActivity : AppCompatActivity() {
     fun hideKeyboard(view: View) {
         view.hideKeyboard()
     }
+
     private fun getRecentSearchData(): List<Entity>? {
         val prefs =
             getSharedPreferences(
@@ -429,7 +487,7 @@ class MapActivity : AppCompatActivity() {
             )
 
         val listType: Type = object : TypeToken<List<Entity>>() {}.type
-        val recentSearchEntities: List<Entity>? =  Gson().fromJson(
+        val recentSearchEntities: List<Entity>? = Gson().fromJson(
             prefs?.getString(
                 getString(R.string.saved_recent_search_key),
                 ""
@@ -496,8 +554,16 @@ class MapActivity : AppCompatActivity() {
             .asyncCall(getUIExecutor(), object : Callback<DestinationPredictionResponse> {
                 override fun onSuccess(response: DestinationPredictionResponse) {
                     val gson = Gson()
-                    predictLocation = response.results.map { gson.fromJson(gson.toJson(it.entity), Entity::class.java) }
-                    Log.i(TAG, "fetchPredictionLocation: onSuccess, result count = ${predictLocation.size}")
+                    predictLocation = response.results.map {
+                        gson.fromJson(
+                            gson.toJson(it.entity),
+                            Entity::class.java
+                        )
+                    }
+                    Log.i(
+                        TAG,
+                        "fetchPredictionLocation: onSuccess, result count = ${predictLocation.size}"
+                    )
                     if (predictLocation.isNotEmpty()) displayRecentSearchInfo()
                 }
 
@@ -509,7 +575,8 @@ class MapActivity : AppCompatActivity() {
 }
 
 fun View.hideKeyboard() {
-    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    val inputMethodManager =
+        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     inputMethodManager.hideSoftInputFromWindow(windowToken, 0)
 }
 

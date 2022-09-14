@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 
 import com.telenav.sdk.entity.model.base.Category
 import com.telenav.sdk.entity.model.base.Entity
+import org.apache.commons.lang.StringUtils
 
 import telenav.demo.app.R
 import telenav.demo.app.model.SearchResult
@@ -52,7 +53,7 @@ object CategoryAndFiltersUtil {
         HotCategory("Banks", BANKS_TAG, R.drawable.ic_banks_color),
         HotCategory("Entertainment ", ENTERTAINMENT_ARTS_TAG, R.drawable.ic_entertainment_color),
         HotCategory("Hospital", HOSPITAL_TAG, R.drawable.ic_hospital_color),
-        HotCategory("More", "",  R.drawable.ic_more_color)
+        HotCategory("More", "", R.drawable.ic_more_color)
     )
 
     val categoriesColors = arrayListOf(
@@ -112,7 +113,8 @@ object CategoryAndFiltersUtil {
     )
 
     val powerFeedLevelsMap = mapOf<String, String>(
-        "Level 1" to "1", "Level 2" to "2", "DC Fast" to "5", "Ultra Fast" to "6")
+        "Level 1" to "1", "Level 2" to "2", "DC Fast" to "5", "Ultra Fast" to "6"
+    )
 
     fun getCategoryIcon(categoryTag: String, name: String): Int {
         when {
@@ -366,41 +368,55 @@ object CategoryAndFiltersUtil {
         }
     }
 
-    fun bitmapDescriptorFromVector(context: Context, @DrawableRes vectorDrawableResourceId: Int): BitmapDescriptor? {
+    fun bitmapDescriptorFromVector(
+        context: Context,
+        @DrawableRes vectorDrawableResourceId: Int
+    ): BitmapDescriptor? {
         val background = ContextCompat.getDrawable(context, R.drawable.ic_map_pin)
         background!!.setBounds(0, 0, background.intrinsicWidth, background.intrinsicHeight)
-        val vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId)
-        vectorDrawable!!.setTint(context.getColor(android.R.color.white))
-
         // calculate position of icon, to place it on the correct position on the Pin
         val centerW = background.intrinsicWidth / 2
         val centerH = background.intrinsicHeight / 2
-        val iconHalfW = vectorDrawable.intrinsicWidth / 2
-        val iconHalfH = vectorDrawable.intrinsicHeight / 2
+        var vectorDrawable = ContextCompat.getDrawable(context, R.drawable.ic_map_pin)
+        if (vectorDrawableResourceId > 0){
+            vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId)
+            vectorDrawable!!.setTint(context.getColor(android.R.color.white))
+            val iconHalfW = vectorDrawable.intrinsicWidth / 2
+            val iconHalfH = vectorDrawable.intrinsicHeight / 2
+            // put icon in the center
+            vectorDrawable.setBounds(
+                centerW - iconHalfW,
+                centerH - iconHalfH,
+                centerW + iconHalfW,
+                centerH + iconHalfH
+            )
+        }
 
-        // put icon in the center
-        vectorDrawable.setBounds(
-            centerW - iconHalfW,
-            centerH - iconHalfH,
-            centerW + iconHalfW,
-            centerH + iconHalfH
-        )
+
 
         // draw background on a bitmap with same size of background drawable
-        val bitmap = Bitmap.createBitmap(background.intrinsicWidth, background.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val bitmap = Bitmap.createBitmap(
+            background.intrinsicWidth,
+            background.intrinsicHeight,
+            Bitmap.Config.ARGB_8888
+        )
         val canvas = Canvas(bitmap)
         background.draw(canvas)
 
         // scale the icon to fit Pin, 20% smaller, and place a little higher. use experience value
         canvas.scale(0.8f, 0.8f, centerW.toFloat(), centerH.toFloat())
         canvas.translate(0f, -background.intrinsicHeight.toFloat() / 7)
-        vectorDrawable.draw(canvas)
+        if (vectorDrawableResourceId > 0) vectorDrawable?.draw(canvas)
+
         return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 
 
-    fun generateSearchResult(entityResult: Entity?, currentSearchHotCategory: String?) : SearchResult {
-        if (entityResult == null || (entityResult.place==null && entityResult.address == null)) {
+    fun generateSearchResult(
+        entityResult: Entity?,
+        currentSearchHotCategory: String?
+    ): SearchResult {
+        if (entityResult == null || (entityResult.place == null && entityResult.address == null)) {
             return SearchResult.build("No result", "No category") {}
         }
 
@@ -408,7 +424,7 @@ object CategoryAndFiltersUtil {
         if (entityResult.place == null) {
             val address = entityResult.address
             return SearchResult.build(address.formattedAddress, "") {
-                iconId = R.drawable.ic_more_color
+                iconId = 0
                 latitude = address.navCoordinates.latitude
                 longitude = address.navCoordinates.longitude
                 distance = -1.0 // negative distance to prevent showing 0.0mil on screen
@@ -420,15 +436,15 @@ object CategoryAndFiltersUtil {
             categoryName = entityResult.place.categories[0].name
         }
 
-        val searchResult = SearchResult.build(entityResult.place.name,  categoryName) {
+        val searchResult = SearchResult.build(entityResult.place.name, categoryName) {
             id = entityResult.id
             permanentlyClosed = entityResult.place.isPermanentlyClosed
             parking = entityResult.facets?.parking
             address = entityResult.place.address.formattedAddress
 
-                if (entityResult.place.phoneNumbers.isNotEmpty()) {
-                    phoneNo = entityResult.place.phoneNumbers[0]
-                }
+            if (entityResult.place.phoneNumbers.isNotEmpty()) {
+                phoneNo = entityResult.place.phoneNumbers[0]
+            }
 
             if (entityResult.facets != null && entityResult.facets.rating.isNotEmpty()) {
                 ratingLevel = entityResult.facets.rating[0].averageRating
@@ -438,9 +454,9 @@ object CategoryAndFiltersUtil {
                 priceLevel = entityResult.facets.priceInfo.priceLevel
             }
 
-            iconId = R.drawable.ic_more_color
+            iconId = 0
             for (eachCategory in hotCategoriesList) {
-                if ((eachCategory.tag) == currentSearchHotCategory) {
+                if (StringUtils.isNotBlank(currentSearchHotCategory) && eachCategory.tag == currentSearchHotCategory) {
                     iconId = eachCategory.iconPurple
                     break
                 }
@@ -462,7 +478,8 @@ object CategoryAndFiltersUtil {
             }
 
             if (entityResult.place != null && entityResult.place.address != null &&
-                entityResult.place.address.navCoordinates != null) {
+                entityResult.place.address.navCoordinates != null
+            ) {
                 if (entityResult.place.address.navCoordinates.latitude != null) {
                     latitude = entityResult.place.address.navCoordinates.latitude
                 }
@@ -475,17 +492,42 @@ object CategoryAndFiltersUtil {
         return searchResult
     }
 
-    fun placeCameraDependingOnSearchResults(googleMap: GoogleMap?, coordinatesList: MutableList<LatLng>, currentLocation: Location?) {
+    fun placeCameraDependingOnSearchResults(
+        googleMap: GoogleMap?,
+        coordinatesList: MutableList<LatLng>,
+        currentLocation: Location?
+    ) {
         if (coordinatesList.isNotEmpty() && coordinatesList.size > 2) {
-            googleMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(createLatLngBounds(coordinatesList[0], coordinatesList[1]), 100))
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newLatLngBounds(
+                    createLatLngBounds(
+                        coordinatesList[0],
+                        coordinatesList[1]
+                    ), 100
+                )
+            )
         } else if (coordinatesList.isNotEmpty()) {
-            googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(coordinatesList[0].latitude, coordinatesList[0].longitude), 17f))
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        coordinatesList[0].latitude,
+                        coordinatesList[0].longitude
+                    ), 17f
+                )
+            )
         } else if (currentLocation != null) {
-            googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(currentLocation.latitude, currentLocation.longitude), 17f))
+            googleMap?.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        currentLocation.latitude,
+                        currentLocation.longitude
+                    ), 17f
+                )
+            )
         }
     }
 
-    fun createLatLngBounds(firstCoordinate : LatLng, secondCoordinate : LatLng): LatLngBounds? {
+    fun createLatLngBounds(firstCoordinate: LatLng, secondCoordinate: LatLng): LatLngBounds? {
         val builder = LatLngBounds.Builder()
         builder.include(firstCoordinate)
         builder.include(secondCoordinate)
@@ -521,7 +563,8 @@ object CategoryAndFiltersUtil {
      * @param tag categoryTag
      * @return CategoryViewData
      */
-    fun Category.toViewData(tag: String): CategoryViewData = CategoryViewData(name, getCategoryIcon(tag, name))
+    fun Category.toViewData(tag: String): CategoryViewData =
+        CategoryViewData(name, getCategoryIcon(tag, name))
 
     /**
      * Convert HotCategory data into CategoryAdapter needed format

@@ -52,6 +52,12 @@
     <string name="browse">Browse</string>
     <string name="path">Path</string>
     <string name="search_mode">SDK Search Mode</string>
+    <string name="explore">Explore</string>
+    <string name="explore_enabled">Enabled</string>
+    <string name="explore_disabled">Disabled</string>
+    <string name="explore_intent">Explore Intent</string>
+    <string name="explore_limit">Explore Limit</string>
+    <string name="explore_radius">Explore Radius(Meter)</string>
     <string name="settings">Settings</string>
     <string name="open_time">Open time</string>
     <string name="reviews"> %d Reviews</string>

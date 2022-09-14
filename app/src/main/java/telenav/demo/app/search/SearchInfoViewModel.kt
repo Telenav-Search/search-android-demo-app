@@ -54,6 +54,34 @@ class SearchInfoViewModel : ViewModel() {
     val categories = MutableLiveData<List<Category>>().apply { listOf<Any>() }
     var predictions = MutableLiveData<List<WordPrediction>>().apply { listOf<WordPrediction>() }
 
+    fun explore(
+        query: String?,
+        categoryTag: String?,
+        cvpLocation: Location,
+        executor: Executor,
+        searchAreaLocation: Location? = null
+    ) {
+        //explore
+        val exploreIntent =
+            App.readStringFromSharedPreferences(App.KEY_EXPLORE_INTENT, "0")!!.toInt()
+        val exploreEnabled = App.readBooleanFromSharedPreferences(App.KEY_EXPLORE_ENABLED, false)
+        if (!exploreEnabled) {
+            searchResults.postValue(emptyList())
+            return
+        }
+        var exploreCommand = "";
+        if (query?.startsWith("explore:") == false) {
+            when (exploreIntent) {
+                0 -> exploreCommand = "explore:poi"
+                1 -> exploreCommand = "explore:address"
+                2 -> exploreCommand = "explore:all"
+            }
+        } else {
+            exploreCommand = query!!
+        }
+        search(exploreCommand, categoryTag, cvpLocation, executor, searchAreaLocation)
+    }
+
     fun search(
         query: String?,
         categoryTag: String?,
@@ -63,26 +91,41 @@ class SearchInfoViewModel : ViewModel() {
         filterCategory: String? = null,
         filtersAvailable: Boolean = false,
         nearLeft: LatLng? = null,
-        farRight: LatLng? = null) {
+        farRight: LatLng? = null
+    ) {
 
         loading.postValue(true)
         searchError.postValue("")
 
         val filtersSearch = SearchFilters.builder()
+        var limit = App.readStringFromSharedPreferences(
+            App.SEARCH_LIMIT,
+            SEARCH_INFO_LIMIT_WITH_FILTERS.toString()
+        )!!.toInt();
+        //explore
+        val exploreLimit = App.readIntFromSharedPreferences(App.KEY_EXPLORE_LIMIT, 10)
+        val radius = App.readIntFromSharedPreferences(App.KEY_EXPLORE_RADIUS, 3000)
+        val exploreEnabled = App.readBooleanFromSharedPreferences(App.KEY_EXPLORE_ENABLED, false)
+        val doExploreFlag = query?.startsWith("explore:") == true && exploreEnabled
+        if (doExploreFlag) {
+            filtersSearch.setGeoFilter(RadiusGeoFilter.builder(radius).build())
+            limit = exploreLimit
+        }
+
         if (categoryTag != null) {
             filtersSearch.setCategoryFilter(
-                    CategoryFilter.builder().addCategory(categoryTag).build()
+                CategoryFilter.builder().addCategory(categoryTag).build()
             )
         }
         if (nearLeft != null && farRight != null) {
             val bBox: BBox = BBox
-                    .builder()
-                    .setBottomLeft(nearLeft.latitude, nearLeft.longitude)
-                    .setTopRight(farRight.latitude, farRight.longitude)
-                    .build()
+                .builder()
+                .setBottomLeft(nearLeft.latitude, nearLeft.longitude)
+                .setTopRight(farRight.latitude, farRight.longitude)
+                .build()
             val geoFilter: BBoxGeoFilter = BBoxGeoFilter
-                    .builder(bBox)
-                    .build()
+                .builder(bBox)
+                .build()
             filtersSearch.setGeoFilter(geoFilter)
         }
 
@@ -111,7 +154,8 @@ class SearchInfoViewModel : ViewModel() {
                     val powerFeed = getPowerFeedLevels()
 
                     if (!connectionTypes.isNullOrEmpty()) {
-                        builder.setConnectorTypes(connectionTypes.split(",").filter { it.isNotEmpty() })
+                        builder.setConnectorTypes(
+                            connectionTypes.split(",").filter { it.isNotEmpty() })
                     }
 
                     if (!chargeBrands.isNullOrEmpty()) {
@@ -119,7 +163,8 @@ class SearchInfoViewModel : ViewModel() {
                     }
 
                     if (!powerFeed.isNullOrEmpty()) {
-                        builder.setPowerFeedLevels(powerFeed.split(",").filter { it.isNotEmpty() }.map { it.toInt() })
+                        builder.setPowerFeedLevels(powerFeed.split(",").filter { it.isNotEmpty() }
+                            .map { it.toInt() })
                     }
 
                     builder.setFreeCharge(isFreeCharger())
@@ -143,9 +188,15 @@ class SearchInfoViewModel : ViewModel() {
                 setFilters(filtersSearch.build())
             }.apply {
                 if (filtersAvailable && filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG)) {
-                    val parkingDuration = App.readIntFromSharedPreferences(App.PARKING_DURATION, 0) * 60 // convert hours to minutes
+                    val parkingDuration = App.readIntFromSharedPreferences(
+                        App.PARKING_DURATION,
+                        0
+                    ) * 60 // convert hours to minutes
                     val entryTime = App.readStringFromSharedPreferences(App.PARKING_START_FROM, "")
-                    Log.i(TAG, "search: parking params, entryTime = $entryTime, duration = $parkingDuration")
+                    Log.i(
+                        TAG,
+                        "search: parking params, entryTime = $entryTime, duration = $parkingDuration"
+                    )
                     if (parkingDuration != 0 || !entryTime.isNullOrEmpty()) {
                         when {
                             entryTime.isNullOrEmpty() -> {
@@ -153,7 +204,8 @@ class SearchInfoViewModel : ViewModel() {
                                     .setParkingParameters(
                                         ParkingParameters.builder()
                                             .setDuration(parkingDuration)
-                                            .build()).build()
+                                            .build()
+                                    ).build()
                                 setFacetParameters(facetParameters)
                             }
                             parkingDuration == 0 -> {
@@ -161,7 +213,8 @@ class SearchInfoViewModel : ViewModel() {
                                     .setParkingParameters(
                                         ParkingParameters.builder()
                                             .setEntryTime(entryTime)
-                                            .build()).build()
+                                            .build()
+                                    ).build()
                                 setFacetParameters(facetParameters)
                             }
                             else -> {
@@ -170,7 +223,8 @@ class SearchInfoViewModel : ViewModel() {
                                         ParkingParameters.builder()
                                             .setDuration(parkingDuration)
                                             .setEntryTime(entryTime)
-                                            .build()).build()
+                                            .build()
+                                    ).build()
                                 setFacetParameters(facetParameters)
                             }
                         }
@@ -181,8 +235,7 @@ class SearchInfoViewModel : ViewModel() {
                 searchAreaLocation?.let { setAnchor(it.latitude, it.longitude) }
             }
             .setLocation(cvpLocation.latitude, cvpLocation.longitude)
-            .setLimit(App.readStringFromSharedPreferences(App.SEARCH_LIMIT,
-                SEARCH_INFO_LIMIT_WITH_FILTERS.toString())!!.toInt())
+            .setLimit(limit)
             .asyncCall(
                 executor,
                 object : Callback<EntitySearchResponse> {
@@ -193,8 +246,14 @@ class SearchInfoViewModel : ViewModel() {
                             response.referenceId
                         )
                         if (categories.value.isNullOrEmpty()) {
-                            requestSubcategories(categoryTag,
-                                searchAreaLocation ?: cvpLocation, executor, filtersAvailable, filterCategory, response.results)
+                            requestSubcategories(
+                                categoryTag,
+                                searchAreaLocation ?: cvpLocation,
+                                executor,
+                                filtersAvailable,
+                                filterCategory,
+                                response.results
+                            )
                         } else {
                             handleSearchResponse(filtersAvailable, filterCategory, response.results)
                         }
@@ -225,21 +284,21 @@ class SearchInfoViewModel : ViewModel() {
             .asyncCall(
                 executor,
                 object : Callback<EntityDiscoverCategoryResponse?> {
-                override fun onSuccess(response: EntityDiscoverCategoryResponse?) {
-                    // log response in JSON format
-                    Log.d("TAG", EntityJsonConverter.toPrettyJson(response))
-                    categories.value= response?.results as List<Category>
-                    handleSearchResponse(filtersAvailable, filterCategory, results)
-                }
+                    override fun onSuccess(response: EntityDiscoverCategoryResponse?) {
+                        // log response in JSON format
+                        Log.d("TAG", EntityJsonConverter.toPrettyJson(response))
+                        categories.value = response?.results as List<Category>
+                        handleSearchResponse(filtersAvailable, filterCategory, results)
+                    }
 
-                override fun onFailure(t: Throwable?) {
-                    handleSearchResponse(filtersAvailable, filterCategory, results)
-                    Log.e(
-                        "TAG",
-                        "Get unsuccessful response or throwable happened when executing the request."
-                    )
-                }
-            })
+                    override fun onFailure(t: Throwable?) {
+                        handleSearchResponse(filtersAvailable, filterCategory, results)
+                        Log.e(
+                            "TAG",
+                            "Get unsuccessful response or throwable happened when executing the request."
+                        )
+                    }
+                })
     }
 
     fun requestSuggestions(text: String, location: Location, executor: Executor) {
@@ -247,8 +306,12 @@ class SearchInfoViewModel : ViewModel() {
         telenavEntityClient.suggestionPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
-            .setLimit(App.readStringFromSharedPreferences(App.SUGGESTIONS_LIMIT,
-                SUGGESTIONS_LIMIT_DEF.toString())!!.toInt())
+            .setLimit(
+                App.readStringFromSharedPreferences(
+                    App.SUGGESTIONS_LIMIT,
+                    SUGGESTIONS_LIMIT_DEF.toString()
+                )!!.toInt()
+            )
             .asyncCall(executor,
                 object : Callback<EntitySuggestionPredictionResponse> {
                     override fun onSuccess(response: EntitySuggestionPredictionResponse) {
@@ -274,8 +337,12 @@ class SearchInfoViewModel : ViewModel() {
         telenavEntityClient.wordPredictionRequest()
             .setQuery(text)
             .setLocation(location.latitude, location.longitude)
-            .setLimit(App.readStringFromSharedPreferences(App.PREDICTIONS_LIMIT,
-                PREDICTIONS_LIMIT.toString())!!.toInt())
+            .setLimit(
+                App.readStringFromSharedPreferences(
+                    App.PREDICTIONS_LIMIT,
+                    PREDICTIONS_LIMIT.toString()
+                )!!.toInt()
+            )
             .asyncCall(executor,
                 object : com.telenav.sdk.core.Callback<EntityWordPredictionResponse> {
                     override fun onSuccess(response: EntityWordPredictionResponse) {
@@ -296,7 +363,7 @@ class SearchInfoViewModel : ViewModel() {
             object : Callback<EntityGetCategoriesResponse> {
                 override fun onSuccess(response: EntityGetCategoriesResponse) {
                     loading.postValue(false)
-                    categories.value= response.results as List<Category>
+                    categories.value = response.results as List<Category>
                 }
 
                 override fun onFailure(p1: Throwable?) {
@@ -308,7 +375,11 @@ class SearchInfoViewModel : ViewModel() {
         )
     }
 
-    private fun handleSearchResponse(filtersAvailable: Boolean, filterCategory: String?, results: List<Entity>) {
+    private fun handleSearchResponse(
+        filtersAvailable: Boolean,
+        filterCategory: String?,
+        results: List<Entity>
+    ) {
         loading.postValue(false)
         if (filtersAvailable) {
             searchResults.value = applyFilters(results, filterCategory)
@@ -331,8 +402,8 @@ class SearchInfoViewModel : ViewModel() {
         val filteredResults = arrayListOf<Entity>()
         results.forEach { entity ->
             if (entity.facets.rating != null && entity.facets.rating.size > 0
-                    && entity.facets.rating[0].averageRating - starsNumber.toDouble() >= 0.0 &&
-                    entity.facets.rating[0].averageRating - starsNumber.toDouble() < 1.0
+                && entity.facets.rating[0].averageRating - starsNumber.toDouble() >= 0.0 &&
+                entity.facets.rating[0].averageRating - starsNumber.toDouble() < 1.0
             ) {
                 filteredResults.add(entity)
             }
@@ -357,13 +428,15 @@ class SearchInfoViewModel : ViewModel() {
         }
 
         if (!filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG) &&
-            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)) {
+            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)
+        ) {
             val starsNumber = getRateStars()
             if (starsNumber != Stars.DEFAULT.starsNumber) {
                 filteredResults = filterByStar(results, starsNumber)
             }
         } else if (filterCategory.equals(CategoryAndFiltersUtil.PARKING_TAG) &&
-            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)) {
+            !filterCategory.equals(CategoryAndFiltersUtil.EV_CHARGER_TAG)
+        ) {
             val priceNumber = getPriceLevel()
             if (priceNumber != PriceLevelType.DEFAULT.priceLevel) {
                 filteredResults = filterByPrice(results, priceNumber)
@@ -383,7 +456,8 @@ class SearchInfoViewModel : ViewModel() {
         val prefs =
             context.getSharedPreferences(
                 context.getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE)
+                Context.MODE_PRIVATE
+            )
 
         val listType: Type = object : TypeToken<List<Entity>>() {}.type
         return Gson().fromJson(
@@ -398,7 +472,8 @@ class SearchInfoViewModel : ViewModel() {
         val prefs =
             context.getSharedPreferences(
                 context.getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE)
+                Context.MODE_PRIVATE
+            )
 
         with(prefs.edit()) {
             putString(
@@ -417,7 +492,8 @@ class SearchInfoViewModel : ViewModel() {
         val prefs =
             context.getSharedPreferences(
                 context.getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE)
+                Context.MODE_PRIVATE
+            )
 
         val listType: Type = object : TypeToken<List<Category>>() {}.type
         return Gson().fromJson(
@@ -432,7 +508,8 @@ class SearchInfoViewModel : ViewModel() {
         val prefs =
             context.getSharedPreferences(
                 context.getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE)
+                Context.MODE_PRIVATE
+            )
 
         with(prefs.edit()) {
             putString(
@@ -447,7 +524,7 @@ class SearchInfoViewModel : ViewModel() {
         categories.value = getRecentCategoryData(context)
     }
 
-    fun getHome(context: Context) : Entity? {
+    fun getHome(context: Context): Entity? {
         val homeEntity = dataCollectorClient.getHome(context)
         homeEntity?.let {
             savedAddress.value = listOf(it)
@@ -456,7 +533,7 @@ class SearchInfoViewModel : ViewModel() {
 
     }
 
-    fun getWork(context: Context) : Entity? {
+    fun getWork(context: Context): Entity? {
         val workEntity = dataCollectorClient.getWork(context)
         workEntity?.let {
             savedAddress.value = listOf(it)
@@ -490,7 +567,12 @@ class SearchInfoViewModel : ViewModel() {
         if (strConnectorTypes == null || strConnectorTypes.isEmpty()) {
             return null;
         }
-        return strConnectorTypes.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.connectorTypesMap.getOrDefault(it, "") }
+        return strConnectorTypes.split(",").joinToString(separator = ",") {
+            CategoryAndFiltersUtil.connectorTypesMap.getOrDefault(
+                it,
+                ""
+            )
+        }
     }
 
     private fun getChargerBrands(): String? {
@@ -498,7 +580,12 @@ class SearchInfoViewModel : ViewModel() {
         if (strChargeBrands == null || strChargeBrands.isEmpty()) {
             return null;
         }
-        return strChargeBrands.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.chargerBrandsMap.getOrDefault(it, "") }
+        return strChargeBrands.split(",").joinToString(separator = ",") {
+            CategoryAndFiltersUtil.chargerBrandsMap.getOrDefault(
+                it,
+                ""
+            )
+        }
     }
 
     private fun getPowerFeedLevels(): String? {
@@ -506,6 +593,11 @@ class SearchInfoViewModel : ViewModel() {
         if (strPowerFeedLevels == null || strPowerFeedLevels.isEmpty()) {
             return null;
         }
-        return strPowerFeedLevels.split(",").joinToString(separator = ",") { CategoryAndFiltersUtil.powerFeedLevelsMap.getOrDefault(it, "") }
+        return strPowerFeedLevels.split(",").joinToString(separator = ",") {
+            CategoryAndFiltersUtil.powerFeedLevelsMap.getOrDefault(
+                it,
+                ""
+            )
+        }
     }
 }
