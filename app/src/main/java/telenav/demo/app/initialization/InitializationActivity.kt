@@ -40,9 +40,7 @@ import telenav.demo.app.R
 import telenav.demo.app.map.MapActivity
 import telenav.demo.app.model.ServerDataUtil
 
-import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 
-import java.io.File
 import java.util.*
 import java.util.concurrent.Executor
 
