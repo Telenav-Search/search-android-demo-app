@@ -45,6 +45,7 @@ class SearchResultsListRecyclerAdapter(
 
     override fun onBindViewHolder(holder: EntityFavoriteHolder, position: Int) {
         val entity = list[position]
+        //TODO: handle null exception which from destination predict
         val name =
             if (entity.type == EntityType.ADDRESS) entity.address.formattedAddress else entity.place.name
 

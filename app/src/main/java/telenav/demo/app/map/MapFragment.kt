@@ -7,22 +7,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
-
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.UiSettings
 import com.google.android.gms.maps.model.*
-
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
-
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
@@ -45,6 +39,8 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
     private var alreadyInitialized = false
     private val viewModel: SearchInfoViewModel by viewModels()
+    private var polylineList: MutableList<Polyline> = mutableListOf()
+
 
 
     override fun onCreateView(
@@ -101,10 +97,11 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         return false
     }
 
-    fun addSearchResultsOnMap(
+    fun addSearchResultsAndPolygonOnMap(
         searchResults: List<Entity>?,
         currentLocation: Location?,
-        currentSearchHotTag: String?
+        currentSearchHotTag: String?,
+        polygon: PolygonOptions?
     ) {
 
         googleMap?.clear()
@@ -112,6 +109,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         searchResults?.forEach { result ->
             addSearchResultsOnMap(result, currentSearchHotTag)
         }
+        polygon?.let { addPolygon(it) }
 
         CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
             googleMap,
@@ -225,7 +223,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
                 it.isMyLocationEnabled = true
             } catch (e: SecurityException) {
             }
-            it.isTrafficEnabled = true
+            it.isTrafficEnabled = false
 
             val location = (requireActivity() as MapActivity).getCVPLocation()
             positionMap(location.latitude, location.longitude)
@@ -253,8 +251,28 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     fun getScreenLocation(screenPoint: Point): LatLng? =
         googleMap?.projection?.fromScreenLocation(screenPoint)
 
-    override fun onMapClick(p0: LatLng?) {
+    override fun onMapClick(latlon: LatLng?) {
+        Log.i("MapFragment","map click.")
         (requireActivity() as MapActivity).collapseEntityDetails()
+        (requireActivity() as MapActivity).getPolylineOption()
+            .add(latlon)
+        if((requireActivity() as MapActivity).isTouchEnabled()){
+
+            googleMap?.addPolyline((requireActivity() as MapActivity).getPolylineOption())
+                ?.let { polylineList.add(it) }
+        }
+
+    }
+
+    fun addPolygon(polygon: PolygonOptions): Polygon? {
+        return googleMap?.addPolygon(polygon)
+    }
+
+    fun removeAllPolyline(){
+        for (line in polylineList) {
+            line.remove()
+        }
+        polylineList.clear()
     }
 
     override fun onMapLongClick(latlon: LatLng?) {

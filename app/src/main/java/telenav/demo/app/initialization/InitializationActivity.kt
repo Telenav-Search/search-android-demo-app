@@ -17,6 +17,8 @@ import android.widget.Toast
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.telenav.sdk.common.logging.TaLog
+import com.telenav.sdk.common.model.NavLogLevelType
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -86,15 +88,12 @@ class InitializationActivity : AppCompatActivity() {
         vLoading = findViewById(R.id.initialization_loading)
         vIcon = findViewById(R.id.initialization_icon)
 
-        findViewById<View>(R.id.initialization_select_index).setOnClickListener { openDirectoryForIndex() }
         findViewById<View>(R.id.initialization_next).setOnClickListener { initSDKs() }
         findViewById<View>(R.id.initialization_request_permissions).setOnClickListener {
             startActivityForResult(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION), 1)
         }
 
-        val indexPath = File(filesDir.absolutePath + "/indexData")
-        if (!indexPath.exists()) indexPath.mkdir()
-        indexDataPath = indexPath.absolutePath
+        indexDataPath = BuildConfig.telenav_data_dir
     }
 
     override fun onResume() {
@@ -164,6 +163,8 @@ class InitializationActivity : AppCompatActivity() {
 
                 getUIExecutor().execute {
                     if (!isChanged) {
+                        TaLog.enableLogs(true);
+                        TaLog.setLogLevel(NavLogLevelType.INFO);
                         DataCollectorService.initialize(this@InitializationActivity, sdkOptions)
                         OtaService.initialize(this@InitializationActivity, sdkOptions)
                         PredictionService.initialize(sdkOptions)
@@ -183,14 +184,6 @@ class InitializationActivity : AppCompatActivity() {
         }
     }
 
-    private fun openDirectoryForIndex() {
-        val directoryPickerDialog = DirectoryPickerDialog(
-            this, {}
-        ) { files: Array<File> ->
-            indexDataPath = files[0].path
-        }
-        directoryPickerDialog.show()
-    }
 
     private fun checkPermissions() {
         if (!this.checkLocationPermission() || !this.checkExternalStoragePermissions()) {

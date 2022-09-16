@@ -282,23 +282,23 @@ class SearchListBottomFragment : BottomSheetDialogFragment() {
     }
 
     private fun onBack() {
-        (activity!! as MapActivity).hideKeyboard(binding?.search!!)
+        (requireActivity() as MapActivity).hideKeyboard(binding?.search!!)
         if (shouldUpdateHomeAddress || shouldUpdateWorkAddress) {
             if (!openedFromMainScreen) {
-                (activity!! as MapActivity).showPersonalInfoFragment()
+                (requireActivity() as MapActivity).showPersonalInfoFragment()
             }
         } else {
-            (activity!! as MapActivity).updateBottomSheetState()
-            (activity!! as MapActivity).updateBottomView()
-            (activity!! as MapActivity).clearTextAndFocus()
+            (requireActivity() as MapActivity).updateBottomSheetState()
+            (requireActivity() as MapActivity).updateBottomView()
+            (requireActivity() as MapActivity).clearTextAndFocus()
         }
         dismiss()
     }
 
     private fun searchText() {
-        val loc = (activity!! as MapActivity).getSearchAreaLocation()
-        (activity!! as MapActivity).setLastSearch(binding?.search?.text.toString())
-        (activity!! as MapActivity).hideKeyboard(binding?.search!!)
+        val loc = (requireActivity() as MapActivity).getSearchAreaLocation()
+        (requireActivity() as MapActivity).setLastSearch(binding?.search?.text.toString())
+        (requireActivity() as MapActivity).hideKeyboard(binding?.search!!)
         binding?.searchList?.removeAllViewsInLayout()
         activity?.getUIExecutor()?.let {
             hidePredictions()

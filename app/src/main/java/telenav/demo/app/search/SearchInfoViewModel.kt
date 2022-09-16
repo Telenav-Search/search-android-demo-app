@@ -59,7 +59,9 @@ class SearchInfoViewModel : ViewModel() {
         categoryTag: String?,
         cvpLocation: Location,
         executor: Executor,
-        searchAreaLocation: Location? = null
+        searchAreaLocation: Location? = null,
+        nearLeft: LatLng? = null,
+        farRight: LatLng? = null
     ) {
         //explore
         val exploreIntent =
@@ -79,7 +81,7 @@ class SearchInfoViewModel : ViewModel() {
         } else {
             exploreCommand = query!!
         }
-        search(exploreCommand, categoryTag, cvpLocation, executor, searchAreaLocation)
+        search(exploreCommand, categoryTag, cvpLocation, executor, searchAreaLocation,null,true,nearLeft,farRight)
     }
 
     fun search(

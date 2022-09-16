@@ -11,15 +11,22 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.View.OnFocusChangeListener
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Polygon
+import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -47,7 +54,10 @@ import telenav.demo.app.utils.CategoryAndFiltersUtil.toViewData
 import telenav.demo.app.utils.LocationUtil
 import telenav.demo.app.widgets.CategoryAdapter
 import java.lang.reflect.Type
+import java.security.AccessController.getContext
 import java.util.concurrent.Executor
+import java.util.stream.Collectors
+import kotlin.streams.toList
 
 
 class MapActivity : AppCompatActivity() {
@@ -61,6 +71,7 @@ class MapActivity : AppCompatActivity() {
     }
 
     private var gpsInit = false
+    private var touchEnabled = false;
     private val viewModel: SearchInfoViewModel by viewModels()
     private var lastSearch: String = ""
     private var navigationFromSearchInfo = false
@@ -90,6 +101,10 @@ class MapActivity : AppCompatActivity() {
     private var hotCategoryTag = ""
     private var bottomSheetState = BottomSheetBehavior.STATE_COLLAPSED
     private var predictLocation: List<Entity> = emptyList()
+    private lateinit var touchIcon: ImageView
+    var polylineOptions = PolylineOptions()
+    var polygonOptions = PolygonOptions()
+    private var polygon: Polygon? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,6 +116,13 @@ class MapActivity : AppCompatActivity() {
         displayUserInfo()
         displayRecentSearchInfo()
         resetFilters()
+
+
+    }
+
+
+    fun setTouchEnabled(enabled: Boolean) {
+        touchEnabled = enabled
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -124,6 +146,56 @@ class MapActivity : AppCompatActivity() {
             }
         }
         search.setOnClickListener { showSearchListBottomFragment() }
+        touchIcon = findViewById(R.id.map_fragment_touch_iv)
+        touchIcon.setOnClickListener {
+            touchClick()
+
+        }
+
+    }
+
+    fun touchClick() {
+        if (touchEnabled) {
+            setTouchEnabled(false)
+            touchIcon.setColorFilter(
+                ContextCompat.getColor(
+                    applicationContext,
+                    R.color.telenav_indigo
+                )
+            )
+            mapFragment?.removeAllPolyline()
+            if (polylineOptions.points.size > 2) {
+                val sortedByLat = polylineOptions.points.sortedBy { it.latitude }
+                val minLat = sortedByLat[0].latitude
+                val maxLat = sortedByLat[sortedByLat.size - 1].latitude
+                val sortedByLon = polylineOptions.points.sortedBy { it.longitude }
+                val minLon = sortedByLon[0].longitude
+                val maxLon = sortedByLon[sortedByLon.size - 1].longitude
+                val firstPoint = LatLng(minLat, minLon)
+                polygonOptions.add(firstPoint)
+                val secondPoint = LatLng(minLat, maxLon)
+                polygonOptions.add(secondPoint)
+                val thirdPoint = LatLng(maxLat, maxLon)
+                polygonOptions.add(thirdPoint)
+                val lastPoint = LatLng(maxLat, minLon)
+                polygonOptions.add(lastPoint)
+                val haftLat = (minLat + maxLat) / 2
+                val haftLon = (minLon + maxLon) / 2
+                explore(
+                    LatLng(haftLat, haftLon),
+                    LatLng(minLat, minLon), LatLng
+                        (maxLat, maxLon),polygonOptions
+                )
+                polygon = mapFragment?.addPolygon(polygonOptions)
+
+            }
+        } else {
+            polygon?.remove()
+            setTouchEnabled(true)
+            polygonOptions = PolygonOptions()
+            polylineOptions = PolylineOptions()
+            touchIcon.setColorFilter(ContextCompat.getColor(applicationContext, R.color.blue_c1))
+        }
     }
 
     fun onBackFromFilterFragment() {
@@ -182,7 +254,12 @@ class MapActivity : AppCompatActivity() {
         explore(null)
     }
 
-    fun explore(latLng: LatLng?) {
+    fun explore(
+        latLng: LatLng?,
+        nearLeft: LatLng? = null,
+        farRight: LatLng? = null,
+        polygonOptions: PolygonOptions?=null
+    ) {
         Log.i(TAG, "explore trigger")
         val latitude = latLng?.latitude;
         val longitude = latLng?.longitude;
@@ -194,11 +271,19 @@ class MapActivity : AppCompatActivity() {
             location.latitude = latitude
             location.longitude = longitude
         }
-        if (location.latitude > 0.0 && getSearchAreaLocation().latitude > 0.0) {
+        if (location.latitude !=0.0 && getSearchAreaLocation().latitude !=0.0) {
             this.getUIExecutor().let {
-                viewModel.explore("", null, location, it, getSearchAreaLocation())
+                viewModel.explore(
+                    "",
+                    null,
+                    location,
+                    it,
+                    getSearchAreaLocation(),
+                    nearLeft,
+                    farRight
+                )
                 viewModel.searchResults.observe(this) {
-                    displaySearchResults(viewModel.searchResults.value, "")
+                    displaySearchResults(viewModel.searchResults.value, "",polygonOptions)
                     mapFragment?.moveToCurrentLocation(
                         LatLng(
                             location.latitude,
@@ -237,8 +322,8 @@ class MapActivity : AppCompatActivity() {
      *
      * -------- !!!!!!! this methods are called by fragments ---------
      */
-    fun displaySearchResults(it: List<Entity>?, currentSearchHotCategory: String?) {
-        mapFragment?.addSearchResultsOnMap(it, getSearchAreaLocation(), currentSearchHotCategory)
+    fun displaySearchResults(it: List<Entity>?, currentSearchHotCategory: String?, polygonOptions: PolygonOptions? = null) {
+        mapFragment?.addSearchResultsAndPolygonOnMap(it, getSearchAreaLocation(), currentSearchHotCategory,polygonOptions)
     }
 
     fun updateBottomSheetState() {
@@ -542,6 +627,12 @@ class MapActivity : AppCompatActivity() {
     }
 
     fun getCVPLocation(): Location = cvpLocation ?: gpsLocation
+
+    fun getPolylineOption(): PolylineOptions = polylineOptions
+
+    fun getPolygonOption(): PolygonOptions = polygonOptions
+
+    fun isTouchEnabled(): Boolean = touchEnabled
 
     fun getSearchAreaLocation(): Location = saLocation ?: gpsLocation
 

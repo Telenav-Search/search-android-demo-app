@@ -19,7 +19,7 @@
         android:layout_alignParentTop="true"
         android:layout_margin="15dp"
         android:src="@drawable/ic_touch"
-        android:visibility="gone" />
+        />
 
       <RelativeLayout
         android:id="@+id/top_navigation_panel"

@@ -14,9 +14,8 @@ import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import com.obsez.android.lib.filechooser.ChooserDialog
 import com.telenav.sdk.core.SDKRuntime
-import ir.androidexception.filepicker.dialog.DirectoryPickerDialog
 import kotlinx.android.synthetic.main.activity_settings.*
 import telenav.demo.app.App
 import telenav.demo.app.R
@@ -24,7 +23,6 @@ import telenav.demo.app.initialization.SearchMode
 import telenav.demo.app.map.MapActivity.Companion.IS_ENV_CHANGED
 import telenav.demo.app.model.ServerDataUtil
 import telenav.demo.app.utils.LocationUtil
-import java.io.File
 
 
 class SettingsActivity : AppCompatActivity() {
@@ -278,13 +276,20 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun openDirectoryForIndex() {
-        val directoryPickerDialog = DirectoryPickerDialog(
-            this, {}
-        ) { files: Array<File> ->
-            indexDataPath = files[0].path
-            updateUI()
-        }
-        directoryPickerDialog.show()
+        val sp = getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        sp.getString(getString(R.string.saved_index_data_path_key), "")!!
+
+        ChooserDialog(this)
+            .withFilter(true, false)
+            .withStartFile(indexDataPath) // to handle the result(s)
+            .withChosenListener(ChooserDialog.Result { path, pathFile ->
+
+                indexDataPath = path
+                updateUI()
+
+            })
+            .build()
+            .show()
     }
 
     private fun updateUI() {
