@@ -445,12 +445,12 @@ class SearchInfoViewModel : ViewModel() {
             }
         }
 
-        if (filteredResults.size > App.readFromSharedPreferences(App.FILTER_NUMBER)) {
+        /*if (filteredResults.size > App.readFromSharedPreferences(App.FILTER_NUMBER)) {
             return filteredResults.subList(
                 0,
                 App.readFromSharedPreferences(App.FILTER_NUMBER)
             )
-        }
+        }*/
         return filteredResults
     }
 

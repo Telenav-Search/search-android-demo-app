@@ -73,7 +73,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         }
     }
 
-    private fun clearMarkers() {
+    fun clearMarkers() {
         googleMap?.clear()
         coordinatesList.clear()
     }
@@ -307,6 +307,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         viewModel.searchResults.observe(viewLifecycleOwner) {
 
             if(lastId!=viewModel?.searchResults?.value?.get(0)?.id.toString()){
+                Log.i("MapFragment","searchResults.size:"+viewModel?.searchResults?.value?.size.toString())
                 addSearchResultsOnMap(viewModel.searchResults.value)
             }
 

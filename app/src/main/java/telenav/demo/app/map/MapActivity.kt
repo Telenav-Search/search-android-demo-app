@@ -191,6 +191,7 @@ class MapActivity : AppCompatActivity() {
             }
         } else {
             polygon?.remove()
+            mapFragment?.clearMarkers()
             setTouchEnabled(true)
             polygonOptions = PolygonOptions()
             polylineOptions = PolylineOptions()
@@ -284,6 +285,7 @@ class MapActivity : AppCompatActivity() {
                 )
                 viewModel.searchResults.observe(this) {
                     displaySearchResults(viewModel.searchResults.value, "",polygonOptions)
+                    Log.i("MapActivity","size:"+viewModel.searchResults.value?.size.toString())
                     mapFragment?.moveToCurrentLocation(
                         LatLng(
                             location.latitude,
