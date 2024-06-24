@@ -1,0 +1,19 @@
+---
+homeProject: search-android-demo-app
+groupId: com.telenav.sdk
+artifacts:
+  search-android-demo:
+    projectName: app
+    types:
+      - apk
+    enableUnitTestStep: true
+    needShowLink: true
+    publishingTask: publishReleasePublicationToMavenRepository
+    displayName: search-android-demo
+buildStepTasks:
+  - ":app:assembleRelease"
+notificationEmails:
+  - jwei@telenavsoftware.com
+  - ktian@telenavsoftware.com
+  - qchen@telenavsoftware.com
+  - jshao@telenavsoftware.com

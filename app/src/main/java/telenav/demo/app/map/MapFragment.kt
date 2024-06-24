@@ -3,50 +3,45 @@ package telenav.demo.app.map
 import android.graphics.Point
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.maps.model.VisibleRegion
+import com.google.android.gms.maps.model.*
 import com.telenav.sdk.datacollector.api.DataCollectorService
 import com.telenav.sdk.datacollector.model.event.EntityActionEvent
 import com.telenav.sdk.entity.model.base.Entity
 import telenav.demo.app.App
 import telenav.demo.app.R
 import telenav.demo.app.databinding.FragmentMapBinding
-import telenav.demo.app.entitydetails.EntityDetailFragment
 import telenav.demo.app.entitydetails.EntityDetailViewModel
-import telenav.demo.app.infoui.CustomInfoWindowAdapter
 import telenav.demo.app.model.SearchResult
-import telenav.demo.app.search.SearchViewModel
-import telenav.demo.app.search.filters.Filter
+import telenav.demo.app.search.SearchInfoViewModel
 import telenav.demo.app.utils.CategoryAndFiltersUtil
 import telenav.demo.app.utils.entityClick
-import java.util.concurrent.Executor
 
 class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
-    GoogleMap.OnMarkerClickListener {
+    GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener,
+    GoogleMap.OnMapLongClickListener {
 
     private lateinit var map: SupportMapFragment
     private var googleMap: GoogleMap? = null
-    private lateinit var customInfoWindowAdapter: CustomInfoWindowAdapter
     private var searchResultList: MutableList<SearchResult> = mutableListOf()
     private var entitiesList: MutableList<Entity> = mutableListOf()
     private var coordinatesList: MutableList<LatLng> = mutableListOf()
     private lateinit var entityDetailViewModel: EntityDetailViewModel
-    private lateinit var entityDetailFragment: EntityDetailFragment
     private val dataCollectorClient by lazy { DataCollectorService.getClient() }
-    private val viewModel: SearchViewModel by viewModels()
     private var alreadyInitialized = false
+    private val viewModel: SearchInfoViewModel by viewModels()
+    private var polylineList: MutableList<Polyline> = mutableListOf()
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,54 +49,33 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentMapBinding.inflate(inflater, container, false)
-        binding.viewModel = viewModel
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initMap()
-        entityDetailFragment = EntityDetailFragment()
         entityDetailViewModel =
             ViewModelProvider(requireActivity()).get(EntityDetailViewModel::class.java)
-        viewModel.searchResults.observe(requireActivity(), Observer {
-            (activity as MapActivity).displaySearchResults(
-                it as List<Entity>?,
-                ""
-            )
-            (activity!! as MapActivity).showSearchHotCategoriesFragment(
-                it as List<Entity>, ""
-            )
-            (activity!! as MapActivity).enableDisableRedoButton(true)
-        })
-    }
-
-    fun searchInRegion(
-        query: String?,
-        categoryId: String?,
-        location: Location,
-        executor: Executor,
-        nearLeft: LatLng? = null,
-        farRight: LatLng? = null
-    ) {
-        viewModel.search(query, categoryId, location, executor, nearLeft, farRight)
-    }
-
-    fun setFilters(filters: List<Filter>?) {
-        viewModel.filters = filters
     }
 
     override fun onInfoWindowClick(marker: Marker?) {
-        dataCollectorClient.entityClick(
-            App.readStringFromSharedPreferences(
-                App.LAST_ENTITY_RESPONSE_REF_ID, ""
-            ) ?: "",
-            entitiesList[marker?.zIndex!!.toInt() - 1].id,
-            EntityActionEvent.DisplayMode.MAP_VIEW
-        )
-        entityDetailViewModel.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        entityDetailFragment.show(fragmentManager!!, entityDetailFragment.tag)
-        marker.hideInfoWindow()
+        marker?.zIndex?.let {
+            dataCollectorClient.entityClick(
+                App.readStringFromSharedPreferences(
+                    App.LAST_ENTITY_RESPONSE_REF_ID, ""
+                ) ?: "",
+                entitiesList[it.toInt() - 1].id,
+                EntityActionEvent.DisplayMode.MAP_VIEW
+            )
+            entityDetailViewModel.setSearchResult(searchResultList[it.toInt() - 1])
+            marker.hideInfoWindow()
+        }
+    }
+
+    fun clearMarkers() {
+        googleMap?.clear()
+        coordinatesList.clear()
     }
 
     fun getRegion(): VisibleRegion? {
@@ -109,63 +83,104 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
     }
 
     override fun onMarkerClick(marker: Marker?): Boolean {
-        marker?.hideInfoWindow()
-        if (searchResultList.isEmpty()) {
-            return true
+        marker?.zIndex?.let {
+            val index = it.toInt() - 1
+            if (index in searchResultList.indices) {
+                val searchResult = searchResultList[index]
+                if (index < entitiesList.size) {
+                    val entity = entitiesList[index]
+                    (requireActivity() as MapActivity).showEntityDetails(searchResult, entity)
+                }
+            }
         }
-        customInfoWindowAdapter.setSearchResult(searchResultList[marker?.zIndex!!.toInt() - 1])
-        marker.showInfoWindow()
+
         return false
     }
 
-    fun addSearchResultsOnMap(
+    fun addSearchResultsAndPolygonOnMap(
         searchResults: List<Entity>?,
         currentLocation: Location?,
-        currentSearchHotCategory: String?
+        currentSearchHotTag: String?,
+        polygon: PolygonOptions?
     ) {
 
         googleMap?.clear()
         coordinatesList.clear()
         searchResults?.forEach { result ->
-
-            if (result == null || result.place == null) {
-                return
-            }
-            entitiesList.add(result)
-            val searchResult =
-                CategoryAndFiltersUtil.generateSearchResult(result, currentSearchHotCategory)
-            searchResultList.add(searchResult)
-            coordinatesList.add(
-                LatLng(
-                    result.place.address.navCoordinates.latitude,
-                    result.place.address.navCoordinates.longitude
-                )
-            )
-
-            googleMap?.addMarker(
-                MarkerOptions()
-                    .position(
-                        LatLng(
-                            result.place.address.navCoordinates.latitude,
-                            result.place.address.navCoordinates.longitude
-                        )
-                    )
-                    .title(result.place.name)
-                    .zIndex(searchResultList.size.toFloat())
-                    .icon(
-                        CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                            activity!!,
-                            searchResult.iconId
-                        )
-                    )
-            )
+            addSearchResultsOnMap(result, currentSearchHotTag)
         }
+        polygon?.let { addPolygon(it) }
 
         CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
             googleMap,
             coordinatesList,
             currentLocation
         )
+    }
+
+    fun addSearchResultsOnMap(
+        searchResults: List<Entity>?
+    ) {
+        searchResults?.forEach { result ->
+            addSearchResultsOnMap(result, "")
+        }
+
+    }
+
+    fun addEntityResultOnMap(
+        entity: Entity,
+        currentLocation: Location?,
+        currentSearchHotTag: String?
+    ) {
+
+        googleMap?.clear()
+        coordinatesList.clear()
+        addSearchResultsOnMap(entity, currentSearchHotTag, true)
+        CategoryAndFiltersUtil.placeCameraDependingOnSearchResults(
+            googleMap,
+            coordinatesList,
+            currentLocation
+        )
+    }
+
+    private fun addSearchResultsOnMap(
+        entity: Entity,
+        currentSearchHotTag: String?,
+        shouldOpenEntityDetails: Boolean = false
+    ) {
+
+        val geoPoint = when {
+            entity.place != null -> entity.place.address.navCoordinates
+            entity.address != null -> entity.address.geoCoordinates
+            else -> return
+        }
+        val title = when {
+            entity.place != null -> entity.place.name
+            entity.address != null -> entity.address.formattedAddress
+            else -> return
+        }
+        entitiesList.add(entity)
+        val searchResult =
+            CategoryAndFiltersUtil.generateSearchResult(entity, currentSearchHotTag)
+        searchResultList.add(searchResult)
+        coordinatesList.add(LatLng(geoPoint.latitude, geoPoint.longitude))
+
+        googleMap?.addMarker(
+            MarkerOptions()
+                .position(LatLng(geoPoint.latitude, geoPoint.longitude))
+                .title(title)
+                .zIndex(searchResultList.size.toFloat())
+                .icon(
+                    CategoryAndFiltersUtil.bitmapDescriptorFromVector(
+                        requireActivity(),
+                        searchResult.iconId
+                    )
+                )
+        )
+
+        if (shouldOpenEntityDetails) {
+            (requireActivity() as MapActivity).showEntityDetails(searchResult, entity)
+        }
     }
 
     fun blockMap(block: Boolean) {
@@ -181,7 +196,7 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
                 .position(latLng)
                 .icon(
                     CategoryAndFiltersUtil.bitmapDescriptorFromVector(
-                        activity!!,
+                        requireActivity(),
                         R.drawable.ic_star_full
                     )
                 )
@@ -192,6 +207,9 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
         alreadyInitialized = true
     }
 
+    fun moveToCurrentLocation(latLng: LatLng) {
+        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17.0f))
+    }
 
     private fun initMap() {
         map = SupportMapFragment()
@@ -205,22 +223,23 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
                 it.isMyLocationEnabled = true
             } catch (e: SecurityException) {
             }
-            it.isTrafficEnabled = true
+            it.isTrafficEnabled = false
 
-            val location = (activity!! as MapActivity).lastKnownLocation;
+            val location = (requireActivity() as MapActivity).getCVPLocation()
             positionMap(location.latitude, location.longitude)
 
             googleMap?.setOnMarkerClickListener(this)
             googleMap?.setOnInfoWindowClickListener(this)
-
-            setInfoWindow()
+            googleMap?.setOnMapClickListener(this)
+            googleMap?.setOnMapLongClickListener(this)
+            googleMap?.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    context,
+                    R.raw.hide_landmark
+                )
+            )
+            googleMap?.uiSettings?.isMapToolbarEnabled = true
         }
-    }
-
-    private fun setInfoWindow() {
-        customInfoWindowAdapter =
-            CustomInfoWindowAdapter(layoutInflater.inflate(R.layout.info_window, null))
-        googleMap!!.setInfoWindowAdapter(customInfoWindowAdapter)
     }
 
     private fun positionMap(lat: Double, lon: Double) {
@@ -231,4 +250,70 @@ class MapFragment : Fragment(), GoogleMap.OnInfoWindowClickListener,
 
     fun getScreenLocation(screenPoint: Point): LatLng? =
         googleMap?.projection?.fromScreenLocation(screenPoint)
+
+    override fun onMapClick(latlon: LatLng?) {
+        Log.i("MapFragment","map click.")
+        (requireActivity() as MapActivity).collapseEntityDetails()
+        (requireActivity() as MapActivity).getPolylineOption()
+            .add(latlon)
+        if((requireActivity() as MapActivity).isTouchEnabled()){
+
+            googleMap?.addPolyline((requireActivity() as MapActivity).getPolylineOption())
+                ?.let { polylineList.add(it) }
+        }
+
+    }
+
+    fun addPolygon(polygon: PolygonOptions): Polygon? {
+        return googleMap?.addPolygon(polygon)
+    }
+
+    fun removeAllPolyline(){
+        for (line in polylineList) {
+            line.remove()
+        }
+        polylineList.clear()
+    }
+
+    override fun onMapLongClick(latlon: LatLng?) {
+        Log.i("MapFragment","Long click.")
+        clearMarkers()
+        googleMap?.addMarker(
+            latlon?.let {
+                MarkerOptions()
+                    .position(it)
+                    .icon(
+                        CategoryAndFiltersUtil.bitmapDescriptorFromVector(
+                            requireActivity(),
+                            R.drawable.ic_star_full
+                        )
+                    )
+            }
+        )
+        var location = Location("")
+        latlon?.let {
+            positionMap(it.latitude, latlon.longitude)
+            location.latitude = it.latitude
+            location.longitude = it.longitude
+        }
+        var lastId = viewModel?.searchResults?.value?.get(0)?.id.toString()
+        this.activity?.getUIExecutor().let {
+            it?.let { it1 ->
+                viewModel.explore("", null, location, it1, location)
+
+            }
+        }
+
+        viewModel.searchResults.observe(viewLifecycleOwner) {
+
+            if(lastId!=viewModel?.searchResults?.value?.get(0)?.id.toString()){
+                Log.i("MapFragment","searchResults.size:"+viewModel?.searchResults?.value?.size.toString())
+                addSearchResultsOnMap(viewModel.searchResults.value)
+            }
+
+        }
+
+    }
+
+
 }

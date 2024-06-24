@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/separate_line"
+    android:layout_width="26dp"
+    android:layout_height="3dp"
+    android:layout_marginTop="10dp"
+    android:background="@drawable/rounded_corners_background"
+    android:backgroundTint="@color/blue_c1"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />

@@ -1,0 +1,22 @@
+apply plugin: "com.palantir.git-version"
+
+subprojects {
+    task showGitDetails {
+        description 'Show the GIT details before publish artifacts to Nexus'
+        group 'Publishing'
+        doLast {
+            println("Current Version: $version")
+            def getLatestRevisionNumbe = 'git rev-list HEAD --count'.execute().text.trim()
+
+            def details = versionDetails()
+            println "---------current git information-----------"
+            println "Last Tag: ${details.lastTag}"
+            println "Commit Distance: ${details.commitDistance}"
+            println "GIT Hash: ${details.gitHash}"
+            println "GIT Hash Full: ${details.gitHashFull}" // full 40-character Git commit hash
+            println "Branch Name: ${details.branchName}" // is null if the repository in detached HEAD mode
+            println "Latest Revision numbers: $getLatestRevisionNumbe"
+            println "Is Clean Tag: ${details.isCleanTag}"
+        }
+    }
+}

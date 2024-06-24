@@ -1,0 +1,90 @@
+subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.android.application'
+
+    afterEvaluate {
+        publishing {
+            publications {
+                release(MavenPublication) {
+                    from components.release_apk
+                    groupId "${group}"
+                    artifactId project.hasProperty('artifactId') ? project.artifactId : project.name
+                    version "${version}"
+                }
+            }
+
+            repositories {
+                maven {
+                    if (project.version.endsWith("-SNAPSHOT")) {
+                        url "https://artifactory.telenav.com/telenav-artifacts-preprod"
+                    } else {
+                        url "https://artifactory.telenav.com/telenav-artifacts-production"
+                    }
+                    credentials {
+                        username System.properties['mvnPublishing.username']
+                        password System.properties['mvnPublishing.password']
+                    }
+                }
+            }
+        }
+    }
+
+    tasks.withType(PublishToMavenRepository) {
+        doLast {
+            try {
+                def currentGroup = project.group.toString().replaceAll("\\.", "/")
+                def currentVersion = version.toString().replaceAll("-SNAPSHOT", "")
+                def versionInfo
+                def artifactId = project.hasProperty("currentArtifactName") ? currentArtifactName : project.artifactId
+                if (!artifactId) {
+                    artifactId = project.name
+                }
+                if (version.toString().endsWith("-SNAPSHOT")) {
+                    //get gradleWrapper version
+                    Properties props = new Properties()
+                    File propsFile = new File("$rootDir/gradle/wrapper/gradle-wrapper.properties")
+                    props.load(propsFile.newDataInputStream())
+                    def distributionUrl = props.getProperty('distributionUrl')
+                    def gradleWrapperVersion = distributionUrl.split("/")[-1].split("-")[1]
+                    def gradleVersion = "5.6"
+                    def metadata_file_path
+                    def metadata_XML
+                    if (gradleWrapperVersion > gradleVersion) {
+                        // below snapshot-maven-metadata.xml is based on Gradle >  5.6
+                        metadata_file_path = "$buildDir/tmp/$name"
+                        metadata_XML = new File("${metadata_file_path}/snapshot-maven-metadata.xml").text
+                    } else {
+                        metadata_file_path = "$buildDir/tmp/$name/${currentGroup}/${artifactId}/${version}"
+                        def folderPath = new File(metadata_file_path)
+                        if (!folderPath.exists()) {
+                            metadata_file_path = "$buildDir/tmp/$name/${currentGroup}/${project.name}/${version}"
+                        }
+                        metadata_XML = new File("${metadata_file_path}/maven-metadata-remote.xml").text
+                    }
+                    def metadata = new groovy.util.XmlSlurper().parseText(metadata_XML)
+                    def BN = metadata.versioning.snapshot.buildNumber
+                    def TS = metadata.versioning.snapshot.timestamp
+                    versionInfo = "${currentGroup}/${artifactId}/${version}/${artifactId}-${currentVersion}-${TS}-${BN}"
+                } else {
+                    versionInfo = "${currentGroup}/${artifactId}/${version}/${artifactId}-${currentVersion}"
+                }
+
+                def tnBuildDir = new File("${rootDir}/.tnbuild/${artifactId}")
+                if (!tnBuildDir.exists()) {
+                    tnBuildDir.mkdirs()
+                }
+                def file = file("${rootDir}/.tnbuild/${artifactId}/info.properties")
+                if (file.exists()) {
+                    file.delete()
+                }
+                file.createNewFile()
+                if (file.exists()) {
+                    println("info.properties already exists.")
+                }
+                file.write("versionInfo=${versionInfo}\n")
+            } catch (all) {
+                logger.warn("Can NOT genenate the info property file in the .tnbuild, ignore it.")
+            }
+        }
+    }
+}

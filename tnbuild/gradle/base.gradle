@@ -1,0 +1,15 @@
+wrapper {
+    gradleVersion = project.hasProperty('wrapperGradleVersion') ? wrapperGradleVersion : '5.2.1'
+}
+
+allprojects {
+    group = group
+}
+
+subprojects {
+    ext {
+        shortHash = 'git rev-parse --short HEAD'.execute().text.trim()
+        fullHash = 'git rev-parse HEAD'.execute().text.trim()
+        branchName = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
+    }
+}

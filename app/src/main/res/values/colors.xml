@@ -4,13 +4,15 @@
     <color name="colorPrimaryDark">#E3E3E3</color>
     <color name="colorAccent">@color/blue_c1</color>
     <color name="blue">#9DC4F3</color>
+    <color name="initBackground">#111111</color>
+    <color name="initTextColor">#FFFFFF</color>
 
     <color name="search_edit_text_translucent_bck">#50ccaa99</color>
     <color name="translucent_white">#D3FFFFFF</color>
     <color name="semi_translucent_white">#CEFFFFFF</color>
 
     <color name="action_text">#46C646</color>
-    <color name="start_yellow">#E2E21F</color>
+    <color name="start_yellow">#FFC043</color>
     <color name="grey_medium">#737373</color>
     <color name="grey_light">#979797</color>
     <color name="blue_map_pin">#669CA3</color>
@@ -32,6 +34,8 @@
     <color name="grey_c3">#807F7F</color>
     <color name="black_header">#1E1E1E</color>
     <color name="black_c1">#343434</color>
+    <color name="green_c1">#43AD02</color>
+    <color name="red_c1">#F26D61</color>
 
     <color name="telenav_gray">#808084</color>
     <color name="telenav_gray_opacity_50">#E6808084</color>
@@ -41,6 +45,7 @@
     <color name="telenav_indigo_mid_tone">#5134B9</color>
     <color name="green">#27E7A4</color>
     <color name="red">#EF1D11</color>
+    <color name="pin_red">#EE675C</color>
     <color name="telenav_gray_semi_transparent">#D2808084</color>
     <color name="telenav_indigo_mid_tone_pressed">#140B37</color>
     <color name="green_pressed">#0C6E4C</color>

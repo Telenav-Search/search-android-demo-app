@@ -1,0 +1,66 @@
+apply plugin: "org.sonarqube"
+
+sonarqube {
+    properties {
+        // TODO Update your android.jar path (with path and Android version)
+        property "sonar.projectKey", "telenav:${project.hasProperty('sonarprojectName') ? sonarprojectName : project.name}"
+        property "sonar.projectName", project.hasProperty('sonarprojectName') ? sonarprojectName : project.name
+        property "sonar.projectVersion", project.version
+        property "sonar.host.url", project.hasProperty('jdk11') ? "https://sonarqube.skobbler.com" : "http://sonar.telenav.com:9000"
+    }
+}
+
+subprojects {
+    apply plugin: "org.sonarqube"
+    apply plugin: 'com.dicedmelon.gradle.jacoco-android'
+
+    def testDir = new File("${projectDir}/src/test")
+
+    sonarqube {
+        properties {
+            // TODO Update your android.jar path (with path and Android version)
+            def libraries = project.android.sdkDirectory.getPath() + "/platforms/android-29/android.jar"
+            property "sonar.sources", "src/main/java"
+            // Defines where the java files are
+            property "sonar.binaries", "build/intermediates/javac/debug"
+            property "sonar.libraries", libraries
+            // Defines where the xml files are
+            property "sonar.java.binaries", "build/intermediates/javac/debug"
+            property "sonar.java.libraries", libraries
+            if (testDir.exists()) {
+                property "sonar.tests", "src/test/java"
+
+                property "sonar.java.test.binaries", "build/intermediates/javac/debugUnitTest"
+                property "sonar.java.test.libraries", libraries
+
+                if (project.hasProperty('jdk11')) {
+                    property 'sonar.coverage.jacoco.xmlReportPaths', "${project.buildDir}/jacoco/jacoco.xml"
+                } else {
+                    property "sonar.jacoco.reportPaths", "jacoco.exec"
+                }
+                property "sonar.java.coveragePlugin", "jacoco"
+                property "sonar.junit.reportsPath", "build/test-results/testDebugUnitTest"
+                property "sonar.android.lint.report", "build/outputs/lint-results.xml"
+            }
+        }
+    }
+
+    jacoco {
+        toolVersion = "0.8.4"
+    }
+
+
+    tasks.withType(Test) {
+        jacoco.includeNoLocationClasses = true
+    }
+
+    sonarqube {
+        skipProject = false
+    }
+
+
+    task report {
+        // TODO: empty report task as workaround, change it to handle power mock test coverage in the future
+        dependsOn("jacocoTestReport")
+    }
+}
