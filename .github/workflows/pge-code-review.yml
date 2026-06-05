@@ -1,0 +1,18 @@
+name: "Claude: Code Review"
+
+# Trigger: fires on every human-authored PR.
+# Delegates to ai-workflows-hub reusable workflow — no AI logic lives here.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  code-review:
+    if: |
+      !endsWith(github.event.pull_request.user.login, '[bot]') &&
+      !contains(github.event.pull_request.title, '[Milestone') &&
+      !endsWith(github.event.sender.login, '[bot]')
+    uses: tiankai0114/ai-workflows-hub/.github/workflows/claude-code-review.yml@v1
+    with:
+      aws_role: "arn:aws:iam::759864781520:role/github-actions-bedrock-pge"
