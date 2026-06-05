@@ -14,5 +14,5 @@ jobs:
       !contains(github.event.pull_request.title, '[Milestone') &&
       !endsWith(github.event.sender.login, '[bot]')
     uses: tiankai0114/ai-workflows-hub/.github/workflows/claude-code-review.yml@v1
-    with:
-      aws_role: "arn:aws:iam::759864781520:role/github-actions-bedrock-pge"
+    secrets:
+      api_key: ${{ secrets.LITELLM_API_KEY }}
