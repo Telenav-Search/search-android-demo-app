@@ -1,0 +1,15 @@
+name: "Claude: Decompose"
+
+# Trigger: fires when an issue is labeled with pge/status:decompose.
+# Delegates to ai-workflows-hub reusable workflow — no AI logic lives here.
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  decompose:
+    if: github.event.label.name == 'pge/status:decompose'
+    uses: tiankai0114/ai-workflows-hub/.github/workflows/claude-decompose.yml@v1
+    with:
+      aws_role: "arn:aws:iam::759864781520:role/jenkins-actions-bedrock-pge"
