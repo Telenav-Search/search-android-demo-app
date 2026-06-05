@@ -1,0 +1,166 @@
+# ============================================================
+# GitHub Default Labels (built-in, kept as-is)
+# ============================================================
+- name: bug
+  color: "D73A4A"
+  description: "Something isn't working"
+- name: documentation
+  color: "0075CA"
+  description: "Improvements or additions to documentation"
+- name: duplicate
+  color: "CFD3D7"
+  description: "This issue or pull request already exists"
+- name: enhancement
+  color: "A2EEEF"
+  description: "New feature or request"
+- name: good first issue
+  color: "7057FF"
+  description: "Good for newcomers"
+- name: help wanted
+  color: "008672"
+  description: "Extra attention is needed"
+- name: invalid
+  color: "E4E669"
+  description: "This doesn't seem right"
+- name: question
+  color: "D876E3"
+  description: "Further information is requested"
+- name: wontfix
+  color: "FFFFFF"
+  description: "This will not be worked on"
+- name: chore
+  color: "E6E6E6"
+  description: "Maintenance, cleanup, or infrastructure task"
+
+# ============================================================
+# Custom Labels — all prefixed with "pge/" for easy recognition
+# ============================================================
+
+# --- pge/type: Issue classification ---
+- name: "pge/type:prd"
+  color: "5319E7"
+  description: "Product Requirements Document — new feature"
+- name: "pge/type:change"
+  color: "F9D0C4"
+  description: "Change to existing functionality"
+
+# --- pge/status: Workflow lifecycle ---
+# Manual:  triage → ready → implement → in-progress → in-review → done
+#          triage → decompose (large multi-scope issues) → decomposed
+# Auto:    implement → needs-rework (Evaluator) → approved → done
+#          implement → needs-local (Preflight, >45 files)
+- name: "pge/status:triage"
+  color: "FBCA04"
+  description: "Needs engineering triage (scope + effort)"
+- name: "pge/status:ready"
+  color: "0E8A16"
+  description: "Triaged and scoped — triggers Claude auto-analysis"
+- name: "pge/status:implement"
+  color: "6F42C1"
+  description: "Approved for AI implementation — triggers Claude"
+- name: "pge/status:in-progress"
+  color: "1D76DB"
+  description: "PGE / Claude is actively working on this"
+- name: "pge/status:done"
+  color: "0E8A16"
+  description: "Merged and shipped"
+- name: "pge/status:needs-info"
+  color: "D876E3"
+  description: "PM action required — answer questions in issue comments"
+- name: "pge/status:blocked"
+  color: "B60205"
+  description: "Blocked by dependency or open question"
+- name: "pge/status:needs-local"
+  color: "FF6600"
+  description: "Too large for CI (>45 files) — run locally with Claude Code"
+- name: "pge/status:decompose"
+  color: "BFD4F2"
+  description: "Trigger Claude to split this issue into scope-scoped sub-issues"
+- name: "pge/status:decomposed"
+  color: "E4E669"
+  description: "Issue split into sub-issues by Decomposer — do not implement directly"
+
+# --- pge/pr: Pull request review lifecycle ---
+# Flow: in-review → needs-rework (max 3 cycles) → approved / rejected
+#       in-review → needs-e2e-exploration → (E2E Generator adds specs) → continues review
+- name: "pge/pr:in-review"
+  color: "BFD4F2"
+  description: "PR open for Evaluator review"
+- name: "pge/pr:needs-rework"
+  color: "FBCA04"
+  description: "Evaluator requested changes — triggers Generator rework"
+- name: "pge/pr:approved"
+  color: "0E8A16"
+  description: "Evaluator approved — ready for human merge"
+- name: "pge/pr:rejected"
+  color: "B60205"
+  description: "Evaluator rejected — requires significant rework"
+- name: "pge/pr:needs-e2e-exploration"
+  color: "1D76DB"
+  description: "Triggers E2E Generator to explore changed ui-flows and sediment Playwright specs"
+
+# --- pge/scope: Which repos are affected (name = directory without novo- prefix) ---
+- name: "pge/scope:portal-agent"
+  color: "C2E0C6"
+  description: "Affects novo-portal-agent (agent portal)"
+- name: "pge/scope:quote-engine"
+  color: "BFDADC"
+  description: "Affects novo-quote-engine (backend API)"
+- name: "pge/scope:portal-consumer"
+  color: "D4C5F9"
+  description: "Affects novo-portal-consumer (customer portal)"
+- name: "pge/scope:portal-ui-components"
+  color: "E6D8F0"
+  description: "Affects shared UI (novo-portal-ui-components)"
+- name: "pge/scope:portal-libs-analytics"
+  color: "BFDADC"
+  description: "Affects shared analytics SDK (novo-portal-libs-analytics)"
+- name: "pge/scope:portal-libs-logging"
+  color: "BFDADC"
+  description: "Affects shared logging SDK (novo-portal-libs-logging)"
+
+# --- pge/domain: Which quote workflow area ---
+- name: "pge/domain:client-info"
+  color: "E6E6E6"
+  description: "Client info / initial info step"
+- name: "pge/domain:drivers"
+  color: "E6E6E6"
+  description: "Drivers step"
+- name: "pge/domain:vehicles"
+  color: "E6E6E6"
+  description: "Vehicles step"
+- name: "pge/domain:incidents"
+  color: "E6E6E6"
+  description: "Incidents step"
+- name: "pge/domain:coverage"
+  color: "E6E6E6"
+  description: "Coverage & pricing step"
+- name: "pge/domain:payment"
+  color: "E6E6E6"
+  description: "Payment step"
+- name: "pge/domain:e-signature"
+  color: "E6E6E6"
+  description: "E-signature step"
+- name: "pge/domain:underwriting"
+  color: "E6E6E6"
+  description: "Underwriting step"
+- name: "pge/domain:reports"
+  color: "E6E6E6"
+  description: "Reports / MVR reports step"
+- name: "pge/domain:quote"
+  color: "E6E6E6"
+  description: "Quote lifecycle (backend)"
+- name: "pge/domain:risk-check"
+  color: "E6E6E6"
+  description: "Risk check / Verisk / Equifax"
+
+# --- pge/priority ---
+- name: "pge/P0"
+  color: "B60205"
+  description: "Must have for launch"
+- name: "pge/P1"
+  color: "FF9F1C"
+  description: "Should have"
+- name: "pge/P2"
+  color: "FEF3BD"
+  description: "Nice to have"

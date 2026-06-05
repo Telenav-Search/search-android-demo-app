@@ -1,0 +1,91 @@
+name: "PRD: New Feature"
+description: Submit a product requirements document for a new feature
+title: "[PRD] "
+labels: ["pge/type:prd", "pge/status:triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## How this works
+        1. Fill out this form and submit
+        2. Engineering will triage and add scope labels
+        3. The AI Planner will analyze the issue and generate milestones + Sprint Contracts
+        4. Progress is tracked via labels — you'll see status updates in comments
+
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: One-paragraph summary of the feature and its business value
+      placeholder: "e.g., Allow users to export data as CSV, enabling self-service reporting."
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-stories
+    attributes:
+      label: User Stories
+      description: |
+        Use format: As a {role}, I want {capability}, so that {benefit}.
+        Include acceptance criteria for each story.
+      placeholder: |
+        **US-1: Export data**
+        As a user, I want to export data as CSV, so that I can analyze it in Excel.
+
+        Acceptance Criteria:
+        - Given I am on the Data page, when I click "Export", a CSV file downloads
+        - The CSV contains all columns currently visible in the table
+    validations:
+      required: true
+
+  - type: textarea
+    id: business-rules
+    attributes:
+      label: Business Rules
+      description: Domain-specific rules, validation logic, eligibility criteria
+      placeholder: |
+        - BR-1: Export is limited to the last 12 months of data
+        - BR-2: Sensitive fields (SSN, payment) are redacted in exports
+
+  - type: textarea
+    id: ui-requirements
+    attributes:
+      label: UI/UX Requirements
+      description: Figma links, wireframes, or text descriptions of the expected UI
+      placeholder: "Figma link: https://figma.com/..."
+
+  - type: textarea
+    id: data-requirements
+    attributes:
+      label: Data & API Requirements
+      description: New fields, entities, API endpoints, or changes to existing APIs
+      placeholder: |
+        - New endpoint: GET /api/v1/export?format=csv
+        - New field: User.exportEnabled (boolean)
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 - Must have for launch
+        - P1 - Should have
+        - P2 - Nice to have
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: What is explicitly NOT included in this feature
+      placeholder: "e.g., PDF export is out of scope for this PRD"
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies & Context
+      description: Related issues, external system dependencies, deadlines, or relevant context
+      placeholder: |
+        - Depends on: #42 (data access layer refactor)
+        - Deadline: Q3 2026

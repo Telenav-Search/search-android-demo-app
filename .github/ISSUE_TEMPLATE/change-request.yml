@@ -1,0 +1,55 @@
+name: "Change Request"
+description: Request a change to existing functionality (not a new feature, not a bug)
+title: "[Change] "
+labels: ["pge/type:change", "pge/status:triage"]
+body:
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: How does it work today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired-behavior
+    attributes:
+      label: Desired Behavior
+      description: How should it work instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why?
+      description: Business justification or user feedback driving this change
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this change is done correctly?
+      placeholder: |
+        - [ ] The old behavior no longer occurs
+        - [ ] The new behavior works as described
+        - [ ] Existing related tests pass
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 - Must have for launch
+        - P1 - Should have
+        - P2 - Nice to have
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies & Context
+      description: Related issues or relevant background
