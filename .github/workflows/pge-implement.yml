@@ -1,0 +1,29 @@
+name: "Claude: Generator"
+
+# Trigger:
+#   - issues labeled pge/status:implement  → implement mode (write code, open PR)
+#   - pull_request labeled pge/pr:needs-rework → rework mode (fix Evaluator feedback)
+# Delegates to ai-workflows-hub reusable workflow — no AI logic lives here.
+
+on:
+  issues:
+    types: [labeled]
+  pull_request:
+    types: [labeled]
+
+jobs:
+  run:
+    if: |
+      (github.event_name == 'issues' && github.event.label.name == 'pge/status:implement') ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'pge/pr:needs-rework')
+    uses: tiankai0114/ai-workflows-hub/.github/workflows/claude-implement.yml@v1
+    with:
+      aws_role: "arn:aws:iam::759864781520:role/jenkins-actions-bedrock-pge"
+      bot_id: "290981734"
+      bot_name: "ai-test-kai[bot]"
+      mode: ${{ (github.event_name == 'pull_request' && github.event.label.name == 'pge/pr:needs-rework') && 'rework' || 'implement' }}
+      pr_number: ${{ github.event.pull_request.number || '' }}
+    secrets:
+      github_app_id: ${{ secrets.GH_APP_ID }}
+      github_app_private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+      figma_token: ${{ secrets.FIGMA_TOKEN }}
