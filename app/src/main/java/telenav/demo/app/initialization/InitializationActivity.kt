@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.telenav.sdk.core.ApplicationInfo
 import com.telenav.sdk.core.Locale
 import com.telenav.sdk.core.SDKOptions
 import com.telenav.sdk.core.SDKRuntime
@@ -206,6 +207,9 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
     var apiSecret = BuildConfig.telenav_api_secret
     var apiEndpoint = BuildConfig.telenav_cloud_endpoint
     var userId = BuildConfig.telenav_user_id
+    var applicationName = BuildConfig.telenav_data_collector_applicationName
+    var applicationVersion = BuildConfig.telenav_data_cpllector_applicationVersion
+    var applicationInfo = ApplicationInfo.builder(applicationName,applicationVersion).build()
 
     return SDKOptions.builder()
         .setDeviceGuid(deviceId)
@@ -216,6 +220,7 @@ fun Context.getSDKOptions(deviceId: String, pathToIndex: String = ""): SDKOption
         .setSdkDataDir(dataPath)
         .setSdkCacheDataDir(cachePath)
         .setLocale(Locale.EN_US)
+        .setApplicationInfo(applicationInfo)
         .build()
 }
 

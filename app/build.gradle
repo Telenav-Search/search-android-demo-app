@@ -18,6 +18,9 @@ android {
         buildConfigField  "String", "telenav_api_key", "\"${telenav_api_key}\""
         buildConfigField  "String", "telenav_api_secret", "\"${telenav_api_secret}\""
         buildConfigField  "String", "telenav_cloud_endpoint", "\"${telenav_cloud_endpoint}\""
+        buildConfigField  "String", "telenav_data_collector_applicationName", "\"${telenav_data_collector_applicationName}\""
+        buildConfigField  "String", "telenav_data_cpllector_applicationVersion", "\"${telenav_data_cpllector_applicationVersion}\""
+
     }
 
     buildFeatures {
@@ -49,10 +52,10 @@ dependencies {
     api 'androidx.recyclerview:recyclerview:1.1.0'
     api 'com.squareup.okhttp3:okhttp:4.8.1'
     api 'com.google.code.gson:gson:2.8.6'
-    api 'com.telenav.sdk:telenav-sdk-base:1.4.0'
-    api 'com.telenav.sdk:telenav-entity-hybrid:1.4.0'
-    api 'com.telenav.sdk:telenav-android-datacollector:1.2.6-r15c'
-    api('com.telenav.sdk:telenav-android-ota:1.2.6-r15c'){
+    api 'com.telenav.sdk:telenav-sdk-base:1.8.0-BETA.1'
+    api 'com.telenav.sdk:telenav-entity-hybrid:1.8.0-BETA.1'
+    api 'com.telenav.sdk:telenav-android-datacollector:1.4.5.31'
+    api('com.telenav.sdk:telenav-android-ota:1.4.5.31'){
         exclude group: 'com.telenav.sdk', module: "telenav-entity-onboard"
     }
 
